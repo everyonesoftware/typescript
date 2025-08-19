@@ -1,0 +1,21 @@
+{
+  "name": "everything-cli",
+  "version": "1.0.0",
+  "description": "A CLI for building software.",
+  "main": "outputs/everythingCLI.js",
+  "scripts": {
+    "build": "tsc && node build.js",
+    "clean": "rimraf coverage outputs",
+    "test": "vitest run --coverage",
+    "start": "npm run build && node outputs/everythingCLI.js"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.0",
+    "@vitest/coverage-v8": "3.2.4",
+    "esbuild": "0.25.9",
+    "madge": "^8.0.0",
+    "rimraf": "6.0.1",
+    "typescript": "5.9.2",
+    "vitest": "3.2.4"
+  }
+}
