@@ -1,17 +1,18 @@
-import * as vitest from "vitest";
+import * as mocha from "mocha";
+
 import { Iterable } from "../sources/iterable";
 import { Pre } from "../sources/pre";
 import { ToStringFunctions } from "../sources/toStringFunctions";
 import { isFunction, Type } from "../sources/types";
-import { ExpectTest } from "./expectTest";
+import { AssertTest } from "./assertTest";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
 import { TestSkip } from "./testSkip";
 
 /**
- * A {@link TestRunner} implementation that passes through to vitest.
+ * A {@link TestRunner} implementation that passes through to mocha.
  */
-export class VitestTestRunner implements TestRunner
+export class MochaTestRunner implements TestRunner
 {
     private currentTest: Test | undefined;
     private toStringFunctions: ToStringFunctions;
@@ -25,9 +26,9 @@ export class VitestTestRunner implements TestRunner
         this.toStringFunctions = toStringFunctions;
     }
 
-    public static create(toStringFunctions?: ToStringFunctions): VitestTestRunner
+    public static create(toStringFunctions?: ToStringFunctions): MochaTestRunner
     {
-        return new VitestTestRunner(toStringFunctions);
+        return new MochaTestRunner(toStringFunctions);
     }
 
     private getCurrentTest(): Test | undefined
@@ -97,8 +98,18 @@ export class VitestTestRunner implements TestRunner
 
         this.assertNoCurrentTest();
 
-        vitest.describe.skipIf(TestRunner.shouldSkip(skip))(testGroupName, function()
+        mocha.suite(testGroupName, function()
         {
+            if (TestRunner.shouldSkip(skip))
+            {
+                mocha.beforeEach(function()
+                {
+                    // Calls the mocha skip() function instead of MochaTestRunner.skip().
+                    // https://mochajs.org/#inclusive-tests
+                    this.skip();
+                });
+            }
+
             testAction();
         });
     }
@@ -125,18 +136,27 @@ export class VitestTestRunner implements TestRunner
 
         this.assertNoCurrentTest();
 
-        const runner: VitestTestRunner = this;
-        vitest.test.skipIf(TestRunner.shouldSkip(skip))(testName, function()
+        const runner: MochaTestRunner = this;
+        mocha.test(testName, function()
         {
-            const currentTest: Test = ExpectTest.create();
-            runner.setCurrentTest(currentTest);
-            try
+            if (TestRunner.shouldSkip(skip))
             {
-                testAction(currentTest);
+                // Calls the mocha skip() function instead of MochaTestRunner.skip().
+                // https://mochajs.org/#inclusive-tests
+                this.skip();
             }
-            finally
+            else
             {
-                runner.setCurrentTest(undefined);
+                const currentTest: Test = AssertTest.create();
+                runner.setCurrentTest(currentTest);
+                try
+                {
+                    testAction(currentTest);
+                }
+                finally
+                {
+                    runner.setCurrentTest(undefined);
+                }
             }
         });
     }
@@ -161,9 +181,18 @@ export class VitestTestRunner implements TestRunner
         }
         Pre.condition.assertNotUndefinedAndNotNull(testAction, "testAction");
 
-        vitest.test.skipIf(TestRunner.shouldSkip(skip))(testName, async function()
+        mocha.test(testName, async function()
         {
-            await testAction(ExpectTest.create());
+            if (TestRunner.shouldSkip(skip))
+            {
+                // Calls the mocha skip() function instead of MochaTestRunner.skip().
+                // https://mochajs.org/#inclusive-tests
+                this.skip();
+            }
+            else
+            {
+                await testAction(AssertTest.create());
+            }
         });
     }
 

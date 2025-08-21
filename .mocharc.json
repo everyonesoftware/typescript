@@ -1,0 +1,9 @@
+{
+    "color": true,
+    "ui": "tdd",
+    "extension": [
+        "ts"
+    ],
+    "spec": "tests/**/*.ts",
+    "require": "ts-node/register"
+}

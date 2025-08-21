@@ -1,30 +1,30 @@
-import { expect } from "vitest";
-import { Pre } from "../sources/pre";
+import * as assert from "assert";
 import { Test } from "./test";
+import { Pre } from "../sources/pre";
 import { Type } from "../sources/types";
 
 /**
- * A {@link Test} type that uses Vite's "expect()" functions to make assertions.
+ * A {@link Test} type that uses the standard "assert" module to make assertions.
  */
-export class ExpectTest implements Test
+export class AssertTest implements Test
 {
     protected constructor()
     {
     }
 
     /**
-     * Create a new {@link ExpectTest} object.
+     * Create a new {@link AssertTest} object.
      */
-    public static create(): ExpectTest
+    public static create(): AssertTest
     {
-        return new ExpectTest();
+        return new AssertTest();
     }
 
     public fail(message: string): never
     {
         Pre.condition.assertNotEmpty(message, "message");
 
-        expect.fail(message);
+        assert.fail(message);
     }
 
     public assertUndefined(value: unknown): asserts value is undefined
@@ -54,22 +54,22 @@ export class ExpectTest implements Test
 
     public assertSame<T>(left: T, right: T): void
     {
-        expect(left).toStrictEqual(right);
+        assert.strictEqual(left, right);
     }
 
     public assertNotSame<T>(left: T, right: T): void
     {
-        expect(left).not.toBe(right);
+        assert.notStrictEqual(left, right);
     }
 
     public assertEqual<T>(left: T, right: T): void
     {
-        expect(left).toStrictEqual(right);
+        assert.deepStrictEqual(left, right);
     }
 
     public assertNotEqual<T>(left: T, right: T): void
     {
-        expect(left).not.toStrictEqual(right);
+        assert.notDeepStrictEqual(left, right);
     }
 
     public assertFalse(value: boolean): void
@@ -84,23 +84,16 @@ export class ExpectTest implements Test
 
     public assertThrows(action: () => void, expectedError: Error): void
     {
-        expect(action).toThrowError(expectedError);
+        assert.throws(action, expectedError);
     }
 
     public async assertThrowsAsync(action: () => Promise<unknown>, expectedError: Error): Promise<void>
     {
-        await expect(action).rejects.toThrowError(expectedError);
+        await assert.rejects(action, expectedError);
     }
 
     public assertInstanceOf<T>(value: unknown, type: Type<T>, typeCheck?: (value: unknown) => value is T): asserts value is T
     {
-        if (typeCheck)
-        {
-            expect(typeCheck(value)).toBe(true);
-        }
-        else
-        {
-            expect(value).toBeInstanceOf(type);
-        }
+        Test.assertInstanceOf(this, value, type, typeCheck);
     }
 }
