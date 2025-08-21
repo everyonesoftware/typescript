@@ -2,7 +2,6 @@ import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
 import { MapIterator } from "./mapIterator";
 import { Pre } from "./pre";
-import { Post } from "./post";
 import { JavascriptIteratorToIteratorAdapter } from "./javascriptIteratorToIteratorAdapter";
 import { Result } from "./result";
 import { EmptyError } from "./emptyError";
@@ -155,8 +154,6 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
         {
             result++;
         }
-
-        Post.condition.assertGreaterThanOrEqualTo(result, 0, "result");
 
         return result;
     }

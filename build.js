@@ -1,5 +1,4 @@
 const { build } = require("esbuild");
-const madge = require('madge');
 const { dependencies } = require("./package.json");
 
 build({
@@ -12,11 +11,3 @@ build({
   platform: "node", // for CommonJS
   outdir: "outputs",
 });
-
-madge(["sources", "tests"], {
-  fileExtensions: ["ts"],
-})
-	.then((res) =>
-  {
-    console.log(res.circular());
-  })

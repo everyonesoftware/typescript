@@ -1,6 +1,7 @@
 import { Bytes } from "../sources/bytes";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
+import { createTestRunner } from "./tests";
 
 export function test(runner: TestRunner): void
 {
@@ -41,3 +42,4 @@ export function test(runner: TestRunner): void
         });
     });
 }
+test(createTestRunner());

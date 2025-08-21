@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['tests/**/*.ts'], // adjust to your folder structure
+    include: ['tests/**/*.tests.ts'], // adjust to your folder structure
     // testTimeout: 15000, // 15 seconds
     coverage: {
       enabled: true,
