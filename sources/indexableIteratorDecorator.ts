@@ -1,7 +1,7 @@
 import { IndexableIterator } from "./indexableIterator";
-import { IteratorDecorator } from "./iteratorDecorator";
 import { Iterator } from "./iterator";
-import { Pre } from "./pre";
+import { IteratorDecorator } from "./iteratorDecorator";
+import { PreCondition } from "./preCondition";
 
 /**
  * An {@link IteratorDecorator} that keeps track of which index the inner
@@ -40,8 +40,8 @@ export class IndexableIteratorDecorator<T> extends IteratorDecorator<T> implemen
 
     public getCurrentIndex(): number
     {
-        Pre.condition.assertTrue(this.hasStarted(), "this.hasStarted()");
-        Pre.condition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
+        PreCondition.assertTrue(this.hasStarted(), "this.hasStarted()");
+        PreCondition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
 
         return this.currentIndex;
     }

@@ -1,7 +1,7 @@
 import { IndexableIterator } from "./indexableIterator";
 import { JavascriptIterable } from "./javascript";
 import { ListBase } from "./listBase";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 
 export class JavascriptArrayList<T> extends ListBase<T>
 {
@@ -26,7 +26,7 @@ export class JavascriptArrayList<T> extends ListBase<T>
 
     public override set(index: number, value: T): this
     {
-        Pre.condition.assertAccessIndex(index, this.getCount(), "index");
+        PreCondition.assertAccessIndex(index, this.getCount(), "index");
 
         this.array[index] = value;
 
@@ -45,14 +45,14 @@ export class JavascriptArrayList<T> extends ListBase<T>
 
     public override get(index: number): T
     {
-        Pre.condition.assertAccessIndex(index, this.getCount(), "index");
+        PreCondition.assertAccessIndex(index, this.getCount(), "index");
 
         return this.array[index];
     }
 
     public override insert(index: number, value: T): this
     {
-        Pre.condition.assertInsertIndex(index, this.getCount(), "index");
+        PreCondition.assertInsertIndex(index, this.getCount(), "index");
 
         this.array.splice(index, 0, value);
 
@@ -61,8 +61,8 @@ export class JavascriptArrayList<T> extends ListBase<T>
 
     public override insertAll(index: number, values: JavascriptIterable<T>): this
     {
-        Pre.condition.assertInsertIndex(index, this.getCount() ,"index");
-        Pre.condition.assertNotUndefinedAndNotNull(values, "values");
+        PreCondition.assertInsertIndex(index, this.getCount() ,"index");
+        PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
         this.array.splice(index, 0, ...values);
 

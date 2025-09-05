@@ -1,6 +1,6 @@
 import { Iterator } from "./iterator";
 import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 import { Type } from "./types";
 
@@ -14,8 +14,8 @@ export class MapIterator<TInput,TOutput> implements Iterator<TOutput>
 
     protected constructor(inputIterator: Iterator<TInput>, mapping: (value: TInput) => TOutput)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(inputIterator, "inputIterator");
-        Pre.condition.assertNotUndefinedAndNotNull(mapping, "mapping");
+        PreCondition.assertNotUndefinedAndNotNull(inputIterator, "inputIterator");
+        PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
 
         this.inputIterator = inputIterator;
         this.mapping = mapping;

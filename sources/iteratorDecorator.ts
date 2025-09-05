@@ -1,7 +1,7 @@
 import { Iterator } from "./iterator";
 import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
 import { MapIterator } from "./mapIterator";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 import { Type } from "./types";
 
@@ -12,7 +12,7 @@ export abstract class IteratorDecorator<T> implements Iterator<T>
 
     protected constructor(innerIterator: Iterator<T>)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(innerIterator, "innerIterator");
+        PreCondition.assertNotUndefinedAndNotNull(innerIterator, "innerIterator");
 
         this.innerIterator = innerIterator;
         this.started = false;
@@ -44,7 +44,7 @@ export abstract class IteratorDecorator<T> implements Iterator<T>
 
     public getCurrent(): T
     {
-        Pre.condition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
+        PreCondition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
 
         return this.innerIterator.getCurrent();
     }

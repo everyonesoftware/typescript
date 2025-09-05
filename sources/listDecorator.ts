@@ -2,7 +2,7 @@ import { IndexableIterator } from "./indexableIterator";
 import { JavascriptIterable } from "./javascript";
 import { List } from "./list";
 import { ListBase } from "./listBase";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 
 /**
  * A type that wraps around another {@link List}.
@@ -13,7 +13,7 @@ export abstract class ListDecorator<T> extends ListBase<T>
 
     protected constructor(innerList: List<T>)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(innerList, "innerList");
+        PreCondition.assertNotUndefinedAndNotNull(innerList, "innerList");
 
         super();
 

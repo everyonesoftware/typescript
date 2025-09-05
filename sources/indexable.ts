@@ -4,7 +4,7 @@ import { Iterable } from "./iterable";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { MapIterable } from "./mapIterable";
 import { MutableIndexable } from "./mutableIndexable";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 import { Type } from "./types";
 
@@ -57,7 +57,7 @@ export abstract class Indexable<T> implements Iterable<T>
      */
     public static first<T>(indexable: Indexable<T>): Result<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(indexable, "indexable");
+        PreCondition.assertNotUndefinedAndNotNull(indexable, "indexable");
 
         return indexable.any()
             ? Result.value(indexable.get(0))
@@ -77,7 +77,7 @@ export abstract class Indexable<T> implements Iterable<T>
      */
     public static last<T>(indexable: Indexable<T>): Result<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(indexable, "indexable");
+        PreCondition.assertNotUndefinedAndNotNull(indexable, "indexable");
 
         return indexable.any()
             ? Result.value(indexable.get(indexable.getCount() - 1))

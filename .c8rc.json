@@ -6,6 +6,7 @@
     "temp-directory": "coverage/temp",
     "report-dir": "coverage",
     "reporter": [
-        "lcov"
+        "lcov",
+        "html"
     ]
 }

@@ -5,11 +5,10 @@ import { Indexable } from "./indexable";
 import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { MapIterable } from "./mapIterable";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 import { ToStringFunctions } from "./toStringFunctions";
-import { isUndefinedOrNull, Type } from "./types";
-import * as types from "./types";
+import { instanceOf, isIterable, isUndefinedOrNull, Type } from "./types";
 import { WhereIterable } from "./whereIterable";
 
 /**
@@ -34,7 +33,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
 
     public static [Symbol.iterator]<T>(iterable: Iterable<T>): JavascriptIterator<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
         return iterable.iterate()[Symbol.iterator]();
     }
@@ -49,7 +48,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      */
     public static toArray<T>(iterable: Iterable<T>): T[]
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
         return iterable.iterate().toArray();
     }
@@ -64,7 +63,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      */
     public static any<T>(iterable: JavascriptIterable<T>): boolean
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
         return Iterator.create(iterable).any();
     }
@@ -135,7 +134,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      */
     public static toString<T>(iterable: Iterable<T>, toStringFunctions?: ToStringFunctions): string
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
         if (isUndefinedOrNull(toStringFunctions))
         {
@@ -160,8 +159,8 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      */
     public static map<TInput,TOutput>(iterable: Iterable<TInput>, mapping: (value: TInput) => TOutput): MapIterable<TInput,TOutput>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
-        Pre.condition.assertNotUndefinedAndNotNull(mapping, "mapping");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
 
         return MapIterable.create(iterable, mapping);
     }
@@ -182,10 +181,10 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      */
     public static where<T>(iterable: JavascriptIterable<T>, condition: (value: T) => boolean): Iterable<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
-        Pre.condition.assertNotUndefinedAndNotNull(condition, "condition");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(condition, "condition");
 
-        if (!types.isIterable(iterable))
+        if (!isIterable(iterable))
         {
             iterable = Iterable.create(iterable);
         }
@@ -209,10 +208,10 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      */
     public static instanceOf<TInput,TOutput extends TInput>(iterable: JavascriptIterable<TInput>, typeOrTypeCheck: Type<TOutput> | ((value: TInput) => value is TOutput)): Iterable<TOutput>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
-        Pre.condition.assertNotUndefinedAndNotNull(typeOrTypeCheck, "typeOrTypeCheck");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(typeOrTypeCheck, "typeOrTypeCheck");
 
-        return Iterable.where(iterable, (value: TInput) => types.instanceOf(value, typeOrTypeCheck))
+        return Iterable.where(iterable, (value: TInput) => instanceOf(value, typeOrTypeCheck))
             .map((value: TInput) => (value as unknown) as TOutput);
     }
 
@@ -230,7 +229,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      */
     public static first<T>(iterable: JavascriptIterable<T>): Result<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
         return Iterator.create(iterable).first();
     }
@@ -249,7 +248,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      */
     public static last<T>(iterable: JavascriptIterable<T>): Result<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
         return Iterator.create(iterable).last();
     }
@@ -260,7 +259,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      */
     public static findMaximum<T extends Comparable<T>>(iterable: JavascriptIterable<T> | Iterable<T>): Result<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterable, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
         return Iterator.findMaximum(Iterator.create(iterable));
     }

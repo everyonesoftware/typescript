@@ -1,21 +1,26 @@
 import { Iterator } from "./iterator";
-import { IteratorDecorator } from "./iteratorDecorator";
-import { Pre } from "./pre";
+import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
+import { MapIterator } from "./mapIterator";
+import { PreCondition } from "./preCondition";
+import { Result } from "./result";
+import { Type } from "./types";
 
 /**
  * An {@link Iterator} that iterates over a maximum number of values.
  */
-export class TakeIterator<T> extends IteratorDecorator<T>
+export class TakeIterator<T> implements Iterator<T>
 {
+    private readonly innerIterator: Iterator<T>;
+    private started: boolean;
     private readonly maximumToTake: number;
     private taken: number;
 
     private constructor(innerIterator: Iterator<T>, maximumToTake: number)
     {
-        Pre.condition.assertGreaterThanOrEqualTo(maximumToTake, 0, "maximumToTake");
+        PreCondition.assertGreaterThanOrEqualTo(maximumToTake, 0, "maximumToTake");
 
-        super(innerIterator);
-
+        this.innerIterator = innerIterator;
+        this.started = false;
         this.maximumToTake = maximumToTake;
         this.taken = 0;
     }
@@ -25,22 +30,110 @@ export class TakeIterator<T> extends IteratorDecorator<T>
         return new TakeIterator(innerIterator, maximumToTake);
     }
 
-    public override hasCurrent(): boolean
+    public hasCurrent(): boolean
     {
-        return this.taken <= this.maximumToTake && super.hasCurrent();
+        return this.hasStarted() && this.taken <= this.maximumToTake && this.innerIterator.hasCurrent();
     }
 
-    public override next(): boolean
+    public next(): boolean
     {
-        let result: boolean = false;
-        if (this.taken <= this.maximumToTake)
+        if (this.maximumToTake <= 0)
         {
-            result = super.next();
-            if (result)
-            {
-                this.taken++;
-            }
+            return false;
         }
-        return result;
+        else if (!this.hasStarted())
+        {
+            this.started = true;
+            this.innerIterator.start();
+            this.taken++;
+        }
+        else if (this.taken <= this.maximumToTake)
+        {
+            this.innerIterator.next();
+            this.taken++;
+        }
+        return this.hasCurrent();
+    }
+
+    public hasStarted(): boolean
+    {
+        return this.started;
+    }
+
+    public getCurrent(): T
+    {
+        PreCondition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
+
+        return this.innerIterator.getCurrent();
+    }
+
+    public start(): this
+    {
+        return Iterator.start<T,this>(this);
+    }
+
+    public takeCurrent(): T
+    {
+        return Iterator.takeCurrent(this);
+    }
+
+    public any(): boolean
+    {
+        return Iterator.any(this);
+    }
+
+    public getCount(): number
+    {
+        return Iterator.getCount(this);
+    }
+
+    public toArray(): T[]
+    {
+        return Iterator.toArray(this);
+    }
+
+    public where(condition: (value: T) => boolean): Iterator<T>
+    {
+        return Iterator.where(this, condition);
+    }
+
+    public whereInstanceOf<U extends T>(typeCheck: (value: T) => value is U): Iterator<U>
+    {
+        return Iterator.whereInstanceOf(this, typeCheck);
+    }
+
+    public whereInstanceOfType<U extends T>(type: Type<U>): Iterator<U>
+    {
+        return Iterator.whereInstanceOfType(this, type);
+    }
+
+    public map<TOutput>(mapping: (value: T) => TOutput): MapIterator<T, TOutput>
+    {
+        return Iterator.map(this, mapping);
+    }
+
+    public first(condition?: (value: T) => boolean): Result<T>
+    {
+        return Iterator.first(this, condition);
+    }
+
+    public last(condition?: (value: T) => boolean): Result<T>
+    {
+        return Iterator.last(this, condition);
+    }
+
+    public [Symbol.iterator](): IteratorToJavascriptIteratorAdapter<T>
+    {
+        return Iterator[Symbol.iterator](this);
+    }
+
+    public take(maximumToTake: number): Iterator<T>
+    {
+        return Iterator.take(this, maximumToTake);
+    }
+
+    public skip(maximumToSkip: number): Iterator<T>
+    {
+        return Iterator.skip(this, maximumToSkip);
     }
 }

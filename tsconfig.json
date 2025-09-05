@@ -1,10 +1,8 @@
 {
   "compilerOptions": {
-    "module": "CommonJS", // or "ESNext"
-    "target": "ES2020",
-    "outDir": "dist",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
+    "module": "esnext",
+    "target": "esnext",
+    "outDir": "outputs",
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true

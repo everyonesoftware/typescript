@@ -1,7 +1,8 @@
 import * as assert from "assert";
-import { Test } from "./test";
-import { Pre } from "../sources/pre";
+
+import { PreCondition } from "../sources/preCondition";
 import { Type } from "../sources/types";
+import { Test } from "./test";
 
 /**
  * A {@link Test} type that uses the standard "assert" module to make assertions.
@@ -22,7 +23,7 @@ export class AssertTest implements Test
 
     public fail(message: string): never
     {
-        Pre.condition.assertNotEmpty(message, "message");
+        PreCondition.assertNotEmpty(message, "message");
 
         assert.fail(message);
     }

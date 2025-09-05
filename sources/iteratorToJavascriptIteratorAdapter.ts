@@ -1,6 +1,6 @@
 import { Iterator } from "./iterator";
 import { JavascriptIterator, JavascriptIteratorResult } from "./javascript";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 
 /**
  * A JavaScript/TypeScript object that is used to iterate over a collection of values.
@@ -12,7 +12,7 @@ export class IteratorToJavascriptIteratorAdapter<T> implements JavascriptIterato
 
     private constructor(iterator: Iterator<T>)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
         this.iterator = iterator;
         this.hasStarted = false;

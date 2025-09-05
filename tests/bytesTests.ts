@@ -1,13 +1,12 @@
 import { Bytes } from "../sources/bytes";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
-import { createTestRunner } from "./tests";
 
 export function test(runner: TestRunner): void
 {
     runner.testFile("bytes.ts", () =>
     {
-        runner.testType(Bytes.name, () =>
+        runner.testType("Bytes", () =>
         {
             runner.test("minimumValue", (test: Test) =>
             {
@@ -42,4 +41,3 @@ export function test(runner: TestRunner): void
         });
     });
 }
-test(createTestRunner());

@@ -1,7 +1,7 @@
 import { Iterator } from "./iterator";
 import { Map, MapEntry } from "./map";
 import { MapBase } from "./mapBase";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 
 /**
@@ -13,7 +13,7 @@ export abstract class MapDecorator<TKey,TValue> extends MapBase<TKey,TValue>
 
     protected constructor(innerMap: Map<TKey,TValue>)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(innerMap, "innerMap");
+        PreCondition.assertNotUndefinedAndNotNull(innerMap, "innerMap");
 
         super();
 

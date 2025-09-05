@@ -1,5 +1,5 @@
 import { JavascriptIterable } from "./javascript";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { isString } from "./types";
 
 export function getLength(value: string | undefined | null): number
@@ -47,8 +47,8 @@ export function join(separatorOrParameters: string | { separator: string, values
         values = separatorOrParameters.values;
     }
 
-    Pre.condition.assertNotUndefinedAndNotNull(separator, "separator");
-    Pre.condition.assertNotUndefinedAndNotNull(values, "values");
+    PreCondition.assertNotUndefinedAndNotNull(separator, "separator");
+    PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
     return Array.from(values).join(separator);
 }
@@ -214,8 +214,8 @@ export function escapeAndQuote(valueOrParameters: string | undefined | null | { 
  */
 export function isWhitespace(value: string): boolean
 {
-    Pre.condition.assertNotUndefinedAndNotNull(value, "value");
-    Pre.condition.assertSame(1, value.length, "value.length");
+    PreCondition.assertNotUndefinedAndNotNull(value, "value");
+    PreCondition.assertSame(1, value.length, "value.length");
 
     let result: boolean = true;
     switch (value[0])
@@ -240,8 +240,8 @@ export function isWhitespace(value: string): boolean
  */
 export function isLetter(value: string): boolean
 {
-    Pre.condition.assertNotUndefinedAndNotNull(value, "value");
-    Pre.condition.assertSame(1, value.length, "value.length");
+    PreCondition.assertNotUndefinedAndNotNull(value, "value");
+    PreCondition.assertSame(1, value.length, "value.length");
     
     const character: string = value[0];
     let result: boolean = false;
@@ -262,8 +262,8 @@ export function isLetter(value: string): boolean
  */
 export function isLowercasedLetter(value: string): boolean
 {
-    Pre.condition.assertNotUndefinedAndNotNull(value, "value");
-    Pre.condition.assertSame(1, value.length, "value.length");
+    PreCondition.assertNotUndefinedAndNotNull(value, "value");
+    PreCondition.assertSame(1, value.length, "value.length");
 
     const character: string = value[0];
     return ("a" <= character && character <= "z");
@@ -275,8 +275,8 @@ export function isLowercasedLetter(value: string): boolean
  */
 export function isUppercasedLetter(value: string): boolean
 {
-    Pre.condition.assertNotUndefinedAndNotNull(value, "value");
-    Pre.condition.assertSame(1, value.length, "value.length");
+    PreCondition.assertNotUndefinedAndNotNull(value, "value");
+    PreCondition.assertSame(1, value.length, "value.length");
 
     const character: string = value[0];
     return ("A" <= character && character <= "Z");
@@ -288,8 +288,8 @@ export function isUppercasedLetter(value: string): boolean
  */
 export function isDigit(value: string): boolean
 {
-    Pre.condition.assertNotUndefinedAndNotNull(value, "value");
-    Pre.condition.assertSame(1, value.length, "value.length");
+    PreCondition.assertNotUndefinedAndNotNull(value, "value");
+    PreCondition.assertSame(1, value.length, "value.length");
 
     const character: string = value[0];
     return ("0" <= character && character <= "9");
@@ -301,8 +301,8 @@ export function isDigit(value: string): boolean
  */
 export function isLetterOrDigit(value: string): boolean
 {
-    Pre.condition.assertNotUndefinedAndNotNull(value, "value");
-    Pre.condition.assertSame(1, value.length, "value.length");
+    PreCondition.assertNotUndefinedAndNotNull(value, "value");
+    PreCondition.assertSame(1, value.length, "value.length");
 
     const character: string = value[0];
     let result: boolean = false;

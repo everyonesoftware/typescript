@@ -2,7 +2,7 @@ import { EqualFunctions } from "./equalFunctions";
 import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterator } from "./javascript";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 import { Type } from "./types";
 
@@ -16,8 +16,8 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
 
     protected constructor(innerIterable: Iterable<TInput>, mapping: (value: TInput) => TOutput)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(innerIterable, "innerIterable");
-        Pre.condition.assertNotUndefinedAndNotNull(mapping, "mapping");
+        PreCondition.assertNotUndefinedAndNotNull(innerIterable, "innerIterable");
+        PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
 
         this.innerIterable = innerIterable;
         this.mapping = mapping;

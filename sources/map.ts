@@ -6,7 +6,7 @@ import { JavascriptIterator } from "./javascript";
 import { JavascriptMapMap } from "./javascriptMapMap";
 import { MapIterable } from "./mapIterable";
 import { NotFoundError } from "./notFoundError";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 import { join } from "./strings";
 import { ToStringFunctions } from "./toStringFunctions";
@@ -90,7 +90,7 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
      */
     public static toString<TKey,TValue>(map: Map<TKey,TValue>, toStringFunctions?: ToStringFunctions): string
     {
-        Pre.condition.assertNotUndefinedAndNotNull(map, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(map, "iterable");
 
         if (!toStringFunctions)
         {
@@ -160,8 +160,8 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
      */
     public static getOrSet<TKey,TValue>(map: Map<TKey,TValue>, key: TKey, valueCreator: () => TValue): Result<TValue>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(map, "map");
-        Pre.condition.assertNotUndefinedAndNotNull(valueCreator, "valueCreator");
+        PreCondition.assertNotUndefinedAndNotNull(map, "map");
+        PreCondition.assertNotUndefinedAndNotNull(valueCreator, "valueCreator");
 
         return map.get(key)
             .catch(NotFoundError, () =>
@@ -191,7 +191,7 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
      */
     public static iterateKeys<TKey,TValue>(map: Map<TKey,TValue>): Iterator<TKey>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(map, "map");
+        PreCondition.assertNotUndefinedAndNotNull(map, "map");
 
         return map.iterate().map((entry: MapEntry<TKey,TValue>) => entry.key);
     }
@@ -207,7 +207,7 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
      */
     public static iterateValues<TKey,TValue>(map: Map<TKey,TValue>): Iterator<TValue>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(map, "map");
+        PreCondition.assertNotUndefinedAndNotNull(map, "map");
 
         return map.iterate().map((entry: MapEntry<TKey,TValue>) => entry.value);
     }

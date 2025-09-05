@@ -5,13 +5,12 @@ import { PreConditionError } from "../sources/preConditionError";
 import { join } from "../sources/strings";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
-import { createTestRunner } from "./tests";
 
 export function test(runner: TestRunner): void
 {
     runner.testFile("condition.ts", () =>
     {
-        runner.testType(Condition.name, () =>
+        runner.testType("Condition", () =>
         {
             runner.testFunction("create()", (test: Test) =>
             {
@@ -876,4 +875,3 @@ export function test(runner: TestRunner): void
         });
     });
 }
-test(createTestRunner());

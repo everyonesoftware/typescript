@@ -1,7 +1,7 @@
 
 import { andList } from "../sources/english";
 import { Iterable } from "../sources/iterable";
-import { Pre } from "../sources/pre";
+import { PreCondition } from "../sources/preCondition";
 import { escapeAndQuote } from "../sources/strings";
 import { getName, getParameterCount, isFunction, isString, Type } from "../sources/types";
 import { Test } from "./test";
@@ -141,13 +141,13 @@ export abstract class TestRunner
      */
     public static testFile(runner: TestRunner, fileName: string, skipOrTestAction: TestSkip | ((() => void) | ((test: Test) => void)) | undefined, testAction?: (() => void) | ((test: Test) => void)): void
     {
-        Pre.condition.assertNotUndefinedAndNotNull(runner, "runner");
-        Pre.condition.assertNotUndefinedAndNotNull(fileName, "fileName");
-        Pre.condition.assertNotEmpty(fileName, "fileName");
+        PreCondition.assertNotUndefinedAndNotNull(runner, "runner");
+        PreCondition.assertNotUndefinedAndNotNull(fileName, "fileName");
+        PreCondition.assertNotEmpty(fileName, "fileName");
         let skip: TestSkip | undefined;
         if (isFunction(skipOrTestAction))
         {
-            Pre.condition.assertUndefined(testAction, "testAction");
+            PreCondition.assertUndefined(testAction, "testAction");
 
             skip = undefined;
             testAction = skipOrTestAction;
@@ -156,7 +156,7 @@ export abstract class TestRunner
         {
             skip = skipOrTestAction;
         }
-        Pre.condition.assertNotUndefinedAndNotNull(testAction, "testAction");
+        PreCondition.assertNotUndefinedAndNotNull(testAction, "testAction");
 
         TestRunner.runTestAction(runner, fileName, skip, testAction);
     }
@@ -187,8 +187,8 @@ export abstract class TestRunner
      */
     public static testType(runner: TestRunner, typeNameOrType: string | Type<unknown>, skipOrTestAction: TestSkip | undefined | ((() => void) | ((test: Test) => void)), testAction: ((() => void) | ((test: Test) => void)) | undefined): void
     {
-        Pre.condition.assertNotUndefinedAndNotNull(runner, "runner");
-        Pre.condition.assertNotUndefinedAndNotNull(typeNameOrType, "typeNameOrType");
+        PreCondition.assertNotUndefinedAndNotNull(runner, "runner");
+        PreCondition.assertNotUndefinedAndNotNull(typeNameOrType, "typeNameOrType");
         let typeName: string;
         if (isString(typeNameOrType))
         {
@@ -198,11 +198,11 @@ export abstract class TestRunner
         {
             typeName = getName(typeNameOrType);
         }
-        Pre.condition.assertNotEmpty(typeName, "typeName");
+        PreCondition.assertNotEmpty(typeName, "typeName");
         let skip: TestSkip | undefined;
         if (isFunction(skipOrTestAction))
         {
-            Pre.condition.assertUndefined(testAction, "testAction");
+            PreCondition.assertUndefined(testAction, "testAction");
 
             skip = undefined;
             testAction = skipOrTestAction;
@@ -211,7 +211,7 @@ export abstract class TestRunner
         {
             skip = skipOrTestAction;
         }
-        Pre.condition.assertNotUndefinedAndNotNull(testAction, "testAction");
+        PreCondition.assertNotUndefinedAndNotNull(testAction, "testAction");
 
         TestRunner.runTestAction(runner, typeName, skip, testAction);
     }
@@ -236,13 +236,13 @@ export abstract class TestRunner
      */
     public static testFunction(runner: TestRunner, functionSignature: string, skipOrTestAction: TestSkip | undefined | ((() => void) | ((test: Test) => void)), testAction: ((() => void) | ((test: Test) => void)) | undefined): void
     {
-        Pre.condition.assertNotUndefinedAndNotNull(runner, "runner");
-        Pre.condition.assertNotUndefinedAndNotNull(functionSignature, "functionSignature");
-        Pre.condition.assertNotEmpty(functionSignature);
+        PreCondition.assertNotUndefinedAndNotNull(runner, "runner");
+        PreCondition.assertNotUndefinedAndNotNull(functionSignature, "functionSignature");
+        PreCondition.assertNotEmpty(functionSignature);
         let skip: TestSkip | undefined;
         if (isFunction(skipOrTestAction))
         {
-            Pre.condition.assertUndefined(testAction, "testAction");
+            PreCondition.assertUndefined(testAction, "testAction");
 
             skip = undefined;
             testAction = skipOrTestAction;
@@ -251,7 +251,7 @@ export abstract class TestRunner
         {
             skip = skipOrTestAction;
         }
-        Pre.condition.assertNotUndefinedAndNotNull(testAction, "testAction");
+        PreCondition.assertNotUndefinedAndNotNull(testAction, "testAction");
 
         TestRunner.runTestAction(runner, functionSignature, skip, testAction);
     }

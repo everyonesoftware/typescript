@@ -1,16 +1,16 @@
-import { JavascriptIterable, JavascriptIterator } from "./javascript";
-import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
-import { MapIterator } from "./mapIterator";
-import { Pre } from "./pre";
-import { JavascriptIteratorToIteratorAdapter } from "./javascriptIteratorToIteratorAdapter";
-import { Result } from "./result";
-import { EmptyError } from "./emptyError";
-import { WhereIterator } from "./whereIterator";
-import { Type, instanceOfType, isJavascriptIterator, isUndefinedOrNull } from "./types";
 import { Comparable } from "./comparable";
-import { TakeIterator } from "./takeIterator";
+import { EmptyError } from "./emptyError";
+import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
+import { JavascriptIterable, JavascriptIterator } from "./javascript";
+import { JavascriptIteratorToIteratorAdapter } from "./javascriptIteratorToIteratorAdapter";
+import { MapIterator } from "./mapIterator";
 import { NotFoundError } from "./notFoundError";
+import { PreCondition } from "./preCondition";
+import { Result } from "./result";
 import { SkipIterator } from "./skipIterator";
+import { TakeIterator } from "./takeIterator";
+import { instanceOfType, isJavascriptIterator, isUndefinedOrNull, Type } from "./types";
+import { WhereIterator } from "./whereIterator";
 
 /**
  * A type that can be used to iterate over a collection.
@@ -23,7 +23,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      */
     public static create<T>(values: JavascriptIterator<T> | JavascriptIterable<T>): Iterator<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(values, "values");
+        PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
         return JavascriptIteratorToIteratorAdapter.create(values);
     }
@@ -60,7 +60,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      */
     public static start<T,TIterator extends Iterator<T>>(iterator: TIterator): TIterator
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
         if (!iterator.hasStarted())
         {
@@ -80,8 +80,8 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
 
     public static takeCurrent<T>(iterator: Iterator<T>): T
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
-        Pre.condition.assertTrue(iterator.hasCurrent(), "iterator.hasCurrent()");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertTrue(iterator.hasCurrent(), "iterator.hasCurrent()");
 
         const result: T = iterator.getCurrent();
         iterator.next();
@@ -100,7 +100,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      */
     public static [Symbol.iterator]<T>(iterator: Iterator<T>): IteratorToJavascriptIteratorAdapter<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
         return IteratorToJavascriptIteratorAdapter.create(iterator);
     }
@@ -122,7 +122,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      */
     public static any<T>(iterator: Iterator<T>): boolean
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
         iterator.start();
         return iterator.hasCurrent();
@@ -143,7 +143,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      */
     public static getCount<T>(iterator: Iterator<T>): number
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
         let result: number = 0;
         if (iterator.hasCurrent())
@@ -172,7 +172,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      */
     public static toArray<T>(iterator: Iterator<T>): T[]
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
         const result: T[] = [];
         for (const value of iterator)
@@ -193,8 +193,8 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
 
     public static where<T>(iterator: Iterator<T>, condition: (value: T) => boolean): Iterator<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
-        Pre.condition.assertNotUndefinedAndNotNull(condition, "condition");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(condition, "condition");
 
         return WhereIterator.create(iterator, condition);
     }
@@ -211,8 +211,8 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
 
     public static map<T,TOutput>(iterator: Iterator<T>, mapping: (value: T) => TOutput): MapIterator<T,TOutput>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
-        Pre.condition.assertNotUndefinedAndNotNull(mapping, "mapping");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
 
         return MapIterator.create(iterator, mapping);
     }
@@ -230,7 +230,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
 
     public static whereInstanceOf<T,U extends T>(iterator: Iterator<T>, typeCheck: (value: T) => value is U): Iterator<U>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(typeCheck, "typeCheck");
+        PreCondition.assertNotUndefinedAndNotNull(typeCheck, "typeCheck");
 
         return iterator.where(typeCheck)
             .map((value: T) => value as U);
@@ -248,7 +248,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
 
     public static whereInstanceOfType<T,U extends T>(iterator: Iterator<T>, type: Type<U>): Iterator<U>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(type, "type");
+        PreCondition.assertNotUndefinedAndNotNull(type, "type");
 
         return iterator.whereInstanceOf((value: T) => instanceOfType(value, type));
     }
@@ -271,7 +271,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      */
     public static first<T>(iterator: Iterator<T>, condition?: (value: T) => boolean): Result<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
         return Result.create(() =>
         {
@@ -304,16 +304,16 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      */
     public last(): Result<T>
     {
-        return Iterator.first(this);
+        return Iterator.last(this);
     }
 
     /**
      * Get the last value from the provided {@link Iterator}.
      * @param iterator The {@link Iterator} to get the last value from.
      */
-    public static last<T>(iterator: Iterator<T>): Result<T>
+    public static last<T>(iterator: Iterator<T>, condition?: (value: T) => boolean): Result<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
         return Result.create(() =>
         {
@@ -323,13 +323,30 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
             }
 
             let result: T;
+            let found: boolean = false; 
             do
             {
-                result = iterator.takeCurrent();
+                if (!condition || condition(iterator.getCurrent()))
+                {
+                    result = iterator.getCurrent();
+                    found = true;
+                }
             }
-            while (iterator.hasCurrent());
+            while (iterator.next());
 
-            return result;
+            if (!found)
+            {
+                if (!condition)
+                {
+                    throw new NotFoundError("No value was found in the Iterator.");
+                }
+                else
+                {
+                    throw new NotFoundError("No value was found in the Iterator that matched the provided condition.");
+                }
+            }
+
+            return result!;
         });
     }
 
@@ -339,7 +356,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      */
     public static findMaximum<T extends Comparable<T>>(iterator: JavascriptIterator<T> | Iterator<T>): Result<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(iterator, "iterable");
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterable");
 
         return Result.create(() =>
         {

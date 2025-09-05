@@ -1,4 +1,4 @@
-import { Pre } from "../sources/pre";
+import { PreCondition } from "../sources/preCondition";
 import { TestSkip } from "./testSkip";
 
 /**
@@ -11,7 +11,7 @@ export class BasicTestSkip implements TestSkip
 
     private constructor(shouldSkip: boolean, message: string)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(message, "message");
+        PreCondition.assertNotUndefinedAndNotNull(message, "message");
 
         this.shouldSkip = shouldSkip;
         this.message = message;

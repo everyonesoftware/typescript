@@ -1,5 +1,5 @@
 import { Comparison } from "./comparison";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 
 /**
  * An type that can be compared against another type.
@@ -32,7 +32,7 @@ export abstract class Comparable<T>
      */
     public static lessThan<T>(left: Comparable<T>, right: T): boolean
     {
-        Pre.condition.assertNotUndefinedAndNotNull(left, "left");
+        PreCondition.assertNotUndefinedAndNotNull(left, "left");
 
         return left.compareTo(right) === Comparison.LessThan;
     }
@@ -53,7 +53,7 @@ export abstract class Comparable<T>
      */
     public static lessThanOrEqualTo<T>(left: Comparable<T>, right: T): boolean
     {
-        Pre.condition.assertNotUndefinedAndNotNull(left, "left");
+        PreCondition.assertNotUndefinedAndNotNull(left, "left");
 
         return left.compareTo(right) !== Comparison.GreaterThan;
     }
@@ -74,7 +74,7 @@ export abstract class Comparable<T>
      */
     public static equals<T>(left: Comparable<T>, right: T): boolean
     {
-        Pre.condition.assertNotUndefinedAndNotNull(left, "left");
+        PreCondition.assertNotUndefinedAndNotNull(left, "left");
 
         return left.compareTo(right) === Comparison.Equal;
     }
@@ -95,7 +95,7 @@ export abstract class Comparable<T>
      */
     public static notEquals<T>(left: Comparable<T>, right: T): boolean
     {
-        Pre.condition.assertNotUndefinedAndNotNull(left, "left");
+        PreCondition.assertNotUndefinedAndNotNull(left, "left");
 
         return left.compareTo(right) !== Comparison.Equal;
     }
@@ -116,7 +116,7 @@ export abstract class Comparable<T>
      */
     public static greaterThanOrEqualTo<T>(left: Comparable<T>, right: T): boolean
     {
-        Pre.condition.assertNotUndefinedAndNotNull(left, "left");
+        PreCondition.assertNotUndefinedAndNotNull(left, "left");
 
         return left.compareTo(right) !== Comparison.LessThan;
     }
@@ -137,7 +137,7 @@ export abstract class Comparable<T>
      */
     public static greaterThan<T>(left: Comparable<T>, right: T): boolean
     {
-        Pre.condition.assertNotUndefinedAndNotNull(left, "left");
+        PreCondition.assertNotUndefinedAndNotNull(left, "left");
 
         return left.compareTo(right) === Comparison.GreaterThan;
     }

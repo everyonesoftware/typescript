@@ -1,7 +1,8 @@
-import * as mocha from "mocha";
+
 
 import { Iterable } from "../sources/iterable";
-import { Pre } from "../sources/pre";
+import { PreCondition } from "../sources/preCondition";
+import { join } from "../sources/strings";
 import { ToStringFunctions } from "../sources/toStringFunctions";
 import { isFunction, Type } from "../sources/types";
 import { AssertTest } from "./assertTest";
@@ -10,15 +11,18 @@ import { TestRunner } from "./testRunner";
 import { TestSkip } from "./testSkip";
 
 /**
- * A {@link TestRunner} implementation that passes through to mocha.
+ * A {@link TestRunner} implementation that runs tests directly.
  */
-export class MochaTestRunner implements TestRunner
+export class ConsoleTestRunner implements TestRunner
 {
+    private testGroups: string[];
     private currentTest: Test | undefined;
     private toStringFunctions: ToStringFunctions;
 
     protected constructor(toStringFunctions?: ToStringFunctions)
     {
+        this.testGroups = [];
+
         if (!toStringFunctions)
         {
             toStringFunctions = ToStringFunctions.create();
@@ -26,9 +30,9 @@ export class MochaTestRunner implements TestRunner
         this.toStringFunctions = toStringFunctions;
     }
 
-    public static create(toStringFunctions?: ToStringFunctions): MochaTestRunner
+    public static create(toStringFunctions?: ToStringFunctions): ConsoleTestRunner
     {
-        return new MochaTestRunner(toStringFunctions);
+        return new ConsoleTestRunner(toStringFunctions);
     }
 
     private getCurrentTest(): Test | undefined
@@ -48,6 +52,11 @@ export class MochaTestRunner implements TestRunner
         {
             currentTest.fail("Can't start a new test group or a new test while running a test.");
         }
+    }
+
+    private getFullTestName(testName: string): string
+    {
+        return join(" ", [...this.testGroups, testName]);
     }
 
     public skip(shouldSkip?: boolean, message?: string): TestSkip
@@ -80,12 +89,12 @@ export class MochaTestRunner implements TestRunner
     public testGroup(testGroupName: string, skip: TestSkip | undefined, testAction: () => void): void;
     testGroup(testGroupName: string, skipOrTestAction: TestSkip | undefined | (() => void), testAction?: () => void): void
     {
-        Pre.condition.assertNotUndefinedAndNotNull(testGroupName, "testGroupName");
-        Pre.condition.assertNotEmpty(testGroupName, "testGroupName");
+        PreCondition.assertNotUndefinedAndNotNull(testGroupName, "testGroupName");
+        PreCondition.assertNotEmpty(testGroupName, "testGroupName");
         let skip: TestSkip | undefined;
         if (isFunction(skipOrTestAction))
         {
-            Pre.condition.assertUndefined(testAction, "testAction");
+            PreCondition.assertUndefined(testAction, "testAction");
 
             skip = undefined;
             testAction = skipOrTestAction;
@@ -94,36 +103,42 @@ export class MochaTestRunner implements TestRunner
         {
             skip = skipOrTestAction;
         }
-        Pre.condition.assertNotUndefinedAndNotNull(testAction, "testAction");
+        PreCondition.assertNotUndefinedAndNotNull(testAction, "testAction");
 
         this.assertNoCurrentTest();
 
-        mocha.suite(testGroupName, function()
+        this.testGroups.push(testGroupName);
+        try
         {
             if (TestRunner.shouldSkip(skip))
             {
-                mocha.beforeEach(function()
-                {
-                    // Calls the mocha skip() function instead of MochaTestRunner.skip().
-                    // https://mochajs.org/#inclusive-tests
-                    this.skip();
-                });
+                console.log(`TEST GROUP SKIP: ${testGroupName}`);
             }
-
-            testAction();
-        });
+            else
+            {
+                testAction();
+            }
+        }
+        catch (error)
+        {
+            console.log(`TEST ERROR: ${error}`);
+        }
+        finally
+        {
+            this.testGroups.pop();
+        }
     }
 
     public test(testName: string, testAction: (test: Test) => void): void;
     public test(testName: string, skip: TestSkip | undefined, testAction: (test: Test) => void): void;
     test(testName: string, skipOrTestAction: TestSkip | undefined | ((test: Test) => void), testAction?: (test: Test) => void): void
     {
-        Pre.condition.assertNotUndefinedAndNotNull(testName, "testName");
-        Pre.condition.assertNotEmpty(testName, "testName");
+        PreCondition.assertNotUndefinedAndNotNull(testName, "testName");
+        PreCondition.assertNotEmpty(testName, "testName");
         let skip: TestSkip | undefined;
         if (isFunction(skipOrTestAction))
         {
-            Pre.condition.assertUndefined(testAction, "testAction");
+            PreCondition.assertUndefined(testAction, "testAction");
 
             skip = undefined;
             testAction = skipOrTestAction;
@@ -132,45 +147,47 @@ export class MochaTestRunner implements TestRunner
         {
             skip = skipOrTestAction;
         }
-        Pre.condition.assertNotUndefinedAndNotNull(testAction, "testAction");
+        PreCondition.assertNotUndefinedAndNotNull(testAction, "testAction");
 
         this.assertNoCurrentTest();
 
-        const runner: MochaTestRunner = this;
-        mocha.test(testName, function()
+        try
         {
             if (TestRunner.shouldSkip(skip))
             {
-                // Calls the mocha skip() function instead of MochaTestRunner.skip().
-                // https://mochajs.org/#inclusive-tests
-                this.skip();
+                console.log(`TEST SKIPPED: ${testName}`)
             }
             else
             {
                 const currentTest: Test = AssertTest.create();
-                runner.setCurrentTest(currentTest);
+                this.setCurrentTest(currentTest);
                 try
                 {
+                    console.log(this.getFullTestName(testName));
                     testAction(currentTest);
                 }
                 finally
                 {
-                    runner.setCurrentTest(undefined);
+                    this.setCurrentTest(undefined);
                 }
             }
-        });
+        }
+        catch(error)
+        {
+            console.log(`TEST ERROR: ${error}`)
+        }
     }
 
-    public testAsync(testName: string, testAction: (test: Test) => Promise<unknown>): void;
-    public testAsync(testName: string, skip: TestSkip | undefined, testAction: (test: Test) => Promise<unknown>): void;
-    testAsync(testName: string, skipOrTestAction: TestSkip | undefined | ((test: Test) => Promise<unknown>), testAction?: (test: Test) => Promise<unknown>): void
+    public async testAsync(testName: string, testAction: (test: Test) => Promise<unknown>): Promise<void>;
+    public async testAsync(testName: string, skip: TestSkip | undefined, testAction: (test: Test) => Promise<unknown>): Promise<void>;
+    async testAsync(testName: string, skipOrTestAction: TestSkip | undefined | ((test: Test) => Promise<unknown>), testAction?: (test: Test) => Promise<unknown>): Promise<void>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(testName, "testName");
-        Pre.condition.assertNotEmpty(testName, "testName");
+        PreCondition.assertNotUndefinedAndNotNull(testName, "testName");
+        PreCondition.assertNotEmpty(testName, "testName");
         let skip: TestSkip | undefined;
         if (isFunction(skipOrTestAction))
         {
-            Pre.condition.assertUndefined(testAction, "testAction");
+            PreCondition.assertUndefined(testAction, "testAction");
 
             skip = undefined;
             testAction = skipOrTestAction;
@@ -179,26 +196,29 @@ export class MochaTestRunner implements TestRunner
         {
             skip = skipOrTestAction;
         }
-        Pre.condition.assertNotUndefinedAndNotNull(testAction, "testAction");
+        PreCondition.assertNotUndefinedAndNotNull(testAction, "testAction");
 
-        mocha.test(testName, async function()
+        try
         {
             if (TestRunner.shouldSkip(skip))
             {
-                // Calls the mocha skip() function instead of MochaTestRunner.skip().
-                // https://mochajs.org/#inclusive-tests
-                this.skip();
+                console.log(`TEST SKIPPED (ASYNC): ${testName}`);
             }
             else
             {
+                console.log(this.getFullTestName(testName));
                 await testAction(AssertTest.create());
             }
-        });
+        }
+        catch (error)
+        {
+            console.log(`TEST ERROR (ASYNC): ${error}`)
+        }
     }
 
     public andList(values: unknown[] | Iterable<unknown>): string
     {
-        Pre.condition.assertNotUndefinedAndNotNull(values, "values");
+        PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
         return TestRunner.andList(this, values);
     }

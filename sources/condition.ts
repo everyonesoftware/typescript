@@ -1,3 +1,4 @@
+import { Bytes } from "./bytes";
 import { JavascriptIterable } from "./javascript";
 import { MutableCondition } from "./mutableCondition";
 import { Type } from "./types";
@@ -25,7 +26,21 @@ export abstract class Condition
      * @param expression The name of the expression that produced the value.
      * @param message An additional message that will be included with the error.
      */
-    public abstract assertUndefined(value: unknown, expression?: string, message?: string): asserts value is undefined;
+    public assertUndefined(value: unknown, expression?: string, message?: string): asserts value is undefined
+    {
+        Condition.assertUndefined(this, value, expression, message);
+    }
+
+    /**
+     * Assert that the provided value is undefined.
+     * @param value The value to check.
+     * @param expression The name of the expression that produced the value.
+     * @param message An additional message that will be included with the error.
+     */
+    public static assertUndefined(condition: Condition, value: unknown, expression?: string, message?: string): asserts value is undefined
+    {
+        condition.assertSame(undefined, value, expression, message);
+    }
 
     /**
      * Assert that the provided value is not undefined and not null.
@@ -33,7 +48,10 @@ export abstract class Condition
      * @param expression The name of the expression that produced the value.
      * @param message An additional message that will be included with the error.
      */
-    public abstract assertNotUndefined<T>(value: T, expression?: string, message?: string): asserts value is NonNullable<T>;
+    public assertNotUndefined<T>(value: T, expression?: string, message?: string): asserts value is NonNullable<T>
+    {
+        Condition.assertNotUndefined(this, value, expression, message);
+    }
 
     /**
      * Assert that the provided value is not undefined and not null.
@@ -41,7 +59,33 @@ export abstract class Condition
      * @param expression The name of the expression that produced the value.
      * @param message An additional message that will be included with the error.
      */
-    public abstract assertNotUndefinedAndNotNull<T>(value: T, expression?: string, message?: string): asserts value is NonNullable<T>;
+    public static assertNotUndefined<T>(condition: Condition, value: T, expression?: string, message?: string): asserts value is NonNullable<T>
+    {
+        condition.assertNotSame(undefined, value, expression, message);
+    }
+
+    /**
+     * Assert that the provided value is not undefined and not null.
+     * @param value The value to check.
+     * @param expression The name of the expression that produced the value.
+     * @param message An additional message that will be included with the error.
+     */
+    public assertNotUndefinedAndNotNull<T>(value: T, expression?: string, message?: string): asserts value is NonNullable<T>
+    {
+        Condition.assertNotUndefinedAndNotNull(this, value, expression, message);
+    }
+
+    /**
+     * Assert that the provided value is not undefined and not null.
+     * @param value The value to check.
+     * @param expression The name of the expression that produced the value.
+     * @param message An additional message that will be included with the error.
+     */
+    public static assertNotUndefinedAndNotNull<T>(condition: Condition, value: T, expression?: string, message?: string): asserts value is NonNullable<T>
+    {
+        condition.assertNotSame(undefined, value, expression, message);
+        condition.assertNotSame(null, value, expression, message);
+    }
 
     /**
      * Assert that the provided value is true.
@@ -49,7 +93,21 @@ export abstract class Condition
      * @param expression The name of the expression that produced the value.
      * @param message An additional message that will be included with the error.
      */
-    public abstract assertTrue(value: boolean, expression?: string, message?: string): asserts value is true;
+    public assertTrue(value: boolean, expression?: string, message?: string): asserts value is true
+    {
+        Condition.assertTrue(this, value, expression, message);
+    }
+
+    /**
+     * Assert that the provided value is true.
+     * @param value The value to check.
+     * @param expression The name of the expression that produced the value.
+     * @param message An additional message that will be included with the error.
+     */
+    public static assertTrue(condition: Condition, value: boolean, expression?: string, message?: string): asserts value is true
+    {
+        condition.assertSame(true, value, expression, message);
+    }
 
     /**
      * Assert that the provided value is false.
@@ -57,7 +115,21 @@ export abstract class Condition
      * @param expression The name of the expression that produced the value.
      * @param message An additional message that will be included with the error.
      */
-    public abstract assertFalse(value: boolean, expression?: string, message?: string): asserts value is false;
+    public assertFalse(value: boolean, expression?: string, message?: string): asserts value is false
+    {
+        Condition.assertFalse(this, value, expression, message);
+    }
+
+    /**
+     * Assert that the provided value is false.
+     * @param value The value to check.
+     * @param expression The name of the expression that produced the value.
+     * @param message An additional message that will be included with the error.
+     */
+    public static assertFalse(condition: Condition, value: boolean, expression?: string, message?: string): asserts value is false
+    {
+        condition.assertSame(false, value, expression, message);
+    }
 
     /**
      * Assert that the provided actual value is the same as the provided expected value.
@@ -157,7 +229,22 @@ export abstract class Condition
      * @param expression  The expression that produced the actual value.
      * @param message An optional message that describes the scenario.
      */
-    public abstract assertAccessIndex(index: number, count: number, expression?: string, message?: string): void;
+    public assertAccessIndex(index: number, count: number, expression?: string, message?: string): void
+    {
+        Condition.assertAccessIndex(this, index, count, expression, message);
+    }
+
+    /**
+     * Assert that the index is within the access bounds of an indexable with the provided count.
+     * @param index The index to check.
+     * @param count The number of elements in the indexable.
+     * @param expression  The expression that produced the actual value.
+     * @param message An optional message that describes the scenario.
+     */
+    public static assertAccessIndex(condition: Condition, index: number, count: number, expression?: string, message?: string): void
+    {
+        condition.assertBetween(0, index, count - 1, expression, message);
+    }
 
     /**
      * Assert that the index is within the insertion bounds of a {@link List} with the provided count.
@@ -166,7 +253,22 @@ export abstract class Condition
      * @param expression  The expression that produced the actual value.
      * @param message An optional message that describes the scenario.
      */
-    public abstract assertInsertIndex(index: number, count: number, expression?: string, message?: string): void;
+    public assertInsertIndex(index: number, count: number, expression?: string, message?: string): void
+    {
+        Condition.assertInsertIndex(this, index, count, expression, message);
+    }
+
+    /**
+     * Assert that the index is within the insertion bounds of a {@link List} with the provided count.
+     * @param index The index to check.
+     * @param count The number of elements in the indexable.
+     * @param expression  The expression that produced the actual value.
+     * @param message An optional message that describes the scenario.
+     */
+    public static assertInsertIndex(condition: Condition, index: number, count: number, expression?: string, message?: string): void
+    {
+        condition.assertBetween(0, index, count, expression, message);
+    }
 
     /**
      * Assert that the value is one of the possibilities.
@@ -183,7 +285,22 @@ export abstract class Condition
      * @param expression The expression that produced the value.
      * @param message An optional error message.
      */
-    public abstract assertByte(value: number, expression?: string, message?: string): void;
+    public assertByte(value: number, expression?: string, message?: string): void
+    {
+        Condition.assertByte(this, value, expression, message);
+    }
+
+    /**
+     * Assert that the value is within the bounds of a byte.
+     * @param value The value to check.
+     * @param expression The expression that produced the value.
+     * @param message An optional error message.
+     */
+    public static assertByte(condition: Condition, value: number, expression?: string, message?: string): void
+    {
+        condition.assertBetween(Bytes.minimumValue, value, Bytes.maximumValue, expression, message);
+        condition.assertInteger(value, expression, message);
+    }
 
     /**
      * Assert that the value is an integer.

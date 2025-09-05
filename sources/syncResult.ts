@@ -1,6 +1,6 @@
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
-import { Type, isFunction } from "./types";
+import { isFunction, Type } from "./types";
 
 /**
  * A {@link Result} type that contains values or errors that have already occurred.
@@ -22,7 +22,7 @@ export class SyncResult<T> implements Result<T>
      */
     public static create<T>(createFunction: (() => T)): SyncResult<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(createFunction, "createFunction");
+        PreCondition.assertNotUndefinedAndNotNull(createFunction, "createFunction");
 
         let resultValue: T | undefined = undefined;
         let resultError: unknown | undefined = undefined;
@@ -52,7 +52,7 @@ export class SyncResult<T> implements Result<T>
      */
     public static error<T>(error: unknown): SyncResult<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(error, "error");
+        PreCondition.assertNotUndefinedAndNotNull(error, "error");
 
         return new SyncResult<T>(undefined, error);
     }
@@ -68,7 +68,7 @@ export class SyncResult<T> implements Result<T>
 
     public then<U>(thenFunction: (() => U) | ((argument: T) => U)): SyncResult<U>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(thenFunction, "thenFunction");
+        PreCondition.assertNotUndefinedAndNotNull(thenFunction, "thenFunction");
 
         let resultValue: U | undefined = undefined;
         let resultError: unknown | undefined = this.error;
@@ -88,7 +88,7 @@ export class SyncResult<T> implements Result<T>
 
     public onValue(onValueFunction: (() => void) | ((argument: T) => void)): SyncResult<T>
     {
-        Pre.condition.assertNotUndefinedAndNotNull(onValueFunction, "onValueFunction");
+        PreCondition.assertNotUndefinedAndNotNull(onValueFunction, "onValueFunction");
 
         let result: SyncResult<T> = this;
         if (this.error === undefined)
@@ -115,16 +115,16 @@ export class SyncResult<T> implements Result<T>
             errorType = undefined;
             catchFunction = errorTypeOrCatchFunction as (() => T) | ((error: unknown) => T);
 
-            Pre.condition.assertNotUndefinedAndNotNull(catchFunction, "catchFunction");
-            Pre.condition.assertTrue(isFunction(catchFunction), "isFunction(catchFunction)");
+            PreCondition.assertNotUndefinedAndNotNull(catchFunction, "catchFunction");
+            PreCondition.assertTrue(isFunction(catchFunction), "isFunction(catchFunction)");
         }
         else
         {
             errorType = errorTypeOrCatchFunction as Type<TError>;
 
-            Pre.condition.assertNotUndefinedAndNotNull(errorType, "errorType");
-            Pre.condition.assertNotUndefinedAndNotNull(catchFunction, "catchFunction");
-            Pre.condition.assertTrue(isFunction(catchFunction), "isFunction(catchFunction)");
+            PreCondition.assertNotUndefinedAndNotNull(errorType, "errorType");
+            PreCondition.assertNotUndefinedAndNotNull(catchFunction, "catchFunction");
+            PreCondition.assertTrue(isFunction(catchFunction), "isFunction(catchFunction)");
         }
 
         let result: SyncResult<T> = this;
@@ -149,17 +149,17 @@ export class SyncResult<T> implements Result<T>
     {
         if (onErrorFunction === undefined || onErrorFunction === null)
         {
-            Pre.condition.assertNotUndefinedAndNotNull(errorTypeOrOnErrorFunction, "onErrorFunction");
-            Pre.condition.assertTrue(isFunction(errorTypeOrOnErrorFunction), "isFunction(onErrorFunction)");
+            PreCondition.assertNotUndefinedAndNotNull(errorTypeOrOnErrorFunction, "onErrorFunction");
+            PreCondition.assertTrue(isFunction(errorTypeOrOnErrorFunction), "isFunction(onErrorFunction)");
 
             onErrorFunction = errorTypeOrOnErrorFunction as (() => void) | ((error: unknown) => void);
             errorTypeOrOnErrorFunction = undefined!;
         }
         else
         {
-            Pre.condition.assertNotUndefinedAndNotNull(errorTypeOrOnErrorFunction, "errorType");
-            Pre.condition.assertNotUndefinedAndNotNull(onErrorFunction, "catchFunction");
-            Pre.condition.assertTrue(isFunction(onErrorFunction), "isFunction(catchFunction)");
+            PreCondition.assertNotUndefinedAndNotNull(errorTypeOrOnErrorFunction, "errorType");
+            PreCondition.assertNotUndefinedAndNotNull(onErrorFunction, "catchFunction");
+            PreCondition.assertTrue(isFunction(onErrorFunction), "isFunction(catchFunction)");
         }
 
         let result: SyncResult<T> = this;
@@ -184,17 +184,17 @@ export class SyncResult<T> implements Result<T>
     {
         if (convertErrorFunction === undefined || convertErrorFunction === null)
         {
-            Pre.condition.assertNotUndefinedAndNotNull(errorTypeOrConvertErrorFunction, "convertErrorFunction");
-            Pre.condition.assertTrue(isFunction(errorTypeOrConvertErrorFunction), "isFunction(convertErrorFunction)");
+            PreCondition.assertNotUndefinedAndNotNull(errorTypeOrConvertErrorFunction, "convertErrorFunction");
+            PreCondition.assertTrue(isFunction(errorTypeOrConvertErrorFunction), "isFunction(convertErrorFunction)");
 
             convertErrorFunction = errorTypeOrConvertErrorFunction as (() => unknown) | ((error: unknown) => unknown);
             errorTypeOrConvertErrorFunction = undefined!;
         }
         else
         {
-            Pre.condition.assertNotUndefinedAndNotNull(errorTypeOrConvertErrorFunction, "errorType");
-            Pre.condition.assertNotUndefinedAndNotNull(convertErrorFunction, "convertErrorFunction");
-            Pre.condition.assertTrue(isFunction(convertErrorFunction), "isFunction(convertErrorFunction)");
+            PreCondition.assertNotUndefinedAndNotNull(errorTypeOrConvertErrorFunction, "errorType");
+            PreCondition.assertNotUndefinedAndNotNull(convertErrorFunction, "convertErrorFunction");
+            PreCondition.assertTrue(isFunction(convertErrorFunction), "isFunction(convertErrorFunction)");
         }
 
         let result: SyncResult<T> = this;

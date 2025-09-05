@@ -3,8 +3,20 @@
  */
 export interface AssertMessageParameters
 {
+    /**
+     * The expected state.
+     */
     expected: string,
+    /**
+     * The actual state.
+     */
     actual: string,
+    /**
+     * A string representation of the expression that produced the actual state.
+     */
     expression?: string,
+    /**
+     * A message that describes the failure.
+     */
     message?: string,
 }

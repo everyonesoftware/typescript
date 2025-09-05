@@ -3,7 +3,7 @@ import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { MapIterable } from "./mapIterable";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 import { Type } from "./types";
 
@@ -13,7 +13,7 @@ export abstract class IterableDecorator<T> implements Iterable<T>
 
     protected constructor(innerIterable: Iterable<T>)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(innerIterable, "innerIterable");
+        PreCondition.assertNotUndefinedAndNotNull(innerIterable, "innerIterable");
 
         this.innerIterable = innerIterable;
     }

@@ -1,13 +1,13 @@
-import { JavascriptArrayList } from "./javascriptArrayList";
+import { Indexable } from "./indexable";
 import { IndexableIterator } from "./indexableIterator";
+import { Iterable } from "./iterable";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
+import { JavascriptArrayList } from "./javascriptArrayList";
 import { MapIterable } from "./mapIterable";
 import { MutableIndexable } from "./mutableIndexable";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
-import { Indexable } from "./indexable";
 import { Type } from "./types";
-import { Iterable } from "./iterable";
 
 export abstract class List<T> implements MutableIndexable<T>
 {
@@ -66,7 +66,7 @@ export abstract class List<T> implements MutableIndexable<T>
      */
     public static add<T,TList extends List<T>>(list: TList, value: T): TList
     {
-        Pre.condition.assertNotUndefinedAndNotNull(list, "list");
+        PreCondition.assertNotUndefinedAndNotNull(list, "list");
         
         return list.insert(list.getCount(), value);
     }
@@ -87,8 +87,8 @@ export abstract class List<T> implements MutableIndexable<T>
      */
     public static addAll<T,TList extends List<T>>(list: TList, values: JavascriptIterable<T>): TList
     {
-        Pre.condition.assertNotUndefinedAndNotNull(list, "list");
-        Pre.condition.assertNotUndefinedAndNotNull(values, "values");
+        PreCondition.assertNotUndefinedAndNotNull(list, "list");
+        PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
         return list.insertAll(list.getCount(), values);
     }
@@ -115,9 +115,9 @@ export abstract class List<T> implements MutableIndexable<T>
      */
     public static insertAll<T,TList extends List<T>>(list: TList, index: number, values: JavascriptIterable<T>): TList
     {
-        Pre.condition.assertNotUndefinedAndNotNull(list, "list");
-        Pre.condition.assertInsertIndex(index, list.getCount(), "index");
-        Pre.condition.assertNotUndefinedAndNotNull(values, "values");
+        PreCondition.assertNotUndefinedAndNotNull(list, "list");
+        PreCondition.assertInsertIndex(index, list.getCount(), "index");
+        PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
         let insertIndex: number = index;
         for (const value of values)

@@ -1,7 +1,7 @@
 import { Iterable } from "./iterable";
 import { IterableDecorator } from "./iterableDecorator";
 import { Iterator } from "./iterator";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 
 /**
  * An {@link Iterable} that only returns values that match a condition.
@@ -12,8 +12,8 @@ export class WhereIterable<T> extends IterableDecorator<T>
     
     private constructor(innerIterable: Iterable<T>, condition: (value: T) => boolean)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(innerIterable, "innerIterable");
-        Pre.condition.assertNotUndefinedAndNotNull(condition, "condition");
+        PreCondition.assertNotUndefinedAndNotNull(innerIterable, "innerIterable");
+        PreCondition.assertNotUndefinedAndNotNull(condition, "condition");
 
         super(innerIterable);
 

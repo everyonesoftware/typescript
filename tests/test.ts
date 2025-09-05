@@ -1,4 +1,4 @@
-import { Pre } from "../sources/pre";
+import { PreCondition } from "../sources/preCondition";
 import { isUndefinedOrNull, Type } from "../sources/types";
 
 /**
@@ -148,7 +148,7 @@ export abstract class Test
      */
     public static assertFalse(test: Test, value: boolean): asserts value is false
     {
-        Pre.condition.assertNotUndefinedAndNotNull(test, "test");
+        PreCondition.assertNotUndefinedAndNotNull(test, "test");
 
         test.assertSame(value, false);
     }
@@ -168,7 +168,7 @@ export abstract class Test
      */
     public static assertTrue(test: Test, value: boolean): asserts value is true
     {
-        Pre.condition.assertNotUndefinedAndNotNull(test, "test");
+        PreCondition.assertNotUndefinedAndNotNull(test, "test");
 
         test.assertSame(value, true);
     }
@@ -208,7 +208,7 @@ export abstract class Test
      */
     public static assertInstanceOf<T>(test: Test, value: unknown, type: Type<T>, typeCheck?: (value: unknown) => value is T): asserts value is T
     {
-        Pre.condition.assertNotUndefinedAndNotNull(type, "type");
+        PreCondition.assertNotUndefinedAndNotNull(type, "type");
 
         if (isUndefinedOrNull(typeCheck))
         {

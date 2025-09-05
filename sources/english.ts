@@ -1,6 +1,6 @@
 import { Iterator } from "./iterator";
 import { JavascriptIterable } from "./javascript";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 
 export function andList(values: JavascriptIterable<string>): string
 {
@@ -14,8 +14,8 @@ export function orList(values: JavascriptIterable<string>): string
 
 function list(conjunction: string, values: JavascriptIterable<string>): string
 {
-    Pre.condition.assertNotEmpty(conjunction, "conjunction");
-    Pre.condition.assertNotUndefinedAndNotNull(values, "values");
+    PreCondition.assertNotEmpty(conjunction, "conjunction");
+    PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
     let result: string = "";
     let index = 0;

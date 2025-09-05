@@ -2,9 +2,9 @@ import { Iterator } from "./iterator";
 import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
 import { JavascriptIterable, JavascriptIterator, JavascriptIteratorResult } from "./javascript";
 import { MapIterator } from "./mapIterator";
-import { Pre } from "./pre";
+import { PreCondition } from "./preCondition";
 import { Result } from "./result";
-import { Type, isJavascriptIterable } from "./types";
+import { isJavascriptIterable, Type } from "./types";
 
 export class JavascriptIteratorToIteratorAdapter<T> implements Iterator<T>
 {
@@ -13,7 +13,7 @@ export class JavascriptIteratorToIteratorAdapter<T> implements Iterator<T>
 
     private constructor(javascriptIterator: JavascriptIterator<T>)
     {
-        Pre.condition.assertNotUndefinedAndNotNull(javascriptIterator, "javascriptIterator");
+        PreCondition.assertNotUndefinedAndNotNull(javascriptIterator, "javascriptIterator");
 
         this.javascriptIterator = javascriptIterator;
     }
@@ -44,7 +44,7 @@ export class JavascriptIteratorToIteratorAdapter<T> implements Iterator<T>
 
     public getCurrent(): T
     {
-        Pre.condition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
+        PreCondition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
 
         return this.javascriptIteratorResult!.value;
     }
