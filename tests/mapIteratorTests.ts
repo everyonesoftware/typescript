@@ -8,7 +8,7 @@ export function test(runner: TestRunner): void
 {
     runner.testFile("mapIterator.ts", () =>
     {
-        runner.testType(MapIterator.name, () =>
+        runner.testType("MapIterator<TInput,TOutput>", () =>
         {
             runner.testFunction("create(Iterator<TInput>,(TInput)=>TOutput)", () =>
             {

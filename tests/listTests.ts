@@ -9,7 +9,7 @@ export function test(runner: TestRunner): void
 {
     runner.testFile("list.ts", () =>
     {
-        runner.testType(List.name, () =>
+        runner.testType("List<T>", () =>
         {
             runner.testFunction("create(T[]|Iterable<T>|undefined)", () =>
             {

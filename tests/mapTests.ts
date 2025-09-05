@@ -9,7 +9,7 @@ export function test(runner: TestRunner): void
 {
     runner.testFile("map.ts", () =>
     {
-        runner.testType(Map.name, () =>
+        runner.testType("Map<TKey,TValue>", () =>
         {
             runner.testFunction("create()", (test: Test) =>
             {
@@ -24,7 +24,7 @@ export function test(runner: TestRunner): void
 
 export function mapTests(runner: TestRunner, creator: () => Map<number,string>): void
 {
-    runner.testType(Map.name, () =>
+    runner.testType("Map<TKey,TValue>", () =>
     {
         runner.testFunction("creator()", (test: Test) =>
         {

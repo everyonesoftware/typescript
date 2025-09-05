@@ -23,4 +23,5 @@ build({
   external: external,
   platform: "node",
   outdir: "outputs",
+  sourcemap: true,
 });

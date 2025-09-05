@@ -54,7 +54,7 @@ export function test(runner: TestRunner): void
 
 export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>): void
 {
-    runner.testType(Iterator.name, () =>
+    runner.testType("Iterator<T>", () =>
     {
         runner.testFunction("create()", (test: Test) =>
         {

@@ -8,7 +8,7 @@ export function test(runner: TestRunner): void
 {
     runner.testFile("disposable.ts", () =>
     {
-        runner.testType(Disposable.name, () =>
+        runner.testType("Disposable", () =>
         {
             runner.testFunction("create()", () =>
             {
