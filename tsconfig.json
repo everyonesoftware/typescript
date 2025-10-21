@@ -5,7 +5,8 @@
     "outDir": "outputs",
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "sourceMap": true
   },
   "include": ["sources", "tests"]
 }

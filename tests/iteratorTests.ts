@@ -1,3 +1,4 @@
+import { EmptyError } from "../sources/emptyError";
 import { Iterator } from "../sources/iterator";
 import {
     JavascriptIterable, JavascriptIterator, JavascriptIteratorResult
@@ -48,6 +49,552 @@ export function test(runner: TestRunner): void
                 createTest([1, 2, 3]);
                 createTest([false, true]);
             });
+
+            runner.testFunction("next()", () =>
+            {
+                runner.testGroup("not empty", () =>
+                {
+                    runner.test("not started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values);
+                        test.assertFalse(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                        
+                        for (const value of values)
+                        {
+                            test.assertTrue(iterator.next());
+                            test.assertTrue(iterator.hasCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertEqual(value, iterator.getCurrent());
+                        }
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertFalse(iterator.next());
+                            test.assertFalse(iterator.hasCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertThrows(
+                                () => iterator.getCurrent(),
+                                new PreConditionError(
+                                    "Expression: this.hasCurrent()",
+                                    "Expected: true",
+                                    "Actual: false",
+                                ),
+                            );
+                        }
+                    });
+
+                    runner.test("started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertTrue(iterator.hasCurrent());
+                        test.assertEqual(1, iterator.getCurrent());
+                        
+                        for (const value of values.slice(1))
+                        {
+                            test.assertTrue(iterator.next());
+                            test.assertTrue(iterator.hasCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertEqual(value, iterator.getCurrent());
+                        }
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertFalse(iterator.next());
+                            test.assertFalse(iterator.hasCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertThrows(
+                                () => iterator.getCurrent(),
+                                new PreConditionError(
+                                    "Expression: this.hasCurrent()",
+                                    "Expected: true",
+                                    "Actual: false",
+                                ),
+                            );
+                        }
+                    });
+                });
+            });
+
+            runner.testFunction("start()", (test: Test) =>
+            {
+                const iterator: Iterator<number> = Iterator.create([1, 2, 3]);
+                for (let i: number = 0; i < 2; i++)
+                {
+                    const startResult: Iterator<number> = iterator.start();
+                    test.assertSame(startResult, iterator);
+                    test.assertTrue(iterator.hasStarted());
+                    test.assertTrue(iterator.hasCurrent());
+                    test.assertEqual(1, iterator.getCurrent());
+                }
+            });
+
+            runner.testFunction("takeCurrent()", () =>
+            {
+                runner.testGroup("with non-empty", () =>
+                {
+                    runner.test("not started", (test: Test) =>
+                    {
+                        const iterator: Iterator<number> = Iterator.create([1, 2, 3]);
+                        test.assertFalse(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertThrows(() => iterator.takeCurrent(),
+                                new PreConditionError(
+                                    "Expression: iterator.hasCurrent()",
+                                    "Expected: true",
+                                    "Actual: false",
+                                ));
+                            test.assertFalse(iterator.hasStarted());
+                            test.assertFalse(iterator.hasCurrent());
+                        }
+                    });
+
+                    runner.test("started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertTrue(iterator.hasCurrent());
+                        test.assertEqual(1, iterator.getCurrent());
+
+                        for (let i = 0; i < values.length - 1; i++)
+                        {
+                            test.assertEqual(values[i], iterator.takeCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertTrue(iterator.hasCurrent());
+                            test.assertEqual(values[i + 1], iterator.getCurrent());
+                        }
+
+                        test.assertEqual(values[values.length - 1], iterator.takeCurrent());
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                    });
+                });
+            });
+
+            runner.testFunction("any()", () =>
+            {
+                runner.testGroup("with non-empty", () =>
+                {
+                    runner.test("not started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values);
+                        test.assertFalse(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertTrue(iterator.any());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertTrue(iterator.hasCurrent());
+                            test.assertEqual(values[0], iterator.getCurrent());
+                        }
+                    });
+
+                    runner.test("started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertTrue(iterator.hasCurrent());
+                        test.assertEqual(values[0], iterator.getCurrent());
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertTrue(iterator.any());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertTrue(iterator.hasCurrent());
+                            test.assertEqual(values[0], iterator.getCurrent());
+                        }
+                    });
+                });
+            });
+
+            runner.testFunction("getCount()", () =>
+            {
+                runner.testGroup("with non-empty", () =>
+                {
+                    runner.test("not started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values);
+                        test.assertFalse(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+
+                        test.assertEqual(values.length, iterator.getCount());
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertEqual(iterator.getCount(), 0);
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertFalse(iterator.hasCurrent());
+                        }
+                    });
+
+                    runner.test("started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertTrue(iterator.hasCurrent());
+                        test.assertEqual(values[0], iterator.getCurrent());
+
+                        test.assertEqual(values.length, iterator.getCount());
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertEqual(iterator.getCount(), 0);
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertFalse(iterator.hasCurrent());
+                        }
+                    });
+                });
+            });
+
+            runner.testFunction("toArray()", () =>
+            {
+                runner.testGroup("not empty", () =>
+                {
+                    runner.test("not started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values);
+
+                        test.assertEqual(values, iterator.toArray());
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+
+                        test.assertEqual([], iterator.toArray());
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                    });
+
+                    runner.test("started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values).start();
+
+                        test.assertEqual(values, iterator.toArray());
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+
+                        test.assertEqual([], iterator.toArray());
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                    });
+                });
+            });
+
+            runner.testFunction("where()", () =>
+            {
+                runner.testGroup("with non-empty", () =>
+                {
+                    runner.test("not started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3, 4, 5];
+                        const iterator: Iterator<number> = Iterator.create(values);
+                        const result: Iterator<number> = iterator.where(x => x % 2 === 1);
+                        test.assertNotUndefinedAndNotNull(result);
+                        test.assertNotSame(result, iterator);
+                        test.assertFalse(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                        test.assertFalse(result.hasStarted());
+                        test.assertFalse(result.hasCurrent());
+
+                        for (const expectedValue of [1, 3, 5])
+                        {
+                            test.assertTrue(result.next());
+                            test.assertTrue(result.hasStarted());
+                            test.assertTrue(result.hasCurrent());
+                            test.assertEqual(expectedValue, result.getCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertTrue(iterator.hasCurrent());
+                            test.assertEqual(expectedValue, iterator.getCurrent());
+                        }
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertFalse(result.next());
+                            test.assertTrue(result.hasStarted());
+                            test.assertFalse(result.hasCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertFalse(iterator.hasCurrent());
+                        }
+                    });
+
+                    runner.test("started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3, 4, 5];
+                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        const result: Iterator<number> = iterator.where(x => x % 2 === 1);
+                        test.assertNotUndefinedAndNotNull(result);
+                        test.assertNotSame(result, iterator);
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertTrue(iterator.hasCurrent());
+                        test.assertEqual(values[0], iterator.getCurrent())
+                        test.assertFalse(result.hasStarted());
+                        test.assertFalse(result.hasCurrent());
+
+                        for (const expectedValue of [1, 3, 5])
+                        {
+                            test.assertTrue(result.next());
+                            test.assertTrue(result.hasStarted());
+                            test.assertTrue(result.hasCurrent());
+                            test.assertEqual(expectedValue, result.getCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertTrue(iterator.hasCurrent());
+                            test.assertEqual(expectedValue, iterator.getCurrent());
+                        }
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertFalse(result.next());
+                            test.assertTrue(result.hasStarted());
+                            test.assertFalse(result.hasCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertFalse(iterator.hasCurrent());
+                        }
+                    });
+                });
+            });
+
+            runner.testFunction("map()", () =>
+            {
+                runner.testGroup("with non-empty", () =>
+                {
+                    runner.test("not started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values);
+                        const result: Iterator<number> = iterator.map(x => x + 10);
+                        test.assertFalse(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                        test.assertFalse(result.hasStarted());
+                        test.assertFalse(result.hasCurrent());
+
+                        for (const value of values)
+                        {
+                            test.assertTrue(result.next());
+                            test.assertTrue(result.hasStarted());
+                            test.assertTrue(result.hasCurrent());
+                            test.assertEqual(value + 10, result.getCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertTrue(iterator.hasCurrent());
+                            test.assertEqual(value, iterator.getCurrent());
+                        }
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertFalse(result.next());
+                            test.assertTrue(result.hasStarted());
+                            test.assertFalse(result.hasCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertFalse(iterator.hasCurrent());
+                        }
+                    });
+
+                    runner.test("started", (test: Test) =>
+                    {
+                        const values: number[] = [1, 2, 3];
+                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        const result: Iterator<number> = iterator.map(x => x + 10);
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertTrue(iterator.hasCurrent());
+                        test.assertEqual(values[0], iterator.getCurrent());
+                        test.assertFalse(result.hasStarted());
+                        test.assertFalse(result.hasCurrent());
+
+                        for (const value of values)
+                        {
+                            test.assertTrue(result.next());
+                            test.assertTrue(result.hasStarted());
+                            test.assertTrue(result.hasCurrent());
+                            test.assertEqual(value + 10, result.getCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertTrue(iterator.hasCurrent());
+                            test.assertEqual(value, iterator.getCurrent());
+                        }
+
+                        for (let i = 0; i < 2; i++)
+                        {
+                            test.assertFalse(result.next());
+                            test.assertTrue(result.hasStarted());
+                            test.assertFalse(result.hasCurrent());
+                            test.assertTrue(iterator.hasStarted());
+                            test.assertFalse(iterator.hasCurrent());
+                        }
+                    });
+                });
+            });
+
+            runner.testFunction("first()", () =>
+            {
+                runner.testGroup("with no condition", () =>
+                {
+                    function firstErrorTest(iterable: JavascriptIterable<string>, expected: Error): void
+                    {
+                        runner.test(`with ${runner.toString(iterable)}`, (test: Test) =>
+                        {
+                            const iterator: Iterator<string> = Iterator.create(iterable);
+                            for (let i = 0; i < 3; i++)
+                            {
+                                test.assertThrows(() => { iterator.first().await(); }, expected);
+                            }
+                        });
+                    }
+
+                    firstErrorTest(
+                        [],
+                        new EmptyError(),
+                    );
+
+                    function firstTest<T>(iterable: JavascriptIterable<T>, expected: T): void
+                    {
+                        runner.test(`with ${runner.toString(iterable)}`, (test: Test) =>
+                        {
+                            const iterator: Iterator<T> = Iterator.create(iterable);
+                            for (let i = 0; i < 3; i++)
+                            {
+                                test.assertEqual(iterator.first().await(), expected);
+                            }
+                        });
+                    }
+
+                    firstTest([1], 1);
+                    firstTest([2, 3], 2);
+                    firstTest([4, 5, 6, 7, 8], 4);
+                });
+
+                runner.testGroup("with condition argument", () =>
+                {
+                    function firstErrorTest<T>(iterable: JavascriptIterable<T>, condition: (value: T) => boolean, expected: Error): void
+                    {
+                        runner.test(`with ${runner.toString(iterable)} and ${condition?.name} condition`, (test: Test) =>
+                        {
+                            const iterator: Iterator<T> = Iterator.create(iterable);
+                            for (let i = 0; i < 3; i++)
+                            {
+                                test.assertThrows(() =>
+                                {
+                                    iterator.first(condition).await();
+                                }, expected);
+                            }
+                        });
+                    }
+
+                    function isOdd(value: number): boolean
+                    {
+                        return value % 2 === 1;
+                    }
+
+                    function isEven(value: number): boolean
+                    {
+                        return value % 2 === 0;
+                    }
+
+                    firstErrorTest(
+                        [],
+                        undefined!,
+                        new EmptyError(),
+                    );
+                    firstErrorTest(
+                        [],
+                        null!,
+                        new EmptyError(),
+                    );
+                    firstErrorTest(
+                        [1],
+                        isEven,
+                        new NotFoundError("No value was found in the Iterator that matched the provided condition."),
+                    );
+                    firstErrorTest(
+                        [2, 4],
+                        isOdd,
+                        new NotFoundError("No value was found in the Iterator that matched the provided condition."),
+                    );
+
+                    function firstTest<T>(iterable: JavascriptIterable<T>, condition: (value: T) => boolean, expected: T): void
+                    {
+                        runner.test(`with ${runner.toString(iterable)} and ${condition?.name} condition`, (test: Test) =>
+                        {
+                            const iterator: Iterator<T> = Iterator.create(iterable);
+                            for (let i = 0; i < 3; i++)
+                            {
+                                test.assertEqual(iterator.first(condition).await(), expected);
+                            }
+                        });
+                    }
+
+                    firstTest([1], isOdd, 1);
+                    firstTest([2, 3], isEven, 2);
+                    firstTest([2, 3], isOdd, 3);
+                    firstTest([4, 6, 7, 8], isEven, 4);
+                    firstTest([4, 6, 7, 8], isOdd, 7);
+                });
+            });
+
+            runner.testFunction("skip(number)", () =>
+            {
+                function skipErrorTest(iterable: JavascriptIterable<string>, maximumToSkip: number, expected: Error): void
+                {
+                    runner.test(`with ${runner.andList([iterable, maximumToSkip])}`, (test: Test) =>
+                    {
+                        const iterator: Iterator<string> = Iterator.create(iterable);
+                        test.assertThrows(() => iterator.skip(maximumToSkip), expected);
+                    });
+                }
+
+                skipErrorTest([], undefined!, new PreConditionError(
+                    "Expression: maximumToSkip",
+                    "Expected: not undefined and not null",
+                    "Actual: undefined",
+                ));
+                skipErrorTest([], null!, new PreConditionError(
+                    "Expression: maximumToSkip",
+                    "Expected: not undefined and not null",
+                    "Actual: null",
+                ));
+                skipErrorTest([], 0.5, new PreConditionError(
+                    "Expression: maximumToSkip",
+                    "Expected: integer",
+                    "Actual: 0.5",
+                ));
+                skipErrorTest([], -1, new PreConditionError(
+                    "Expression: maximumToSkip",
+                    "Expected: greater than or equal to 0",
+                    "Actual: -1",
+                ));
+
+                function skipTest(iterable: JavascriptIterable<string>, maximumToSkip: number, expected: JavascriptIterable<string>): void
+                {
+                    runner.test(`with ${runner.andList([iterable, maximumToSkip])}`, (test: Test) =>
+                    {
+                        const iterator: Iterator<string> = Iterator.create(iterable);
+                        const skipIterator: Iterator<string> = iterator.skip(maximumToSkip);
+                        test.assertEqual(expected, skipIterator.toArray());
+                    });
+                }
+
+                skipTest([], 0, []);
+                skipTest([], 1, []);
+                skipTest([], 2, []);
+                skipTest(["a", "b", "c"], 0, ["a", "b", "c"]);
+                skipTest(["a", "b", "c"], 1, ["b", "c"]);
+                skipTest(["a", "b", "c"], 2, ["c"]);
+                skipTest(["a", "b", "c"], 3, []);
+                skipTest(["a", "b", "c"], 4, []);
+            });
         });
     });
 }
@@ -56,7 +603,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
 {
     runner.testType("Iterator<T>", () =>
     {
-        runner.testFunction("create()", (test: Test) =>
+        runner.testFunction("creator()", (test: Test) =>
         {
             const iterator: Iterator<T> = creator();
             test.assertNotUndefinedAndNotNull(iterator);
@@ -72,9 +619,6 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
         runner.testFunction("start()", (test: Test) =>
         {
             const iterator: Iterator<T> = creator();
-            test.assertFalse(iterator.hasStarted());
-            test.assertFalse(iterator.hasCurrent());
-
             for (let i: number = 0; i < 2; i++)
             {
                 const startResult: Iterator<T> = iterator.start();
@@ -86,74 +630,78 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
 
         runner.testFunction("takeCurrent()", () =>
         {
-            runner.test("with not started", (test: Test) =>
+            runner.testGroup("with empty", () =>
             {
-                const iterator: Iterator<T> = creator();
-                test.assertFalse(iterator.hasStarted());
-                test.assertFalse(iterator.hasCurrent());
-
-                for (let i = 0; i < 2; i++)
+                runner.test("not started", (test: Test) =>
                 {
-                    test.assertThrows(() => iterator.takeCurrent(),
-                        new PreConditionError(
-                            "Expression: iterator.hasCurrent()",
-                            "Expected: true",
-                            "Actual: false",
-                        ));
-                    test.assertFalse(iterator.hasStarted());
-                    test.assertFalse(iterator.hasCurrent());
-                }
-            });
+                    const iterator: Iterator<T> = creator();
+                    for (let i = 0; i < 2; i++)
+                    {
+                        test.assertThrows(() => iterator.takeCurrent(),
+                            new PreConditionError(
+                                "Expression: iterator.hasCurrent()",
+                                "Expected: true",
+                                "Actual: false",
+                            ));
+                        test.assertFalse(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                    }
+                });
 
-            runner.test("when the Iterator doesn't have a current value", (test: Test) =>
-            {
-                const iterator: Iterator<T> = creator().start();
-                test.assertTrue(iterator.hasStarted());
-                test.assertFalse(iterator.hasCurrent());
-
-                for (let i = 0; i < 2; i++)
+                runner.test("started", (test: Test) =>
                 {
-                    test.assertThrows(() => iterator.takeCurrent(),
-                        new PreConditionError(
-                            "Expression: iterator.hasCurrent()",
-                            "Expected: true",
-                            "Actual: false",
-                        ));
+                    const iterator: Iterator<T> = creator().start();
                     test.assertTrue(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
-                }
+
+                    for (let i = 0; i < 2; i++)
+                    {
+                        test.assertThrows(() => iterator.takeCurrent(),
+                            new PreConditionError(
+                                "Expression: iterator.hasCurrent()",
+                                "Expected: true",
+                                "Actual: false",
+                            ));
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                    }
+                });
             });
         });
 
         runner.testFunction("next()", () =>
         {
-            runner.test("with not started", (test: Test) =>
+            runner.testGroup("with empty", () =>
             {
-                const iterator: Iterator<T> = creator();
-                test.assertFalse(iterator.hasStarted());
-                test.assertFalse(iterator.hasCurrent());
-
-                for (let i = 0; i < 2; i++)
+                runner.test("not started", (test: Test) =>
                 {
-                    test.assertFalse(iterator.next());
+                    const iterator: Iterator<T> = creator();
+                    test.assertFalse(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
+
+                    for (let i = 0; i < 2; i++)
+                    {
+                        test.assertFalse(iterator.next());
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                    }
+                });
+
+                runner.test("started", (test: Test) =>
+                {
+                    const iterator: Iterator<T> = creator().start();
                     test.assertTrue(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
-                }
-            });
 
-            runner.test("with started", (test: Test) =>
-            {
-                const iterator: Iterator<T> = creator().start();
-                test.assertTrue(iterator.hasStarted());
-                test.assertFalse(iterator.hasCurrent());
-
-                for (let i = 0; i < 2; i++)
-                {
-                    test.assertFalse(iterator.next());
-                    test.assertTrue(iterator.hasStarted());
-                    test.assertFalse(iterator.hasCurrent());
-                }
+                    for (let i = 0; i < 2; i++)
+                    {
+                        test.assertFalse(iterator.next());
+                        test.assertTrue(iterator.hasStarted());
+                        test.assertFalse(iterator.hasCurrent());
+                    }
+                });
             });
+            
         });
 
         runner.testFunction("[Symbol.iterator]()", (test: Test) =>
@@ -194,10 +742,12 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
             test.assertFalse(iterator.hasStarted());
             test.assertFalse(iterator.hasCurrent());
 
-            test.assertEqual(iterator.getCount(), 0);
-
-            test.assertTrue(iterator.hasStarted());
-            test.assertFalse(iterator.hasCurrent());
+            for (let i = 0; i < 2; i++)
+            {
+                test.assertEqual(iterator.getCount(), 0);
+                test.assertTrue(iterator.hasStarted());
+                test.assertFalse(iterator.hasCurrent());
+            }
         });
 
         runner.testFunction("toArray()", (test: Test) =>
@@ -206,13 +756,86 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
             test.assertFalse(iterator.hasStarted());
             test.assertFalse(iterator.hasCurrent());
 
-            const array: T[] = iterator.toArray();
-            test.assertEqual(array, []);
-            test.assertTrue(iterator.hasStarted());
-            test.assertFalse(iterator.hasCurrent());
+            for (let i = 0; i < 2; i++)
+            {
+                const array: T[] = iterator.toArray();
+                test.assertEqual(array, []);
+                test.assertTrue(iterator.hasStarted());
+                test.assertFalse(iterator.hasCurrent());
+            }
         });
 
-        runner.testFunction("map((TInput)=>TOutput)", () =>
+        runner.testFunction("where()", () =>
+        {
+            runner.test("with undefined condition", (test: Test) =>
+            {
+                const iterator: Iterator<T> = creator();
+                test.assertThrows(() => iterator.where(undefined!), new PreConditionError(
+                    "Expression: condition",
+                    "Expected: not undefined and not null",
+                    "Actual: undefined",
+                ));
+                test.assertFalse(iterator.hasStarted());
+                test.assertFalse(iterator.hasCurrent());
+            });
+
+            runner.test("with null condition", (test: Test) =>
+            {
+                const iterator: Iterator<T> = creator();
+                test.assertThrows(() => iterator.where(null!), new PreConditionError(
+                    "Expression: condition",
+                    "Expected: not undefined and not null",
+                    "Actual: null",
+                ));
+                test.assertFalse(iterator.hasStarted());
+                test.assertFalse(iterator.hasCurrent());
+            });
+
+            runner.testGroup("with empty", () =>
+            {
+                runner.test("not started", (test: Test) =>
+                {
+                    const iterator: Iterator<T> = creator();
+
+                    const result: Iterator<T> = iterator.where((value: T) => value !== undefined);
+                    test.assertNotUndefinedAndNotNull(result);
+                    test.assertNotSame(result, iterator);
+                    test.assertFalse(result.hasStarted());
+                    test.assertFalse(result.hasCurrent());
+                    test.assertFalse(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
+
+                    test.assertFalse(result.next());
+                    test.assertTrue(result.hasStarted());
+                    test.assertFalse(result.hasCurrent());
+                    test.assertTrue(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
+                });
+
+                runner.test("started", (test: Test) =>
+                {
+                    const iterator: Iterator<T> = creator().start();
+                    test.assertTrue(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
+
+                    const result: Iterator<T> = iterator.where((value: T) => value !== undefined);
+                    test.assertNotUndefinedAndNotNull(result);
+                    test.assertNotSame(result, iterator);
+                    test.assertFalse(result.hasStarted());
+                    test.assertFalse(result.hasCurrent());
+                    test.assertTrue(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
+
+                    test.assertFalse(result.next());
+                    test.assertTrue(result.hasStarted());
+                    test.assertFalse(result.hasCurrent());
+                    test.assertTrue(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
+                });
+            });
+        });
+
+        runner.testFunction("map()", () =>
         {
             runner.test("with undefined", (test: Test) =>
             {
@@ -238,189 +861,40 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
                 test.assertFalse(iterator.hasCurrent());
             });
 
-            runner.test("with not started", (test: Test) =>
+            runner.testGroup("with empty", () =>
             {
-                const iterator: Iterator<T> = creator();
-                test.assertFalse(iterator.hasStarted());
-                test.assertFalse(iterator.hasCurrent());
-
-                const mapIterator: MapIterator<T,number> = iterator.map(_ => 5);
-                test.assertFalse(mapIterator.hasStarted());
-                test.assertFalse(mapIterator.hasCurrent());
-                test.assertFalse(iterator.hasStarted());
-                test.assertFalse(iterator.hasCurrent());
-            });
-
-            runner.test("with started", (test: Test) =>
-            {
-                const iterator: Iterator<T> = creator().start();
-                test.assertTrue(iterator.hasStarted());
-                test.assertFalse(iterator.hasCurrent());
-
-                const mapIterator: MapIterator<T,number> = iterator.map(_ => 5);
-                test.assertTrue(mapIterator.hasStarted());
-                test.assertFalse(mapIterator.hasCurrent());
-                test.assertTrue(iterator.hasStarted());
-                test.assertFalse(iterator.hasCurrent());
-            });
-        });
-
-        runner.testFunction("first()", () =>
-        {
-            runner.testGroup("with no condition", () =>
-            {
-                function firstErrorTest(iterable: JavascriptIterable<string>, expected: Error): void
+                runner.test("not started", (test: Test) =>
                 {
-                    runner.test(`with ${runner.toString(iterable)}`, (test: Test) =>
-                    {
-                        const iterator: Iterator<string> = Iterator.create(iterable);
-                        for (let i = 0; i < 3; i++)
-                        {
-                            test.assertThrows(() => { iterator.first().await(); }, expected);
-                        }
-                    });
-                }
+                    const iterator: Iterator<T> = creator();
+                    test.assertFalse(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
 
-                firstErrorTest(
-                    [],
-                    new NotFoundError("No value was found in the Iterator."),
-                );
-
-                function firstTest<T>(iterable: JavascriptIterable<T>, expected: T): void
-                {
-                    runner.test(`with ${runner.toString(iterable)}`, (test: Test) =>
-                    {
-                        const iterator: Iterator<T> = Iterator.create(iterable);
-                        for (let i = 0; i < 3; i++)
-                        {
-                            test.assertEqual(iterator.first().await(), expected);
-                        }
-                    });
-                }
-
-                firstTest([1], 1);
-                firstTest([2, 3], 2);
-                firstTest([4, 5, 6, 7, 8], 4);
-            });
-
-            runner.testGroup("with condition argument", () =>
-            {
-                function firstErrorTest<T>(iterable: JavascriptIterable<T>, condition: (value: T) => boolean, expected: Error): void
-                {
-                    runner.test(`with ${runner.toString(iterable)} and ${condition?.name} condition`, (test: Test) =>
-                    {
-                        const iterator: Iterator<T> = Iterator.create(iterable);
-                        for (let i = 0; i < 3; i++)
-                        {
-                            test.assertThrows(() =>
-                            {
-                                iterator.first(condition).await();
-                            }, expected);
-                        }
-                    });
-                }
-
-                function isOdd(value: number): boolean
-                {
-                    return value % 2 === 1;
-                }
-
-                function isEven(value: number): boolean
-                {
-                    return value % 2 === 0;
-                }
-
-                firstErrorTest(
-                    [],
-                    undefined!,
-                    new NotFoundError("No value was found in the Iterator."),
-                );
-                firstErrorTest(
-                    [],
-                    null!,
-                    new NotFoundError("No value was found in the Iterator."),
-                );
-                firstErrorTest(
-                    [1],
-                    isEven,
-                    new NotFoundError("No value was found in the Iterator that matched the provided condition."),
-                );
-                firstErrorTest(
-                    [2, 4],
-                    isOdd,
-                    new NotFoundError("No value was found in the Iterator that matched the provided condition."),
-                );
-
-                function firstTest<T>(iterable: JavascriptIterable<T>, condition: (value: T) => boolean, expected: T): void
-                {
-                    runner.test(`with ${runner.toString(iterable)} and ${condition?.name} condition`, (test: Test) =>
-                    {
-                        const iterator: Iterator<T> = Iterator.create(iterable);
-                        for (let i = 0; i < 3; i++)
-                        {
-                            test.assertEqual(iterator.first(condition).await(), expected);
-                        }
-                    });
-                }
-
-                firstTest([1], isOdd, 1);
-                firstTest([2, 3], isEven, 2);
-                firstTest([2, 3], isOdd, 3);
-                firstTest([4, 6, 7, 8], isEven, 4);
-                firstTest([4, 6, 7, 8], isOdd, 7);
-            });
-        });
-
-        runner.testFunction("skip(number)", () =>
-        {
-            function skipErrorTest(iterable: JavascriptIterable<string>, maximumToSkip: number, expected: Error): void
-            {
-                runner.test(`with ${runner.andList([iterable, maximumToSkip])}`, (test: Test) =>
-                {
-                    const iterator: Iterator<string> = Iterator.create(iterable);
-                    test.assertThrows(() => iterator.skip(maximumToSkip), expected);
+                    const mapIterator: MapIterator<T,number> = iterator.map(_ => 5);
+                    test.assertFalse(mapIterator.hasStarted());
+                    test.assertFalse(mapIterator.hasCurrent());
+                    test.assertFalse(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
                 });
-            }
 
-            skipErrorTest([], undefined!, new PreConditionError(
-                "Expression: maximumToSkip",
-                "Expected: not undefined and not null",
-                "Actual: undefined",
-            ));
-            skipErrorTest([], null!, new PreConditionError(
-                "Expression: maximumToSkip",
-                "Expected: not undefined and not null",
-                "Actual: null",
-            ));
-            skipErrorTest([], 0.5, new PreConditionError(
-                "Expression: maximumToSkip",
-                "Expected: integer",
-                "Actual: 0.5",
-            ));
-            skipErrorTest([], -1, new PreConditionError(
-                "Expression: maximumToSkip",
-                "Expected: greater than or equal to 0",
-                "Actual: -1",
-            ));
-
-            function skipTest(iterable: JavascriptIterable<string>, maximumToSkip: number, expected: JavascriptIterable<string>): void
-            {
-                runner.test(`with ${runner.andList([iterable, maximumToSkip])}`, (test: Test) =>
+                runner.test("started", (test: Test) =>
                 {
-                    const iterator: Iterator<string> = Iterator.create(iterable);
-                    const skipIterator: Iterator<string> = iterator.skip(maximumToSkip);
-                    test.assertEqual(expected, skipIterator.toArray());
-                });
-            }
+                    const iterator: Iterator<T> = creator().start();
+                    test.assertTrue(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
 
-            skipTest([], 0, []);
-            skipTest([], 1, []);
-            skipTest([], 2, []);
-            skipTest(["a", "b", "c"], 0, ["a", "b", "c"]);
-            skipTest(["a", "b", "c"], 1, ["b", "c"]);
-            skipTest(["a", "b", "c"], 2, ["c"]);
-            skipTest(["a", "b", "c"], 3, []);
-            skipTest(["a", "b", "c"], 4, []);
+                    const mapIterator: MapIterator<T,number> = iterator.map(_ => 5);
+                    test.assertFalse(mapIterator.hasStarted());
+                    test.assertFalse(mapIterator.hasCurrent());
+                    test.assertTrue(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
+
+                    test.assertFalse(mapIterator.next());
+                    test.assertTrue(mapIterator.hasStarted());
+                    test.assertFalse(mapIterator.hasCurrent());
+                    test.assertTrue(iterator.hasStarted());
+                    test.assertFalse(iterator.hasCurrent());
+                });
+            });
         });
     });
 }

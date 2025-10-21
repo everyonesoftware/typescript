@@ -1,12 +1,14 @@
 
 
 import { Iterable } from "../sources/iterable";
+import { List } from "../sources/list";
 import { PreCondition } from "../sources/preCondition";
 import { join } from "../sources/strings";
 import { ToStringFunctions } from "../sources/toStringFunctions";
 import { isFunction, Type } from "../sources/types";
 import { AssertTest } from "./assertTest";
 import { Test } from "./test";
+import { TestFailure } from "./testFailure";
 import { TestRunner } from "./testRunner";
 import { TestSkip } from "./testSkip";
 
@@ -19,6 +21,11 @@ export class ConsoleTestRunner implements TestRunner
     private currentTest: Test | undefined;
     private toStringFunctions: ToStringFunctions;
 
+    private passingTestCount: number;
+    private skippedTestCount: number;
+
+    private readonly testFailures: List<TestFailure>;
+
     protected constructor(toStringFunctions?: ToStringFunctions)
     {
         this.testGroups = [];
@@ -28,6 +35,11 @@ export class ConsoleTestRunner implements TestRunner
             toStringFunctions = ToStringFunctions.create();
         }
         this.toStringFunctions = toStringFunctions;
+
+        this.passingTestCount = 0;
+        this.skippedTestCount = 0;
+
+        this.testFailures = List.create();
     }
 
     public static create(toStringFunctions?: ToStringFunctions): ConsoleTestRunner
@@ -108,11 +120,13 @@ export class ConsoleTestRunner implements TestRunner
         this.assertNoCurrentTest();
 
         this.testGroups.push(testGroupName);
+        let caughtError: unknown = undefined;
         try
         {
             if (TestRunner.shouldSkip(skip))
             {
                 console.log(`TEST GROUP SKIP: ${testGroupName}`);
+                this.skippedTestCount++;
             }
             else
             {
@@ -121,11 +135,18 @@ export class ConsoleTestRunner implements TestRunner
         }
         catch (error)
         {
-            console.log(`TEST ERROR: ${error}`);
+            caughtError = error;
         }
         finally
         {
             this.testGroups.pop();
+        }
+
+        if (caughtError !== undefined)
+        {
+            console.log(`TEST ERROR: ${caughtError}`);
+            const testFailure = TestFailure.create(this.getFullTestName(testGroupName), caughtError);
+            this.testFailures.add(testFailure);
         }
     }
 
@@ -151,11 +172,13 @@ export class ConsoleTestRunner implements TestRunner
 
         this.assertNoCurrentTest();
 
+        const fullTestName: string = this.getFullTestName(testName);
         try
         {
             if (TestRunner.shouldSkip(skip))
             {
-                console.log(`TEST SKIPPED: ${testName}`)
+                console.log(`TEST SKIPPED: ${fullTestName}`)
+                this.skippedTestCount++;
             }
             else
             {
@@ -163,8 +186,9 @@ export class ConsoleTestRunner implements TestRunner
                 this.setCurrentTest(currentTest);
                 try
                 {
-                    console.log(this.getFullTestName(testName));
+                    console.log(fullTestName);
                     testAction(currentTest);
+                    this.passingTestCount++;
                 }
                 finally
                 {
@@ -175,6 +199,7 @@ export class ConsoleTestRunner implements TestRunner
         catch(error)
         {
             console.log(`TEST ERROR: ${error}`)
+            this.testFailures.add(TestFailure.create(fullTestName, error));
         }
     }
 
@@ -198,21 +223,34 @@ export class ConsoleTestRunner implements TestRunner
         }
         PreCondition.assertNotUndefinedAndNotNull(testAction, "testAction");
 
+        const fullTestName: string = this.getFullTestName(testName);
         try
         {
             if (TestRunner.shouldSkip(skip))
             {
-                console.log(`TEST SKIPPED (ASYNC): ${testName}`);
+                console.log(`TEST SKIPPED (ASYNC): ${fullTestName}`);
+                this.skippedTestCount++;
             }
             else
             {
-                console.log(this.getFullTestName(testName));
-                await testAction(AssertTest.create());
+                console.log(fullTestName);
+                const test = AssertTest.create();
+                this.setCurrentTest(test);
+                try
+                {
+                    await testAction(test);
+                    this.passingTestCount++;
+                }
+                finally
+                {
+                    this.setCurrentTest(undefined);
+                }
             }
         }
         catch (error)
         {
             console.log(`TEST ERROR (ASYNC): ${error}`)
+            this.testFailures.add(TestFailure.create(fullTestName, error));
         }
     }
 
@@ -226,5 +264,36 @@ export class ConsoleTestRunner implements TestRunner
     public toString(value: unknown): string
     {
         return this.toStringFunctions.toString(value);
+    }
+
+    public printSummary(): void
+    {
+        console.log();
+        const hasTestFailures: boolean = this.testFailures.any();
+        if (hasTestFailures)
+        {
+            console.log("Test failures:");
+            let testFailureNumber: number = 0;
+            for (const testFailure of this.testFailures)
+            {
+                testFailureNumber++;
+                console.log(`${testFailureNumber}) ${testFailure.getFullTestName()}`);
+                console.log(`  ${testFailure.getErrorMessage()}`);
+                console.log();
+            }
+        }
+
+        if (this.passingTestCount > 0)
+        {
+            console.log(`Passed:  ${this.passingTestCount}`);
+        }
+        if (this.skippedTestCount > 0)
+        {
+            console.log(`Skipped: ${this.skippedTestCount}`);
+        }
+        if (hasTestFailures)
+        {
+            console.log(`Failed:  ${this.testFailures.getCount()}`);
+        }
     }
 }

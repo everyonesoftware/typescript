@@ -39,7 +39,7 @@ export class SkipIterator<T> implements Iterator<T>
             this.started = true;
             this.innerIterator.start();
 
-            for (let i = 1; i < this.maximumToSkip; i++)
+            for (let i = 0; i < this.maximumToSkip; i++)
             {
                 if (!this.innerIterator.next())
                 {

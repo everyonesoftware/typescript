@@ -10,7 +10,7 @@ import { Type } from "./types";
  * An {@link Iterator} that maintains the current index of the value being pointed at in the
  * collection.
  */
-export abstract class IndexableIterator<T> implements Iterator<T>
+export abstract class IndexableIterator<T> extends Iterator<T>
 {
     /**
      * Create a new {@link IndexableIterator} that contains the provided values.
@@ -48,9 +48,9 @@ export abstract class IndexableIterator<T> implements Iterator<T>
      */
     public abstract getCurrentIndex(): number;
 
-    public abstract first(): Result<T>;
+    public abstract first(condition?: (value: T) => boolean): Result<T>;
 
-    public abstract last(): Result<T>;
+    public abstract last(condition?: (value: T) => boolean): Result<T>;
 
     public abstract where(condition: (value: T) => boolean): Iterator<T>;
 

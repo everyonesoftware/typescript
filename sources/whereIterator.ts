@@ -52,6 +52,11 @@ export class WhereIterator<T> implements Iterator<T>
         {
             this.innerIterator.start();
             this.started = true;
+
+            while (this.hasCurrent() && !this.condition(this.getCurrent()))
+            {
+                this.innerIterator.next();
+            }
         }
         else
         {

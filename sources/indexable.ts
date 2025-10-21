@@ -22,7 +22,15 @@ export abstract class Indexable<T> implements Iterable<T>
 
     public abstract toArray(): T[];
 
-    public abstract any(): boolean;
+    public any(): boolean
+    {
+        return Indexable.any(this);
+    }
+
+    public static any<T>(indexable: Indexable<T>): boolean
+    {
+        return indexable.getCount() > 0;
+    }
 
     public abstract getCount(): number;
 
@@ -69,7 +77,7 @@ export abstract class Indexable<T> implements Iterable<T>
      */
     public last(): Result<T>
     {
-        return Indexable.first(this);
+        return Indexable.last(this);
     }
 
     /**

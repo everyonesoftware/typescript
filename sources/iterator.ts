@@ -73,10 +73,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * Get the current value from this {@link Iterator} and advance this {@link Iterator} to the
      * next value.
      */
-    public takeCurrent(): T
-    {
-        return Iterator.takeCurrent(this);
-    }
+    public abstract takeCurrent(): T;
 
     public static takeCurrent<T>(iterator: Iterator<T>): T
     {
@@ -89,10 +86,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
         return result;
     }
 
-    public [Symbol.iterator](): IteratorToJavascriptIteratorAdapter<T>
-    {
-        return Iterator[Symbol.iterator](this);
-    }
+    public abstract [Symbol.iterator](): IteratorToJavascriptIteratorAdapter<T>;
 
     /**
      * Convert the provided {@link Iterator} to a {@link IteratorToJavascriptIteratorAdapter}.
@@ -110,10 +104,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * Note: This may advance the {@link Iterator} to the first value if it hasn't been
      * started yet.
      */
-    public any(): boolean
-    {
-        return Iterator.any(this);
-    }
+    public abstract any(): boolean;
 
     /**
      * Get whether this {@link Iterator} contains any values.
@@ -132,10 +123,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * Get the number of values in this {@link Iterator}.
      * Note: This will consume all of the values in this {@link Iterator}.
      */
-    public getCount(): number
-    {
-        return Iterator.getCount(this);
-    }
+    public abstract getCount(): number;
 
     /**
      * Get the number of values in the provided {@link Iterator}.
@@ -161,10 +149,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
     /**
      * Get all of the remaining values in this {@link Iterator} in a {@link T} {@link Array}.
      */
-    public toArray(): T[]
-    {
-        return Iterator.toArray(this);
-    }
+    public abstract toArray(): T[];
 
     /**
      * Get all of the remaining values in the provided {@link Iterator} in a {@link T}
@@ -186,10 +171,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * Get an {@link Iterator} that will only return values that match the provided condition.
      * @param condition The condition to run against each of the values in this {@link Iterator}.
      */
-    public where(condition: (value: T) => boolean) : Iterator<T>
-    {
-        return Iterator.where(this, condition);
-    }
+    public abstract where(condition: (value: T) => boolean) : Iterator<T>;
 
     public static where<T>(iterator: Iterator<T>, condition: (value: T) => boolean): Iterator<T>
     {
@@ -204,10 +186,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * {@link TOutput} values.
      * @param mapping The mapping that maps {@link T} values to {@link TOutput} values.
      */
-    public map<TOutput>(mapping: (value: T) => TOutput): MapIterator<T,TOutput>
-    {
-        return Iterator.map(this, mapping);
-    }
+    public abstract map<TOutput>(mapping: (value: T) => TOutput): MapIterator<T,TOutput>;
 
     public static map<T,TOutput>(iterator: Iterator<T>, mapping: (value: T) => TOutput): MapIterator<T,TOutput>
     {
@@ -254,10 +233,9 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
     }
 
     /**
-     * Get the first value in this {@link Iterator}. If the condition function is undefined, then
-     * this function will return the first value in this {@link Iterator}. If this condition
-     * function is provided, then this function will return the first value that matches the
-     * provided condition.
+     * If the condition function is undefined, then this function will return the first value in
+     * this {@link Iterator}. If this condition function is provided, then this function will return
+     * the first value that matches the provided condition.
      * @param condition The condition that the returned value must satisfy.
      */
     public first(condition?: (value: T) => boolean): Result<T>
@@ -266,7 +244,9 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
     }
 
     /**
-     * Get the first value from the provided {@link Iterator}.
+     * If the condition function is undefined, then this function will return the first value in
+     * the {@link Iterator}. If this condition function is provided, then this function will return
+     * the first value that matches the provided condition.
      * @param iterator The {@link Iterator} to get the first value from.
      */
     public static first<T>(iterator: Iterator<T>, condition?: (value: T) => boolean): Result<T>
@@ -280,7 +260,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
             {
                 if (!iterator.hasCurrent())
                 {
-                    throw new NotFoundError("No value was found in the Iterator.");
+                    throw new EmptyError();
                 }
             }
             else
@@ -300,15 +280,20 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
     }
 
     /**
-     * Get the last value in this {@link Iterator}.
+     * If the condition function is undefined, then this function will return the last value in this
+     * {@link Iterator}. If this condition function is provided, then this function will return the
+     * last value that matches the provided condition.
+     * @param condition The condition that the returned value must satisfy.
      */
-    public last(): Result<T>
+    public last(condition?: (value: T) => boolean): Result<T>
     {
-        return Iterator.last(this);
+        return Iterator.last(this, condition);
     }
 
     /**
-     * Get the last value from the provided {@link Iterator}.
+     * If the condition function is undefined, then this function will return the last value in the
+     * {@link Iterator}. If this condition function is provided, then this function will return the
+     * last value that matches the provided condition.
      * @param iterator The {@link Iterator} to get the last value from.
      */
     public static last<T>(iterator: Iterator<T>, condition?: (value: T) => boolean): Result<T>
@@ -338,7 +323,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
             {
                 if (!condition)
                 {
-                    throw new NotFoundError("No value was found in the Iterator.");
+                    throw new EmptyError();
                 }
                 else
                 {

@@ -11,6 +11,7 @@ export class MapIterator<TInput,TOutput> implements Iterator<TOutput>
 {
     private readonly inputIterator: Iterator<TInput>;
     private readonly mapping: (value: TInput) => TOutput;
+    private started: boolean;
 
     protected constructor(inputIterator: Iterator<TInput>, mapping: (value: TInput) => TOutput)
     {
@@ -19,6 +20,7 @@ export class MapIterator<TInput,TOutput> implements Iterator<TOutput>
 
         this.inputIterator = inputIterator;
         this.mapping = mapping;
+        this.started = false;
     }
 
     public static create<TInput,TOutput>(inputIterator: Iterator<TInput>, mapping: (value: TInput) => TOutput): MapIterator<TInput,TOutput>
@@ -28,21 +30,32 @@ export class MapIterator<TInput,TOutput> implements Iterator<TOutput>
 
     public next(): boolean
     {
-        return this.inputIterator.next();
+        if (!this.hasStarted())
+        {
+            this.started = true;
+            this.inputIterator.start();
+        }
+        else
+        {
+            this.inputIterator.next();
+        }
+        return this.inputIterator.hasCurrent();
     }
 
     public hasStarted(): boolean
     {
-        return this.inputIterator.hasStarted();
+        return this.started;
     }
 
     public hasCurrent(): boolean
     {
-        return this.inputIterator.hasCurrent();
+        return this.hasStarted() && this.inputIterator.hasCurrent();
     }
 
     public getCurrent(): TOutput
     {
+        PreCondition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
+
         return this.mapping(this.inputIterator.getCurrent());
     }
 
