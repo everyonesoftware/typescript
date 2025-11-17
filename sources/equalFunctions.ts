@@ -1,18 +1,19 @@
 import { Comparer } from "./comparer";
 import { Iterable } from "./iterable";
 import { isMap, Map } from "./map";
-import { getPropertyNames, hasProperty, isArray, isFunctionWithParameterCount, isIterable, isObject } from "./types";
+import { PreCondition } from "./preCondition";
+import { getPropertyNames, hasProperty, isJavascriptIterable, isObject, isString } from "./types";
 
 /**
  * A collection of {@link Function}s that can be used to determine if two values are equal.
  */
 export class EqualFunctions
 {
-    private readonly functions: {matchFunction: (left: unknown, right: unknown) => boolean, equalFunction: (left: unknown, right: unknown) => boolean}[];
+    private readonly equalFunctions: ((left: unknown, right: unknown) => (boolean | undefined))[];
     
     private constructor()
     {
-        this.functions = [];
+        this.equalFunctions = [];
     }
 
     public static create(): EqualFunctions
@@ -20,7 +21,7 @@ export class EqualFunctions
         return new EqualFunctions();
     }
 
-    private defaultEqual(left: unknown, right: unknown): boolean
+    private defaultEqualFunction(left: unknown, right: unknown): boolean
     {
         let result: boolean | undefined = Comparer.equalSameUndefinedNull(left, right);
         if (result === undefined)
@@ -34,29 +35,11 @@ export class EqualFunctions
                     result = Map.equals(left, right, this);
                 }
             }
-            else if (isIterable(left))
+            else if (isJavascriptIterable(left) && !isString(left))
             {
-                if (isIterable(right))
+                if (isJavascriptIterable(right) && !isString(right) && !isMap(right))
                 {
                     result = Iterable.equals(left, right, this);
-                }
-            }
-            else if (isArray(left))
-            {
-                if (isArray(right))
-                {
-                    result = (left.length === right.length);
-                    if (result)
-                    {
-                        for (let i = 0; i < left.length; i++)
-                        {
-                            result = this.areEqual(left[i], right[i]);
-                            if (!result)
-                            {
-                                break;
-                            }
-                        }
-                    }
                 }
             }
             else if (isObject(left))
@@ -106,29 +89,28 @@ export class EqualFunctions
      */
     public areEqual(left: unknown, right: unknown): boolean
     {
-        let matchingEqualFunction = (left: unknown, right: unknown) => this.defaultEqual(left, right);
-        for (const {matchFunction, equalFunction} of this.functions)
+        let result: boolean | undefined;
+        for (const equalFunction of this.equalFunctions)
         {
-            if (matchFunction(left, right))
+            result = equalFunction(left, right);
+            if (result !== undefined)
             {
-                matchingEqualFunction = equalFunction;
                 break;
             }
         }
-        return matchingEqualFunction(left, right);
+        if (result === undefined)
+        {
+            result = this.defaultEqualFunction(left, right);
+        }
+        return result;
     }
 
-    public add<T>(matchFunction: ((value: T) => boolean) | ((left: T, right: T) => boolean), equalFunction: (left: T, right: T) => boolean): this
+    public add(equalFunction: (left: unknown, right: unknown) => (boolean | undefined)): this
     {
-        if (isFunctionWithParameterCount(matchFunction, 1))
-        {
-            const oneArgMatchFunction: (value: unknown) => boolean = matchFunction as (value: unknown) => boolean;
-            matchFunction = (left: unknown, right: unknown) => oneArgMatchFunction(left) && oneArgMatchFunction(right);
-        }
-        this.functions.unshift({
-            matchFunction: matchFunction as (left: unknown, right: unknown) => boolean,
-            equalFunction: equalFunction as (left: unknown, right: unknown) => boolean,
-        });
+        PreCondition.assertNotUndefinedAndNotNull(equalFunction, "equalFunction");
+
+        this.equalFunctions.unshift(equalFunction);
+
         return this;
     }
 }

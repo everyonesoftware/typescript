@@ -1,8 +1,10 @@
 import * as byteTests from "./bytesTests";
+import * as comparerTests from "./comparerTests";
 import * as conditionTests from "./conditionTests";
 import { ConsoleTestRunner } from "./consoleTestRunner";
 import * as disposableTests from "./disposableTests";
 import * as englishTests from "./englishTests";
+import * as equalFunctionsTests from "./equalFunctionsTests";
 import * as indexableTests from "./indexableTests";
 import * as iterableTests from "./iterableTests";
 import * as iteratorTests from "./iteratorTests";
@@ -27,9 +29,11 @@ function main(): void
     const runner = ConsoleTestRunner.create();
 
     byteTests.test(runner);
+    comparerTests.test(runner);
     conditionTests.test(runner);
     disposableTests.test(runner);
     englishTests.test(runner);
+    equalFunctionsTests.test(runner);
     indexableTests.test(runner);
     iterableTests.test(runner);
     iteratorTests.test(runner);

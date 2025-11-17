@@ -12,6 +12,10 @@ import { join } from "./strings";
 import { ToStringFunctions } from "./toStringFunctions";
 import { hasFunction, isUndefinedOrNull, Type } from "./types";
 
+/**
+ * Get whether the provided value is {@link Map}.
+ * @param value The value to check.
+ */
 export function isMap(value: unknown): value is Map<unknown,unknown>
 {
     return value instanceof Map ||
@@ -24,10 +28,19 @@ export function isMap(value: unknown): value is Map<unknown,unknown>
         );
 }
 
+/**
+ * An entry within a {@link Map}.
+ */
 export interface MapEntry<TKey,TValue>
 {
-    key: TKey,
-    value: TValue,
+    /**
+     * The key of the {@link MapEntry}.
+     */
+    readonly key: TKey,
+    /**
+     * The value of the {@link MapEntry}.
+     */
+    readonly value: TValue,
 }
 
 /**

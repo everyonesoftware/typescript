@@ -123,8 +123,9 @@ export abstract class Test
      * Assert that the provided values are equal.
      * @param left The first value.
      * @param right The second value.
+     * @param message A message that will be shown when the values are not equal.
      */
-    public abstract assertEqual<T>(left: T, right: T): void;
+    public abstract assertEqual<T>(left: T, right: T, message?: string): void;
 
     /**
      * Assert that the provided values are not equal.

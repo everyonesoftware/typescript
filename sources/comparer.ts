@@ -70,7 +70,7 @@ export abstract class Comparer<TLeft, TRight = TLeft>
      * @param left The left value of the comparison.
      * @param right The right value of the comparison.
      */
-    public static compareSameUndefinedNull<TLeft, TRight>(left: TLeft | undefined | null, right: TRight | undefined | null): Comparison | undefined
+    public static compareSameUndefinedNull(left: unknown, right: unknown): Comparison | undefined
     {
         let result: Comparison | undefined = undefined;
         if (left === right)
@@ -104,7 +104,7 @@ export abstract class Comparer<TLeft, TRight = TLeft>
      * @param left The left value of the comparison.
      * @param right The right value of the comparison.
      */
-    public static equalSameUndefinedNull<TLeft, TRight>(left: TLeft | undefined | null, right: TRight | undefined | null): boolean | undefined
+    public static equalSameUndefinedNull(left: unknown, right: unknown): boolean | undefined
     {
         let result: Comparison | undefined = Comparer.compareSameUndefinedNull(left, right);
         return result === undefined ? undefined : result === Comparison.Equal;
@@ -119,10 +119,10 @@ export abstract class Comparer<TLeft, TRight = TLeft>
             {
                 result = Comparison.LessThan;
             }
-            else if (left === right)
-            {
-                result = Comparison.Equal;
-            }
+            // else if (left === right)
+            // {
+            //     result = Comparison.Equal;
+            // }
             else
             {
                 result = Comparison.GreaterThan;
