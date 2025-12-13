@@ -68,4 +68,18 @@ export class JavascriptArrayList<T> extends ListBase<T>
 
         return this;
     }
+
+    public override removeAt(index: number): T
+    {
+        PreCondition.assertAccessIndex(index, this.getCount(), "index");
+
+        return this.array.splice(index, 1)[0];
+    }
+
+    public override removeLast(): T
+    {
+        PreCondition.assertNotEmpty(this, "this");
+
+        return this.array.pop()!;
+    }
 }

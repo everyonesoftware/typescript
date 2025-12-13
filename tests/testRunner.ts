@@ -29,6 +29,9 @@ export abstract class TestRunner
      */
     public static andList(runner: TestRunner, values: unknown[] | Iterable<unknown>): string
     {
+        PreCondition.assertNotUndefinedAndNotNull(runner, "runner");
+        PreCondition.assertNotUndefinedAndNotNull(values, "values");
+
         return andList(values.map((value: unknown) => runner.toString(value)));
     }
 
@@ -281,17 +284,4 @@ export abstract class TestRunner
      * @param testAction The action that runs the test.
      */
     public abstract test(testName: string, skip: TestSkip | undefined, testAction: (test: Test) => void): void;
-
-    /**
-     * Create and run an async test with the provided name.
-     * @param testName The name of the async test to run.
-     * @param testAction The action that runs the test.
-     */
-    public abstract testAsync(testName: string, testAction: (test: Test) => Promise<unknown>): void;
-    /**
-     * Create and run an async test with the provided name.
-     * @param testName The name of the async test to run.
-     * @param testAction The action that runs the test.
-     */
-    public abstract testAsync(testName: string, skip: TestSkip | undefined, testAction: (test: Test) => Promise<unknown>): void;
 }

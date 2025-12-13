@@ -203,57 +203,6 @@ export class ConsoleTestRunner implements TestRunner
         }
     }
 
-    public async testAsync(testName: string, testAction: (test: Test) => Promise<unknown>): Promise<void>;
-    public async testAsync(testName: string, skip: TestSkip | undefined, testAction: (test: Test) => Promise<unknown>): Promise<void>;
-    async testAsync(testName: string, skipOrTestAction: TestSkip | undefined | ((test: Test) => Promise<unknown>), testAction?: (test: Test) => Promise<unknown>): Promise<void>
-    {
-        PreCondition.assertNotUndefinedAndNotNull(testName, "testName");
-        PreCondition.assertNotEmpty(testName, "testName");
-        let skip: TestSkip | undefined;
-        if (isFunction(skipOrTestAction))
-        {
-            PreCondition.assertUndefined(testAction, "testAction");
-
-            skip = undefined;
-            testAction = skipOrTestAction;
-        }
-        else
-        {
-            skip = skipOrTestAction;
-        }
-        PreCondition.assertNotUndefinedAndNotNull(testAction, "testAction");
-
-        const fullTestName: string = this.getFullTestName(testName);
-        try
-        {
-            if (TestRunner.shouldSkip(skip))
-            {
-                console.log(`TEST SKIPPED (ASYNC): ${fullTestName}`);
-                this.skippedTestCount++;
-            }
-            else
-            {
-                console.log(fullTestName);
-                const test = AssertTest.create();
-                this.setCurrentTest(test);
-                try
-                {
-                    await testAction(test);
-                    this.passingTestCount++;
-                }
-                finally
-                {
-                    this.setCurrentTest(undefined);
-                }
-            }
-        }
-        catch (error)
-        {
-            console.log(`TEST ERROR (ASYNC): ${error}`)
-            this.testFailures.add(TestFailure.create(fullTestName, error));
-        }
-    }
-
     public andList(values: unknown[] | Iterable<unknown>): string
     {
         PreCondition.assertNotUndefinedAndNotNull(values, "values");

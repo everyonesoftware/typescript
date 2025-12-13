@@ -34,4 +34,11 @@ export abstract class ListBase<T> extends MutableIndexableBase<T> implements Lis
     {
         return List.insertAll(this, index, values);
     }
+
+    public abstract removeAt(index: number): T;
+
+    public removeLast(): T
+    {
+        return List.removeLast(this);
+    }
 }

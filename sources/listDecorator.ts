@@ -60,4 +60,14 @@ export abstract class ListDecorator<T> extends ListBase<T>
 
         return this;
     }
+
+    public override removeAt(index: number): T
+    {
+        return this.innerList.removeAt(index);
+    }
+
+    public override removeLast(): T
+    {
+        return this.innerList.removeLast();
+    }
 }

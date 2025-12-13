@@ -127,4 +127,22 @@ export abstract class List<T> implements MutableIndexable<T>
         }
         return list;
     }
+
+    /**
+     * Remove and return the value in this {@link List} at the provided index.
+     * @param index The index to remove a value from.
+     */
+    public abstract removeAt(index: number): T;
+
+    /**
+     * Remove the last value in this {@link List}.
+     */
+    public abstract removeLast(): T;
+
+    public static removeLast<T,TList extends List<T>>(list: TList): T
+    {
+        PreCondition.assertNotEmpty(list, "list");
+
+        return list.removeAt(list.getCount() - 1);
+    }
 }

@@ -2,9 +2,12 @@ import * as byteTests from "./bytesTests";
 import * as comparerTests from "./comparerTests";
 import * as conditionTests from "./conditionTests";
 import { ConsoleTestRunner } from "./consoleTestRunner";
+import * as consoleTestRunner2Tests from "./consoleTestRunner2Tests";
 import * as disposableTests from "./disposableTests";
 import * as englishTests from "./englishTests";
 import * as equalFunctionsTests from "./equalFunctionsTests";
+import * as fetchHttpClientTests from "./fetchHttpClientTests";
+import * as httpClientTests from "./httpClientTests";
 import * as indexableTests from "./indexableTests";
 import * as iterableTests from "./iterableTests";
 import * as iteratorTests from "./iteratorTests";
@@ -20,6 +23,8 @@ import * as stringComparerTests from "./stringComparerTests";
 import * as stringIteratorTests from "./stringIteratorTests";
 import * as stringsTests from "./stringsTests";
 import * as syncResultTests from "./syncResultTests";
+import * as testActionTests from "./testActionTests";
+import * as testRunnerTests from "./testRunnerTests";
 import * as toStringFunctionsTests from "./toStringFunctionsTests";
 import * as typesTests from "./typesTests";
 import * as whereIteratorTests from "./whereIteratorTests";
@@ -34,6 +39,8 @@ function main(): void
     disposableTests.test(runner);
     englishTests.test(runner);
     equalFunctionsTests.test(runner);
+    fetchHttpClientTests.test(runner);
+    httpClientTests.test(runner);
     indexableTests.test(runner);
     iterableTests.test(runner);
     iteratorTests.test(runner);
@@ -52,6 +59,9 @@ function main(): void
     toStringFunctionsTests.test(runner);
     typesTests.test(runner);
     whereIteratorTests.test(runner);
+    testActionTests.test(runner);
+    consoleTestRunner2Tests.test(runner);
+    testRunnerTests.test(runner);
 
     runner.printSummary();
 }
