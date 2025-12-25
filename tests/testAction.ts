@@ -2,26 +2,29 @@ import { JavascriptIterable } from "../sources/javascript";
 import { List } from "../sources/list";
 import { PreCondition } from "../sources/preCondition";
 import { join } from "../sources/strings";
+import { TestSkip } from "./testSkip";
 
 export class TestAction
 {
     private readonly parent: TestAction | undefined;
     private readonly name: string;
-    private readonly action: () => void;
+    private readonly skip: TestSkip | undefined;
+    private readonly action: () => (void | Promise<void>);
 
-    private constructor(parent: TestAction | undefined, name: string, action: () => void)
+    private constructor(parent: TestAction | undefined, name: string, skip: TestSkip | undefined, action: () => (void | Promise<void>))
     {
         PreCondition.assertNotUndefinedAndNotNull(name, "name");
         PreCondition.assertNotUndefinedAndNotNull(action, "action");
 
         this.parent = parent;
         this.name = name;
+        this.skip = skip;
         this.action = action;
     }
 
-    public static create(parent: TestAction | undefined, name: string, action: () => void): TestAction
+    public static create(parent: TestAction | undefined, name: string, skip: TestSkip | undefined, action: () => (void | Promise<void>)): TestAction
     {
-        return new TestAction(parent, name, action);
+        return new TestAction(parent, name, skip, action);
     }
 
     public getParent(): TestAction | undefined
@@ -50,12 +53,22 @@ export class TestAction
         return join(" ", this.getFullNameParts());
     }
 
-    public getAction(): () => void
+    public getSkip(): TestSkip | undefined
+    {
+        return this.skip || this.parent?.getSkip();
+    }
+
+    public shouldSkip(): boolean
+    {
+        return !!this.getSkip()?.getShouldSkip();
+    }
+
+    public getAction(): () => (void | Promise<void>)
     {
         return this.action;
     }
     
-    public run(): void
+    public runAsync(): void | Promise<void>
     {
         return this.action();
     }

@@ -54,8 +54,8 @@ export function test(runner: TestRunner): void
 
                     const result1: Result<boolean> = disposable.dispose();
                     test.assertNotUndefinedAndNotNull(result1);
-                    test.assertTrue(disposable.isDisposed());
-                    test.assertEqual(value, 1);
+                    test.assertFalse(disposable.isDisposed());
+                    test.assertEqual(value, 0);
 
                     for (let i = 0; i < 3; i++)
                     {
@@ -91,8 +91,8 @@ export function test(runner: TestRunner): void
 
                     const result1: Result<boolean> = disposable.dispose();
                     test.assertNotUndefinedAndNotNull(result1);
-                    test.assertTrue(disposable.isDisposed());
-                    test.assertEqual(value, 1);
+                    test.assertFalse(disposable.isDisposed());
+                    test.assertEqual(value, 0);
 
                     for (let i = 0; i < 3; i++)
                     {

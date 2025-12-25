@@ -12,41 +12,6 @@ export function test(runner: TestRunner): void
     {
         runner.testType("TestRunner", () =>
         {
-            runner.testFunction("shouldSkip()", () =>
-            {
-                runner.test("with undefined skip", (test: Test) =>
-                {
-                    test.assertFalse(TestRunner.shouldSkip(undefined));
-                });
-
-                runner.test("with false skip", (test: Test) =>
-                {
-                    test.assertFalse(TestRunner.shouldSkip(TestSkip.create(false)));
-                });
-
-                runner.test("with true skip", (test: Test) =>
-                {
-                    test.assertTrue(TestRunner.shouldSkip(TestSkip.create(true)));
-                });
-            });
-
-            runner.testFunction("shouldRun()", () =>
-            {
-                runner.test("with undefined skip", (test: Test) =>
-                {
-                    test.assertTrue(TestRunner.shouldRun(undefined));
-                });
-
-                runner.test("with false skip", (test: Test) =>
-                {
-                    test.assertTrue(TestRunner.shouldRun(TestSkip.create(false)));
-                });
-
-                runner.test("with true skip", (test: Test) =>
-                {
-                    test.assertFalse(TestRunner.shouldRun(TestSkip.create(true)));
-                });
-            });
         });
     });
 }
@@ -658,6 +623,262 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                         ),
                     )
                     testTypeErrorTest(
+                        "with null testAction",
+                        "abc",
+                        null!,
+                        new PreConditionError(
+                            "Expression: testAction",
+                            "Expected: not undefined and not null",
+                            "Actual: null",
+                        ),
+                    )
+                });
+            });
+
+            runner.testFunction("testFunction()", () =>
+            {
+                runner.testGroup("with no skip", () =>
+                {
+                    function testFunctionErrorTest(testName: string, functionSignature: string, testAction: () => void, expected: Error): void
+                    {
+                        runner.test(testName, (test: Test) =>
+                        {
+                            const runner2: TestRunner = creator();
+                            test.assertThrows(() => runner2.testFunction(functionSignature, testAction), expected);
+                        })
+                    }
+
+                    testFunctionErrorTest(
+                        "with undefined functionSignature",
+                        undefined!,
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not undefined and not null",
+                            "Actual: undefined",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with null functionSignature",
+                        null!,
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not undefined and not null",
+                            "Actual: null",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with empty functionSignature",
+                        "",
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not empty",
+                            "Actual: \"\"",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with undefined testAction",
+                        "abc",
+                        undefined!,
+                        new PreConditionError(
+                            "Expression: testAction",
+                            "Expected: not undefined and not null",
+                            "Actual: undefined",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with null testAction",
+                        "abc",
+                        null!,
+                        new PreConditionError(
+                            "Expression: testAction",
+                            "Expected: not undefined and not null",
+                            "Actual: undefined",
+                        ),
+                    )
+                });
+
+                runner.testGroup("with undefined skip", () =>
+                {
+                    function testFunctionErrorTest(testName: string, functionSignature: string, testAction: () => void, expected: Error): void
+                    {
+                        runner.test(testName, (test: Test) =>
+                        {
+                            const runner2: TestRunner = creator();
+                            test.assertThrows(() => runner2.testFunction(functionSignature, undefined, testAction), expected);
+                        })
+                    }
+
+                    testFunctionErrorTest(
+                        "with undefined functionSignature",
+                        undefined!,
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not undefined and not null",
+                            "Actual: undefined",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with null functionSignature",
+                        null!,
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not undefined and not null",
+                            "Actual: null",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with empty functionSignature",
+                        "",
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not empty",
+                            "Actual: \"\"",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with undefined testAction",
+                        "abc",
+                        undefined!,
+                        new PreConditionError(
+                            "Expression: testAction",
+                            "Expected: not undefined and not null",
+                            "Actual: undefined",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with null testAction",
+                        "abc",
+                        null!,
+                        new PreConditionError(
+                            "Expression: testAction",
+                            "Expected: not undefined and not null",
+                            "Actual: null",
+                        ),
+                    )
+                });
+
+                runner.testGroup("with null skip", () =>
+                {
+                    function testFunctionErrorTest(testName: string, functionSignature: string, testAction: () => void, expected: Error): void
+                    {
+                        runner.test(testName, (test: Test) =>
+                        {
+                            const runner2: TestRunner = creator();
+                            test.assertThrows(() => runner2.testFunction(functionSignature, null!, testAction), expected);
+                        })
+                    }
+
+                    testFunctionErrorTest(
+                        "with undefined functionSignature",
+                        undefined!,
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not undefined and not null",
+                            "Actual: undefined",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with null functionSignature",
+                        null!,
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not undefined and not null",
+                            "Actual: null",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with empty functionSignature",
+                        "",
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not empty",
+                            "Actual: \"\"",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with undefined testAction",
+                        "abc",
+                        undefined!,
+                        new PreConditionError(
+                            "Expression: testAction",
+                            "Expected: not undefined and not null",
+                            "Actual: undefined",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with null testAction",
+                        "abc",
+                        null!,
+                        new PreConditionError(
+                            "Expression: testAction",
+                            "Expected: not undefined and not null",
+                            "Actual: null",
+                        ),
+                    )
+                });
+
+                runner.testGroup("with skip", () =>
+                {
+                    function testFunctionErrorTest(testName: string, functionSignature: string, testAction: () => void, expected: Error): void
+                    {
+                        runner.test(testName, (test: Test) =>
+                        {
+                            const runner2: TestRunner = creator();
+                            const skip: TestSkip = runner2.skip();
+                            test.assertThrows(() => runner2.testFunction(functionSignature, skip, testAction), expected);
+                        })
+                    }
+
+                    testFunctionErrorTest(
+                        "with undefined functionSignature",
+                        undefined!,
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not undefined and not null",
+                            "Actual: undefined",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with null functionSignature",
+                        null!,
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not undefined and not null",
+                            "Actual: null",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with empty functionSignature",
+                        "",
+                        () => {},
+                        new PreConditionError(
+                            "Expression: functionSignature",
+                            "Expected: not empty",
+                            "Actual: \"\"",
+                        ),
+                    )
+                    testFunctionErrorTest(
+                        "with undefined testAction",
+                        "abc",
+                        undefined!,
+                        new PreConditionError(
+                            "Expression: testAction",
+                            "Expected: not undefined and not null",
+                            "Actual: undefined",
+                        ),
+                    )
+                    testFunctionErrorTest(
                         "with null testAction",
                         "abc",
                         null!,

@@ -28,7 +28,7 @@ export abstract class Result<T>
      * Create a new {@link Result} that contains the provided error.
      * @param error The error to wrap in a {@link Result}.
      */
-    public static error<T>(error: unknown): Result<T>
+    public static error<T>(error: Error): Result<T>
     {
         return SyncResult.error<T>(error);
     }

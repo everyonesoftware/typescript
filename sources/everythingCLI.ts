@@ -5,4 +5,4 @@ function main(process: CurrentProcess): void
     console.log(`Hello ${JSON.stringify(process.getArguments())}!`);
 }
 
-main(CurrentProcess.create(process.argv));
+main(CurrentProcess.create());

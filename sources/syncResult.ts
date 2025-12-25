@@ -1,40 +1,41 @@
 import { PreCondition } from "./preCondition";
 import { Result } from "./result";
-import { isFunction, Type } from "./types";
+import { isFunction, isUndefinedOrNull, Type } from "./types";
 
 /**
  * A {@link Result} type that contains values or errors that have already occurred.
  */
 export class SyncResult<T> implements Result<T>
 {
-    private readonly value: T | undefined;
-    private readonly error: unknown | undefined;
+    private action: (() => void) | undefined;
+    private value: T | undefined;
+    private error: unknown | undefined;
 
-    private constructor(value: T | undefined, error: unknown | undefined)
+    private constructor(action: (() => T))
     {
-        this.value = value;
-        this.error = error;
+        PreCondition.assertNotUndefinedAndNotNull(action, "action");
+
+        this.action = () =>
+        {
+            try
+            {
+                this.value = action();
+            }
+            catch (e)
+            {
+                this.error = e;
+            }
+            this.action = undefined;
+        }
     }
 
     /**
      * Create a new {@link SyncResult} that contains the result of the provided function.
-     * @param createFunction The function to run.
+     * @param action The function to run.
      */
-    public static create<T>(createFunction: (() => T)): SyncResult<T>
+    public static create<T>(action: (() => T)): SyncResult<T>
     {
-        PreCondition.assertNotUndefinedAndNotNull(createFunction, "createFunction");
-
-        let resultValue: T | undefined = undefined;
-        let resultError: unknown | undefined = undefined;
-        try
-        {
-            resultValue = createFunction();
-        }
-        catch (error)
-        {
-            resultError = error;
-        }
-        return new SyncResult<T>(resultValue, resultError);
+        return new SyncResult<T>(action);
     }
 
     /**
@@ -43,23 +44,27 @@ export class SyncResult<T> implements Result<T>
      */
     public static value<T>(value: T): SyncResult<T>
     {
-        return new SyncResult<T>(value, undefined);
+        return SyncResult.create(() => value);
     }
 
     /**
      * Create a new {@link SyncResult} that contains the provided error.
      * @param error The error to wrap in a {@link SyncResult}.
      */
-    public static error<T>(error: unknown): SyncResult<T>
+    public static error<T>(error: Error): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(error, "error");
 
-        return new SyncResult<T>(undefined, error);
+        return SyncResult.create<T>(() => { throw error; });
     }
 
     public await(): T
     {
-        if (this.error !== undefined)
+        if (this.action)
+        {
+            this.action();
+        }
+        if (this.error)
         {
             throw this.error;
         }
@@ -70,39 +75,23 @@ export class SyncResult<T> implements Result<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(thenFunction, "thenFunction");
 
-        let resultValue: U | undefined = undefined;
-        let resultError: unknown | undefined = this.error;
-        if (this.error === undefined)
+        return SyncResult.create(() =>
         {
-            try
-            {
-                resultValue = thenFunction(this.value!);
-            }
-            catch (error)
-            {
-                resultError = error;
-            }
-        }
-        return new SyncResult<U>(resultValue, resultError);
+            const value: T = this.await();
+            return thenFunction(value);
+        });
     }
 
     public onValue(onValueFunction: (() => void) | ((argument: T) => void)): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(onValueFunction, "onValueFunction");
 
-        let result: SyncResult<T> = this;
-        if (this.error === undefined)
+        return SyncResult.create(() =>
         {
-            try
-            {
-                onValueFunction(this.value!);
-            }
-            catch (error)
-            {
-                result = SyncResult.error(error);
-            }
-        }
-        return result;
+            const value: T = this.await();
+            onValueFunction(value);
+            return value;
+        });
     }
 
     public catch(catchFunction: (() => T) | ((error: unknown) => T)): SyncResult<T>;
@@ -110,109 +99,114 @@ export class SyncResult<T> implements Result<T>
     catch<TError>(errorTypeOrCatchFunction: Type<TError> | (() => T) | ((error: unknown) => T), catchFunction?: (() => T) | ((error: TError) => T)): SyncResult<T>
     {
         let errorType: Type<TError> | undefined;
-        if (catchFunction === undefined || catchFunction === null)
+        if (isUndefinedOrNull(catchFunction))
         {
             errorType = undefined;
             catchFunction = errorTypeOrCatchFunction as (() => T) | ((error: unknown) => T);
-
-            PreCondition.assertNotUndefinedAndNotNull(catchFunction, "catchFunction");
-            PreCondition.assertTrue(isFunction(catchFunction), "isFunction(catchFunction)");
         }
         else
         {
             errorType = errorTypeOrCatchFunction as Type<TError>;
 
             PreCondition.assertNotUndefinedAndNotNull(errorType, "errorType");
-            PreCondition.assertNotUndefinedAndNotNull(catchFunction, "catchFunction");
-            PreCondition.assertTrue(isFunction(catchFunction), "isFunction(catchFunction)");
         }
+        PreCondition.assertNotUndefinedAndNotNull(catchFunction, "catchFunction");
+        PreCondition.assertTrue(isFunction(catchFunction), "isFunction(catchFunction)");
 
-        let result: SyncResult<T> = this;
-        if (this.error !== undefined &&
-            (errorType === undefined || errorType === null || this.error instanceof errorType))
+        return SyncResult.create(() =>
         {
+            let value: T;
             try
             {
-                result = SyncResult.value(catchFunction(this.error as TError));
+                value = this.await();
             }
             catch (error)
             {
-                result = SyncResult.error(error);
+                 if (isUndefinedOrNull(errorType) || error instanceof errorType)
+                 {
+                    value = catchFunction(error as TError);
+                 }
+                 else
+                 {
+                    throw error;
+                 }
             }
-        }
-        return result;
+            return value;
+        });
     }
 
     public onError(onErrorFunction: (() => void) | ((error: unknown) => void)): SyncResult<T>;
     public onError<TError>(errorType: Type<TError>, onErrorFunction: (() => void) | ((error: TError) => void)): SyncResult<T>;
     onError<TError>(errorTypeOrOnErrorFunction: Type<TError> | (() => void) | ((error: unknown) => void), onErrorFunction?: (() => void) | ((error: TError) => void)): SyncResult<T>
     {
-        if (onErrorFunction === undefined || onErrorFunction === null)
+        let errorType: Type<TError> | undefined;
+        if (isUndefinedOrNull(onErrorFunction))
         {
-            PreCondition.assertNotUndefinedAndNotNull(errorTypeOrOnErrorFunction, "onErrorFunction");
-            PreCondition.assertTrue(isFunction(errorTypeOrOnErrorFunction), "isFunction(onErrorFunction)");
-
             onErrorFunction = errorTypeOrOnErrorFunction as (() => void) | ((error: unknown) => void);
-            errorTypeOrOnErrorFunction = undefined!;
         }
         else
         {
-            PreCondition.assertNotUndefinedAndNotNull(errorTypeOrOnErrorFunction, "errorType");
-            PreCondition.assertNotUndefinedAndNotNull(onErrorFunction, "catchFunction");
-            PreCondition.assertTrue(isFunction(onErrorFunction), "isFunction(catchFunction)");
-        }
+            errorType = errorTypeOrOnErrorFunction;
 
-        let result: SyncResult<T> = this;
-        if (this.error !== undefined &&
-            (errorTypeOrOnErrorFunction === undefined || errorTypeOrOnErrorFunction === null || this.error instanceof errorTypeOrOnErrorFunction))
+            PreCondition.assertNotUndefinedAndNotNull(errorType, "errorType");
+        }
+        PreCondition.assertNotUndefinedAndNotNull(onErrorFunction, "onErrorFunction");
+        PreCondition.assertTrue(isFunction(onErrorFunction), "isFunction(onErrorFunction)");
+
+        return SyncResult.create(() =>
         {
+            let value: T;
             try
             {
-                onErrorFunction(this.error as TError);
+                value = this.await();
             }
             catch (error)
             {
-                result = SyncResult.error(error);
+                 if (isUndefinedOrNull(errorType) || error instanceof errorType)
+                 {
+                    onErrorFunction(error as TError);
+                 }
+                 throw error;
             }
-        }
-        return result;
+            return value;
+        });
     }
 
     public convertError(convertErrorFunction: (() => unknown) | ((error: unknown) => unknown)): SyncResult<T>;
     public convertError<TError>(errorType: Type<TError>, convertErrorFunction: (() => unknown) | ((error: TError) => unknown)): SyncResult<T>;
     convertError<TError>(errorTypeOrConvertErrorFunction: Type<TError> | (() => unknown) | ((error: unknown) => unknown), convertErrorFunction?: (() => unknown) | ((error: TError) => unknown)): SyncResult<T>
     {
-        if (convertErrorFunction === undefined || convertErrorFunction === null)
+        let errorType: Type<TError> | undefined;
+        if (isUndefinedOrNull(convertErrorFunction))
         {
-            PreCondition.assertNotUndefinedAndNotNull(errorTypeOrConvertErrorFunction, "convertErrorFunction");
-            PreCondition.assertTrue(isFunction(errorTypeOrConvertErrorFunction), "isFunction(convertErrorFunction)");
-
-            convertErrorFunction = errorTypeOrConvertErrorFunction as (() => unknown) | ((error: unknown) => unknown);
-            errorTypeOrConvertErrorFunction = undefined!;
+            convertErrorFunction = errorTypeOrConvertErrorFunction as (() => void) | ((error: unknown) => void);
         }
         else
         {
-            PreCondition.assertNotUndefinedAndNotNull(errorTypeOrConvertErrorFunction, "errorType");
-            PreCondition.assertNotUndefinedAndNotNull(convertErrorFunction, "convertErrorFunction");
-            PreCondition.assertTrue(isFunction(convertErrorFunction), "isFunction(convertErrorFunction)");
-        }
+            errorType = errorTypeOrConvertErrorFunction;
 
-        let result: SyncResult<T> = this;
-        if (this.error !== undefined &&
-            (errorTypeOrConvertErrorFunction === undefined || errorTypeOrConvertErrorFunction === null || this.error instanceof errorTypeOrConvertErrorFunction))
+            PreCondition.assertNotUndefinedAndNotNull(errorType, "errorType");
+        }
+        PreCondition.assertNotUndefinedAndNotNull(convertErrorFunction, "convertErrorFunction");
+        PreCondition.assertTrue(isFunction(convertErrorFunction), "isFunction(convertErrorFunction)");
+
+        return SyncResult.create(() =>
         {
-            let newError: unknown;
+            let value: T;
             try
             {
-                newError = convertErrorFunction(this.error as TError);
+                value = this.await();
             }
             catch (error)
             {
-                newError = error;
+                 if (isUndefinedOrNull(errorType) || error instanceof errorType)
+                 {
+                    error = convertErrorFunction(error as TError);
+                 }
+                 throw error;
             }
-            result = SyncResult.error(newError);
-        }
-        return result;
+            return value;
+        });
     }
 
     public toPromise(): PromiseLike<T>

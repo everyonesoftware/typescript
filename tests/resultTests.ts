@@ -15,7 +15,7 @@ export function test(runner: TestRunner): void
                 {
                     test.assertThrows(() => Result.create(undefined!),
                         new PreConditionError(
-                            "Expression: createFunction",
+                            "Expression: action",
                             "Expected: not undefined and not null",
                             "Actual: undefined"));
                 });
@@ -24,7 +24,7 @@ export function test(runner: TestRunner): void
                 {
                     test.assertThrows(() => Result.create(null!),
                         new PreConditionError(
-                            "Expression: createFunction",
+                            "Expression: action",
                             "Expected: not undefined and not null",
                             "Actual: null"));
                 });
@@ -136,7 +136,7 @@ export function test(runner: TestRunner): void
                 runner.test("with undefined", (test: Test) =>
                 {
                     test.assertThrows(
-                        () => Result.error(undefined),
+                        () => Result.error(undefined!),
                         new PreConditionError(
                             "Expression: error",
                             "Expected: not undefined and not null",
@@ -147,7 +147,7 @@ export function test(runner: TestRunner): void
                 runner.test("with null", (test: Test) =>
                 {
                     test.assertThrows(
-                        () => Result.error(null),
+                        () => Result.error(null!),
                         new PreConditionError(
                             "Expression: error",
                             "Expected: not undefined and not null",
@@ -200,7 +200,7 @@ export function test(runner: TestRunner): void
                     const parentResult: Result<number> = Result.value(1);
                     let counter: number = 0;
                     const thenResult: Result<string> = parentResult.then((argument: number) => { counter++; return (argument + 1).toString(); });
-                    test.assertEqual(1, counter);
+                    test.assertEqual(0, counter);
                     test.assertEqual("2", thenResult.await());
                     test.assertEqual(1, counter);
                 });
@@ -214,7 +214,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         throw new Error(`arg: ${argument}`);
                     });
-                    test.assertEqual(counter, 1);
+                    test.assertEqual(counter, 0);
 
                     for (let i = 0; i < 3; i++)
                     {
@@ -245,7 +245,7 @@ export function test(runner: TestRunner): void
                     const parentResult: Result<number> = Result.value(10);
                     let counter: number = 0;
                     const onValueResult: Result<number> = parentResult.onValue(() => counter++);
-                    test.assertEqual(counter, 1);
+                    test.assertEqual(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertEqual(10, onValueResult.await());
@@ -258,7 +258,7 @@ export function test(runner: TestRunner): void
                     const parentResult: Result<number> = Result.value(2);
                     let counter: number = 0;
                     const onValueResult: Result<number> = parentResult.onValue((argument: number) => counter += argument);
-                    test.assertEqual(counter, 2);
+                    test.assertEqual(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertSame(onValueResult.await(), 2);
@@ -275,7 +275,7 @@ export function test(runner: TestRunner): void
                         counter += argument;
                         throw new Error(`argument: ${argument}`);
                     });
-                    test.assertSame(counter, 2);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => onValueResult.await(),
@@ -319,7 +319,7 @@ export function test(runner: TestRunner): void
                     const parentResult: Result<number> = Result.error(new Error("abc"));
                     let counter: number = 0;
                     const catchResult: Result<number> = parentResult.catch(() => { counter++; return 21; });
-                    test.assertSame(1, counter);
+                    test.assertSame(0, counter);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertSame(catchResult.await(), 21);
@@ -343,7 +343,7 @@ export function test(runner: TestRunner): void
                         }
                         return 21;
                     });
-                    test.assertSame(3, counter);
+                    test.assertSame(0, counter);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertSame(catchResult.await(), 21);
@@ -356,7 +356,7 @@ export function test(runner: TestRunner): void
                     const parentResult: Result<number> = Result.error(new Error("abc"));
                     let counter: number = 0;
                     const catchResult: Result<number> = parentResult.catch(Error, () => { counter++; return 21; });
-                    test.assertSame(1, counter);
+                    test.assertSame(0, counter);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertSame(catchResult.await(), 21);
@@ -437,7 +437,7 @@ export function test(runner: TestRunner): void
                     const parentResult: Result<number> = Result.error(new Error("abc"));
                     let counter: number = 0;
                     const catchResult: Result<number> = parentResult.onError(() => { counter++; });
-                    test.assertSame(1, counter);
+                    test.assertSame(0, counter);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => catchResult.await(),
@@ -462,7 +462,7 @@ export function test(runner: TestRunner): void
                         }
                         return 21;
                     });
-                    test.assertSame(3, counter);
+                    test.assertSame(0, counter);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => catchResult.await(),
@@ -476,7 +476,7 @@ export function test(runner: TestRunner): void
                     const parentResult: Result<number> = Result.error(new PreConditionError("abc"));
                     let counter: number = 0;
                     const catchResult: Result<number> = parentResult.onError(Error, () => counter++);
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => catchResult.await(),
@@ -490,7 +490,7 @@ export function test(runner: TestRunner): void
                     const parentResult: Result<number> = Result.error(new PreConditionError("abc"));
                     let counter: number = 0;
                     const catchResult: Result<number> = parentResult.onError(Error, (error: Error) => counter += error.message.length);
-                    test.assertSame(counter, 3);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => catchResult.await(), 
@@ -532,7 +532,7 @@ export function test(runner: TestRunner): void
                     const parentResult: Result<number> = Result.error(new PreConditionError("def"));
                     let counter: number = 0;
                     const catchResult: Result<number> = parentResult.onError(Error, () => { counter++; throw new Error("abc"); });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => catchResult.await(),
@@ -603,7 +603,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         return new Error("def");
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -621,7 +621,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         throw new Error("def");
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -679,7 +679,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         return new Error(`${error} - def`);
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -697,7 +697,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         throw new Error(`${error} - def`);
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -735,7 +735,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         return new Error("def");
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -753,7 +753,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         return new Error("def");
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -789,7 +789,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         throw new Error("def");
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -807,7 +807,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         throw new Error("def");
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -863,7 +863,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         return new Error(`${error} - def`);
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -881,7 +881,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         return new Error(`${error} - def`);
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -917,7 +917,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         throw new Error(`${error} - def`);
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -935,7 +935,7 @@ export function test(runner: TestRunner): void
                         counter++;
                         throw new Error(`${error} - def`);
                     });
-                    test.assertSame(counter, 1);
+                    test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
                         test.assertThrows(() => convertErrorResult.await(),
@@ -969,7 +969,7 @@ export function test(runner: TestRunner): void
                 {
                     let value: number = 0;
                     const result: Result<void> = Result.create(() => { value++; });
-                    test.assertEqual(value, 1);
+                    test.assertEqual(value, 0);
 
                     const promise: PromiseLike<void> = result.toPromise();
                     test.assertEqual(value, 1);
@@ -990,7 +990,7 @@ export function test(runner: TestRunner): void
                         value++;
                         throw new Error("oops!");
                     });
-                    test.assertEqual(value, 1);
+                    test.assertEqual(value, 0);
 
                     const promise: PromiseLike<void> = result.toPromise();
                     test.assertEqual(value, 1);
@@ -1010,7 +1010,7 @@ export function test(runner: TestRunner): void
                         value += "a";
                         return value.length;
                     });
-                    test.assertEqual(value, "a");
+                    test.assertEqual(value, "");
 
                     const promise: PromiseLike<number> = result.toPromise();
                     test.assertEqual(value, "a");
@@ -1035,7 +1035,7 @@ export function test(runner: TestRunner): void
                         }
                         return value.length;
                     });
-                    test.assertEqual(value, "a");
+                    test.assertEqual(value, "");
 
                     const promise: PromiseLike<number> = result.toPromise();
                     test.assertEqual(value, "a");

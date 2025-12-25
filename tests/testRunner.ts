@@ -3,7 +3,9 @@ import { andList } from "../sources/english";
 import { Iterable } from "../sources/iterable";
 import { PreCondition } from "../sources/preCondition";
 import { escapeAndQuote } from "../sources/strings";
-import { getName, getParameterCount, isFunction, isString, Type } from "../sources/types";
+import {
+    getName, getParameterCount, isBoolean, isFunction, isString, Type
+} from "../sources/types";
 import { Test } from "./test";
 import { TestSkip } from "./testSkip";
 
@@ -66,13 +68,25 @@ export abstract class TestRunner
         return result;
     }
 
+    public skip(message?: string): TestSkip;
     /**
      * Create a {@link TestSkip} object that will prevent tests from being run.
      * @param shouldSkip Whether these tests should be skipped.
      * @param message The message that explains why the tests are being skipped.
      */
-    public skip(shouldSkip?: boolean, message?: string): TestSkip
+    public skip(shouldSkip: boolean, message?: string): TestSkip;
+    skip(messageOrShouldSkip?: string | boolean | undefined, message?: string): TestSkip
     {
+        let shouldSkip: boolean;
+        if (!isBoolean(messageOrShouldSkip))
+        {
+            shouldSkip = true;
+            message = messageOrShouldSkip;
+        }
+        else
+        {
+            shouldSkip = messageOrShouldSkip;
+        }
         return TestRunner.skip(this, shouldSkip, message);
     }
 
@@ -84,26 +98,6 @@ export abstract class TestRunner
     public static skip(_runner: TestRunner, shouldSkip?: boolean, message?: string): TestSkip
     {
         return TestSkip.create(shouldSkip, message);
-    }
-
-    /**
-     * Get whether the tests associated with the provided {@link TestSkip} should be
-     * skipped.
-     * @param skip The {@link TestSkip} associated with a set of tests.
-     */
-    public static shouldSkip(skip: TestSkip | undefined): boolean
-    {
-        return skip?.getShouldSkip() === true;
-    }
-
-    /**
-     * Get whether the tests associated with the provided {@link TestSkip} should be
-     * run.
-     * @param skip The {@link TestSkip} associated with a set of tests.
-     */
-    public static shouldRun(skip: TestSkip | undefined): boolean
-    {
-        return !TestRunner.shouldSkip(skip);
     }
 
     public static runTestAction(runner: TestRunner, name: string, skip: TestSkip | undefined, testAction: (() => void) | ((test: Test) => void)): void
@@ -240,8 +234,7 @@ export abstract class TestRunner
     public static testFunction(runner: TestRunner, functionSignature: string, skipOrTestAction: TestSkip | undefined | ((() => void) | ((test: Test) => void)), testAction: ((() => void) | ((test: Test) => void)) | undefined): void
     {
         PreCondition.assertNotUndefinedAndNotNull(runner, "runner");
-        PreCondition.assertNotUndefinedAndNotNull(functionSignature, "functionSignature");
-        PreCondition.assertNotEmpty(functionSignature);
+        PreCondition.assertNotEmpty(functionSignature, "functionSignature");
         let skip: TestSkip | undefined;
         if (isFunction(skipOrTestAction))
         {
