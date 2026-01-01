@@ -1,8 +1,12 @@
 import { CharacterWriteStream } from "./characterWriteStream";
 import { CommandLineParameters } from "./commandLineParameters";
 import { JavascriptIterable } from "./javascript";
+import { Network } from "./network";
 import { NodeJSCharacterWriteStream } from "./nodeJSCharacterWriteStream";
 import { PreCondition } from "./preCondition";
+import { Property } from "./property";
+import { RealNetwork } from "./realNetwork";
+import { isNumber } from "./types";
 
 /**
  * An object that provides all of the resources that are available to the current process.
@@ -12,6 +16,8 @@ export class CurrentProcess
     private args: JavascriptIterable<string> | undefined
     private parameters: CommandLineParameters | undefined;
     private outputWriteStream: CharacterWriteStream | undefined;
+    private exitCodeProperty: Property<number> | undefined;
+    private network: Network | undefined;
 
     private constructor()
     {
@@ -20,6 +26,27 @@ export class CurrentProcess
     public static create(): CurrentProcess
     {
         return new CurrentProcess();
+    }
+
+    public static async run(action: (currentProcess: CurrentProcess) => void | number | Promise<void | number>): Promise<void>
+    {
+        PreCondition.assertNotUndefinedAndNotNull(action, "action");
+
+        const currentProcess: CurrentProcess = CurrentProcess.create();
+        try
+        {
+            const result: void | number = await action(currentProcess);
+            if (isNumber(result))
+            {
+                currentProcess.setExitCode(result);
+            }
+        }
+        catch (error)
+        {
+            currentProcess.setExitCode(-1);
+            const writeStream: CharacterWriteStream = currentProcess.getOutputWriteStream();
+            writeStream.writeLine(`${error}`);
+        }
     }
 
     public getArguments(): JavascriptIterable<string>
@@ -65,5 +92,60 @@ export class CurrentProcess
         this.outputWriteStream = outputWriteStream;
 
         return this;
+    }
+
+    public getExitCode(): number
+    {
+        return this.getExitCodeProperty().getValue();
+    }
+
+    public setExitCode(exitCode: number): this
+    {
+        PreCondition.assertNotUndefinedAndNotNull(exitCode, "exitCode");
+
+        this.getExitCodeProperty().setValue(exitCode);
+
+        return this;
+    }
+
+    public getExitCodeProperty(): Property<number>
+    {
+        if (!this.exitCodeProperty)
+        {
+            this.exitCodeProperty = Property.create({
+                getter: () => process.exitCode as number,
+                setter: (value: number) => { process.exitCode = value; },
+            });
+        }
+        return this.exitCodeProperty;
+    }
+
+    public setExitCodeProperty(exitCodeProperty: Property<number>): this
+    {
+        PreCondition.assertNotUndefinedAndNotNull(exitCodeProperty, "exitCodeProperty");
+
+        this.exitCodeProperty = exitCodeProperty;
+
+        return this;
+    }
+
+    public getNetwork(): Network
+    {
+        if (!this.network)
+        {
+            this.network = RealNetwork.create();
+        }
+        return this.network;
+    }
+
+    public setNetwork(network: Network): this
+    {
+        PreCondition.assertUndefined(this.network, "this.network");
+        PreCondition.assertNotUndefinedAndNotNull(network, "network");
+
+        this.network = network;
+
+        return this;
+
     }
 }

@@ -9,13 +9,11 @@ import { isArray, isIterable, isNumber, isObject, isString } from "./types";
  */
 export class ToStringFunctions
 {
-    private readonly functions: {typeCheckFunction: (value: unknown) => boolean, toStringFunction: (value: unknown) => string}[];
-    private defaultToStringFunction: (value: unknown) => string;
+    private readonly functions: ((value: unknown) => (string | undefined))[];
 
     private constructor()
     {
         this.functions = [];
-        this.defaultToStringFunction = (value: unknown) => this.defaultToString(value);
     }
 
     public static create(): ToStringFunctions
@@ -56,7 +54,7 @@ export class ToStringFunctions
         }
         else if (isObject(value))
         {
-            result = `{${join(",", Object.keys(value).map(x => `${this.toString(x)}:${this.toString((value as any)[x])}`))}}`;
+            result = `{${join(",", Object.entries(value).map(p => join(":", p.map(x => this.toString(x)))))}}`;
         }
         else
         {
@@ -72,25 +70,48 @@ export class ToStringFunctions
      */
     public toString(value: unknown): string
     {
-        let matchingToStringFunction: ((value: unknown) => string) = this.defaultToStringFunction;
-        for (const {typeCheckFunction, toStringFunction} of this.functions)
+        let result: string | undefined;
+        for (const toStringFunction of this.functions)
         {
-            if (typeCheckFunction(value))
+            result = toStringFunction(value);
+            if (result !== undefined)
             {
-                matchingToStringFunction = toStringFunction;
                 break;
             }
         }
-        return matchingToStringFunction(value);
+
+        if (result === undefined)
+        {
+            result = this.defaultToString(value);
+        }
+
+        return result;
     }
 
-    public add<T>(typeCheckFunction: (value: unknown) => value is T, toStringFunction: (value: T) => string): this
+    public add(toStringFunction: (value: unknown) => (string | undefined)): this;
+    public add<T>(typeCheckFunction: (value: unknown) => value is T, typedToStringFunction: (value: T) => string): this;
+    add<T>(typeCheckFunctionOrToStringFunction: ((value: unknown) => (string | undefined)) | ((value: unknown) => value is T), typedToStringFunction?: (value: T) => string): this
     {
-        const toAdd = {
-            typeCheckFunction: typeCheckFunction as (value: unknown) => boolean,
-            toStringFunction: toStringFunction as (value: unknown) => string,
-        };
-        this.functions.unshift(toAdd);
+        let toStringFunction: (value: unknown) => (string | undefined);
+        if (typedToStringFunction)
+        {
+            const typeCheckFunction = typeCheckFunctionOrToStringFunction as (value: unknown) => value is T;
+            toStringFunction = (value: unknown) =>
+            {
+                let result: string | undefined;
+                if (typeCheckFunction(value))
+                {
+                    result = typedToStringFunction!(value);
+                }
+                return result;
+            };
+        }
+        else
+        {
+            toStringFunction = typeCheckFunctionOrToStringFunction as (value: unknown) => (string | undefined);
+        }
+
+        this.functions.unshift(toStringFunction);
 
         return this;
     }

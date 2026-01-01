@@ -1,11 +1,12 @@
 import { CharacterWriteStream } from "../sources/characterWriteStream";
+import { CurrentProcess } from "../sources/currentProcess";
 import { Iterable } from "../sources/iterable";
 import { JavascriptIterable } from "../sources/javascript";
 import { List } from "../sources/list";
 import { NodeJSCharacterWriteStream } from "../sources/nodeJSCharacterWriteStream";
 import { PreCondition } from "../sources/preCondition";
 import { join } from "../sources/strings";
-import { isFunction } from "../sources/types";
+import { isFunction, isJavascriptIterable } from "../sources/types";
 import { AssertTest } from "./assertTest";
 import { FailedTest } from "./failedTest";
 import { SkippedTest } from "./skippedTest";
@@ -13,6 +14,9 @@ import { Test } from "./test";
 import { TestAction } from "./testAction";
 import { TestRunner } from "./testRunner";
 import { TestSkip } from "./testSkip";
+
+export type ConsoleTestFunction = (runner: ConsoleTestRunner) => (void | Promise<void>);
+export type ConsoleTestFunctionContainer = { test: ConsoleTestFunction };
 
 export class ConsoleTestRunner extends TestRunner
 {
@@ -44,6 +48,51 @@ export class ConsoleTestRunner extends TestRunner
     public static create(): ConsoleTestRunner
     {
         return new ConsoleTestRunner();
+    }
+
+    public static run(testFunction: ConsoleTestFunction | ConsoleTestFunctionContainer): Promise<void>;
+    public static run(testFunctions: JavascriptIterable<ConsoleTestFunction | ConsoleTestFunctionContainer>): Promise<void>;
+    static run(testFunctionOrTestFunctions: ConsoleTestFunction | ConsoleTestFunctionContainer | JavascriptIterable<ConsoleTestFunction | ConsoleTestFunctionContainer>): Promise<void>
+    {
+        let testFunction: ConsoleTestFunction;
+        if (isFunction(testFunctionOrTestFunctions))
+        {
+            testFunction = testFunctionOrTestFunctions;
+        }
+        else if (!isJavascriptIterable(testFunctionOrTestFunctions))
+        {
+            testFunction = testFunctionOrTestFunctions.test;
+        }
+        else
+        {
+            const testFunctions: JavascriptIterable<ConsoleTestFunction | ConsoleTestFunctionContainer> = testFunctionOrTestFunctions;
+            testFunction = async (runner: ConsoleTestRunner) =>
+            {
+                for (const testFunction of testFunctions)
+                {
+                    if (isFunction(testFunction))
+                    {
+                        await testFunction(runner);
+                    }
+                    else
+                    {
+                        await testFunction.test(runner);
+                    }
+                }
+            };
+        }
+
+        return CurrentProcess.run(async (currentProcess: CurrentProcess) =>
+        {
+            const runner: ConsoleTestRunner = ConsoleTestRunner.create()
+                .setWriteStream(currentProcess.getOutputWriteStream());
+
+            await testFunction(runner);
+
+            await runner.runAsync();
+
+            runner.printSummary();
+        });
     }
 
     public setWriteStream(writeStream: CharacterWriteStream): this
@@ -237,6 +286,7 @@ export class ConsoleTestRunner extends TestRunner
                     const currentTestAction: TestAction = this.getCurrentTestAction()!;
                     try
                     {
+                        await this.beforeTest(currentTestAction.getFullNameParts());
                         if (currentTestAction.shouldSkip())
                         {
                             await this.afterSkippedTest(currentTestAction.getFullNameParts(), currentTestAction.getSkip());
@@ -246,7 +296,6 @@ export class ConsoleTestRunner extends TestRunner
                             this.currentTest = AssertTest.create();
                             try
                             {
-                                await this.beforeTest(currentTestAction.getFullNameParts());
                                 await testAction(this.currentTest);
                                 await this.afterPassedTest();
                             }

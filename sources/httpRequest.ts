@@ -1,37 +1,19 @@
 import { HttpMethod } from "./httpMethod";
-import { PreCondition } from "./preCondition";
+import { MutableHttpRequest } from "./mutableHttpRequest";
 
-export class HttpRequest
+export abstract class HttpRequest
 {
-    private readonly method: HttpMethod;
-    private readonly url: string;
-
-    private constructor(method: HttpMethod, url: string)
+    public static create(method: HttpMethod, url: string): MutableHttpRequest
     {
-        PreCondition.assertNotUndefinedAndNotNull(method, "method");
-        PreCondition.assertNotEmpty(url, "url");
-
-        this.method = method;
-        this.url = url;
+        return MutableHttpRequest.create(method, url);
     }
 
-    public static create(method: HttpMethod, url: string): HttpRequest
-    {
-        return new HttpRequest(method, url);
-    }
-
-    public static get(url: string): HttpRequest
+    public static get(url: string): MutableHttpRequest
     {
         return HttpRequest.create(HttpMethod.GET, url);
     }
 
-    public getMethod(): HttpMethod
-    {
-        return this.method;
-    }
+    public abstract getMethod(): HttpMethod;
 
-    public getURL(): string
-    {
-        return this.url;
-    }
+    public abstract getURL(): string;
 }

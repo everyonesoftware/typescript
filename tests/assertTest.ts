@@ -83,7 +83,7 @@ export class AssertTest implements Test
         Test.assertTrue(this, value);
     }
 
-    public assertThrows(action: () => void, expectedError: Error): void
+    public assertThrows(action: () => void, expectedError?: Error): void
     {
         assert.throws(action, expectedError);
     }

@@ -1,4 +1,3 @@
-import { CurrentProcess } from "../sources/currentProcess";
 import * as byteTests from "./bytesTests";
 import * as comparerTests from "./comparerTests";
 import * as conditionTests from "./conditionTests";
@@ -17,9 +16,12 @@ import * as javascriptMapMapTests from "./javascriptMapMapTests";
 import * as listTests from "./listTests";
 import * as mapIteratorTests from "./mapIteratorTests";
 import * as mapTests from "./mapTests";
+import * as mutableConditionTests from "./mutableConditionTests";
 import * as notFoundErrorTests from "./notFoundErrorTests";
 import * as postConditionErrorTests from "./postConditionErrorTests";
 import * as preConditionErrorTests from "./preConditionErrorTests";
+import * as propertyTests from "./propertyTests";
+import * as realHttpServerTests from "./realHttpServerTests";
 import * as resultTests from "./resultTests";
 import * as stringComparerTests from "./stringComparerTests";
 import * as stringIteratorTests from "./stringIteratorTests";
@@ -31,46 +33,38 @@ import * as toStringFunctionsTests from "./toStringFunctionsTests";
 import * as typesTests from "./typesTests";
 import * as whereIteratorTests from "./whereIteratorTests";
 
-async function main(): Promise<void>
-{
-    const currentProcess: CurrentProcess = CurrentProcess.create();
-    const runner = ConsoleTestRunner.create()
-        .setWriteStream(currentProcess.getOutputWriteStream());
-
-    byteTests.test(runner);
-    comparerTests.test(runner);
-    conditionTests.test(runner);
-    disposableTests.test(runner);
-    englishTests.test(runner);
-    equalFunctionsTests.test(runner);
-    fetchHttpClientTests.test(runner);
-    httpClientTests.test(runner);
-    indexableTests.test(runner);
-    iterableTests.test(runner);
-    iteratorTests.test(runner);
-    javascriptMapMapTests.test(runner);
-    listTests.test(runner);
-    mapIteratorTests.test(runner);
-    mapTests.test(runner);
-    notFoundErrorTests.test(runner);
-    postConditionErrorTests.test(runner);
-    preConditionErrorTests.test(runner);
-    resultTests.test(runner);
-    stringComparerTests.test(runner);
-    stringIteratorTests.test(runner);
-    stringsTests.test(runner);
-    syncResultTests.test(runner);
-    toStringFunctionsTests.test(runner);
-    typesTests.test(runner);
-    whereIteratorTests.test(runner);
-    testActionTests.test(runner);
-    consoleTestRunner2Tests.test(runner);
-    testRunnerTests.test(runner);
-    inMemoryCharacterWriteStreamTests.test(runner);
-
-    await runner.runAsync();
-
-    runner.printSummary();
-}
-
-main();
+ConsoleTestRunner.run([
+    byteTests.test,
+    comparerTests,
+    conditionTests,
+    consoleTestRunner2Tests,
+    disposableTests,
+    englishTests,
+    equalFunctionsTests.test,
+    fetchHttpClientTests,
+    httpClientTests,
+    indexableTests,
+    inMemoryCharacterWriteStreamTests,
+    iterableTests,
+    iteratorTests,
+    javascriptMapMapTests,
+    listTests,
+    mapIteratorTests,
+    mapTests,
+    mutableConditionTests,
+    notFoundErrorTests,
+    postConditionErrorTests,
+    preConditionErrorTests,
+    propertyTests,
+    resultTests,
+    stringComparerTests,
+    stringIteratorTests,
+    stringsTests,
+    syncResultTests,
+    testActionTests,
+    testRunnerTests,
+    toStringFunctionsTests,
+    typesTests,
+    whereIteratorTests,
+    realHttpServerTests,
+]);

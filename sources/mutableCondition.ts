@@ -49,7 +49,10 @@ export class MutableCondition implements Condition
      */
     public setToStringFunctions(toStringFunctions: ToStringFunctions): this
     {
+        this.assertNotUndefinedAndNotNull(toStringFunctions, "toStringFunctions");
+
         this.toStringFunctions = toStringFunctions;
+
         return this;
     }
 
@@ -61,7 +64,10 @@ export class MutableCondition implements Condition
      */
     public setEqualFunctions(equalFunctions: EqualFunctions): this
     {
+        this.assertNotUndefinedAndNotNull(equalFunctions, "equalFunctions");
+
         this.equalFunctions = equalFunctions;
+
         return this;
     }
 
@@ -72,6 +78,8 @@ export class MutableCondition implements Condition
      */
     public setCreateErrorFunction(createErrorFunction: (message: string) => Error): this
     {
+        this.assertNotUndefinedAndNotNull(createErrorFunction, "createErrorFunction");
+
         this.createErrorFunction = createErrorFunction;
         return this;
     }
@@ -91,7 +99,7 @@ export class MutableCondition implements Condition
      * @param left The left part of the comparison.
      * @param right The right part of the comparison.
      */
-    public areEqual(left: unknown, right: unknown)
+    public areEqual(left: unknown, right: unknown): boolean
     {
         return this.equalFunctions.areEqual(left, right);
     }

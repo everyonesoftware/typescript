@@ -177,9 +177,11 @@ export abstract class Test
     /**
      * Assert that the provided action throws the provided {@link Error} when it is run.
      * @param action The action to run.
-     * @param expectedError The expected {@link Error}.
+     * @param expectedError The optional expected {@link Error} to compare against the thrown
+     * {@link Error}. If the expected {@link Error} is not provided, then any {@link Error} will
+     * satisfy this assertion.
      */
-    public abstract assertThrows(action: () => void, expectedError: Error): void;
+    public abstract assertThrows(action: () => void, expectedError?: Error): void;
 
     /**
      * Assert that the provided action throws the provided {@link Error} when it is run.

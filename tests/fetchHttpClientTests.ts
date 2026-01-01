@@ -18,7 +18,7 @@ export function test(runner: TestRunner): void
 
             runner.testFunction("sendRequest()", () =>
             {
-                runner.test("to URL that exists", runner.skip("No network connection"), async (test: Test) =>
+                runner.test("to URL that exists", runner.skip(false, "No network connection"), async (test: Test) =>
                 {
                     const client: FetchHttpClient = FetchHttpClient.create();
 
