@@ -1,6 +1,6 @@
 import { HttpServer } from "./httpServer";
 import { Network } from "./network";
-import { RealHttpServer } from "./realHttpServer";
+import { NodeJSHttpServer } from "./nodeJSHttpServer";
 
 export class RealNetwork extends Network
 {
@@ -16,6 +16,6 @@ export class RealNetwork extends Network
 
     public createHttpServer(): HttpServer
     {
-        return RealHttpServer.create();
+        return NodeJSHttpServer.create();
     }
 }

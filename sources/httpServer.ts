@@ -1,18 +1,30 @@
 import { Disposable } from "./disposable";
+import { HttpIncomingRequest } from "./httpIncomingRequest";
+import { HttpOutgoingResponse } from "./httpOutgoingResponse";
 import { Result } from "./result";
 
 export abstract class HttpServer extends Disposable
 {
-    public addRequestHandler()
     /**
-     * Get whether this {@link RealHttpServer} is listening for incoming connections.
+     * Add the provided request handler so it will be invoked when a request is received for the
+     * provided path.
+     * @param requestPath The path that will cause the provided handler to be invoked.
+     * @param handler The function that will be invoked when the 
      */
-    public abstract isListening(): boolean
+    public abstract addRequestHandler(requestPath: string, handler: (request: HttpIncomingRequest, response: HttpOutgoingResponse) => Result<void>): void;
+
+    /**
+     * Set the default request handler that will be invoked when no other request handlers match an
+     * {@link HttpIncomingRequest}.
+     * @param handler The handler that will be invoked when no other request handlers match an
+     * {@link HttpIncomingRequest}.
+     */
+    public abstract setDefaultRequestHandler(handler: (request: HttpIncomingRequest, response: HttpOutgoingResponse) => Result<void>): void;
 
     /**
      * Start listening for incoming connections on the provided port number. The returned
      * {@link Result} will complete when the server is disposed.
      * @param portNumber The port number to start listening on.
      */
-    public abstract listen(portNumber: number): Result<void>;
+    public abstract run(portNumber: number): Result<void>;
 }

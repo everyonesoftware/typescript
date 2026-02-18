@@ -1,7 +1,8 @@
 import { FetchHttpResponse } from "./fetchHttpResponse";
 import { HttpClient } from "./httpClient";
+import { HttpOutgoingRequest } from "./httpOutgoingRequest";
+import { HttpHeader } from "./httpHeader";
 import { HttpMethod } from "./httpMethod";
-import { HttpRequest } from "./httpRequest";
 import { PostCondition } from "./postCondition";
 import { PreCondition } from "./preCondition";
 
@@ -20,13 +21,18 @@ export class FetchHttpClient extends HttpClient
         return new FetchHttpClient();
     }
 
-    public async sendRequest(request: HttpRequest): Promise<FetchHttpResponse>
+    public async sendRequest(request: HttpOutgoingRequest): Promise<FetchHttpResponse>
     {
         PreCondition.assertNotUndefinedAndNotNull(request, "request");
 
         const requestInit: RequestInit = {
             method: FetchHttpClient.convertMethod(request.getMethod()),
+            headers: request.getHeaders()
+                .map<[string,string]>((header: HttpHeader) => [header.getName(), header.getValue()])
+                .toArray(),
+            body: request.getBody() || undefined,
         };
+
         const fetchResponse: Response = await fetch(request.getURL(), requestInit);
         const result: FetchHttpResponse = FetchHttpResponse.create(fetchResponse);
 

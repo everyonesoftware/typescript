@@ -61,6 +61,11 @@ export abstract class ListDecorator<T> extends ListBase<T>
         return this;
     }
 
+    public override remove(value: T): boolean
+    {
+        return this.innerList.remove(value);
+    }
+
     public override removeAt(index: number): T
     {
         return this.innerList.removeAt(index);

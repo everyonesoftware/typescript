@@ -1,4 +1,6 @@
-
+import { NotFoundError } from "./notFoundError";
+import { PreCondition } from "./preCondition";
+import { Result } from "./result";
 
 export enum HttpMethod
 {
@@ -50,4 +52,113 @@ export enum HttpMethod
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PATCH
      */
     PATCH,
+}
+
+/**
+ * Parse a {@link HttpMethod} from the provided text.
+ * @param text The text to parse.
+ */
+export function parseHttpMethod(text: string): Result<HttpMethod>
+{
+    return Result.create(() =>
+    {
+        let result: HttpMethod;
+
+        switch (text.toUpperCase())
+        {
+            case "GET":
+                result = HttpMethod.GET;
+                break;
+
+            case "HEAD":
+                result = HttpMethod.HEAD;
+                break;
+
+            case "POST":
+                result = HttpMethod.POST;
+                break;
+
+            case "PUT":
+                result = HttpMethod.PUT;
+                break;
+
+            case "DELETE":
+                result = HttpMethod.DELETE;
+                break;
+
+            case "CONNECT":
+                result = HttpMethod.CONNECT;
+                break;
+
+            case "OPTIONS":
+                result = HttpMethod.OPTIONS;
+                break;
+
+            case "TRACE":
+                result = HttpMethod.TRACE;
+                break;
+
+            case "PATCH":
+                result = HttpMethod.PATCH;
+                break;
+
+            default:
+                throw new NotFoundError(`No HttpMethod exists for the text "${text}".`);
+        }
+
+        return result;
+    });
+}
+
+/**
+ * Get the string representation of the provided {@link HttpMethod}.
+ * @param httpMethod The {@link HttpMethod} to get the string representation of.
+ */
+export function httpMethodToString(httpMethod: HttpMethod): string
+{
+    PreCondition.assertNotUndefinedAndNotNull(httpMethod, "httpMethod");
+
+    let result: string;
+    switch (httpMethod)
+    {
+        case HttpMethod.GET:
+            result = "GET";
+            break;
+
+        case HttpMethod.HEAD:
+            result = "HEAD";
+            break;
+
+        case HttpMethod.POST:
+            result = "POST";
+            break;
+
+        case HttpMethod.PUT:
+            result = "PUT";
+            break;
+
+        case HttpMethod.DELETE:
+            result = "DELETE";
+            break;
+
+        case HttpMethod.CONNECT:
+            result = "CONNECT";
+            break;
+
+        case HttpMethod.OPTIONS:
+            result = "OPTIONS";
+            break;
+
+        case HttpMethod.TRACE:
+            result = "TRACE";
+            break;
+
+        case HttpMethod.PATCH:
+            result = "PATCH";
+            break;
+
+        default:
+            throw new NotFoundError(`Unrecognized HttpMethod: ${httpMethod}`);
+    }
+    return result;
 }

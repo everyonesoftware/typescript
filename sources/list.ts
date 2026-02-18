@@ -129,6 +129,31 @@ export abstract class List<T> implements MutableIndexable<T>
     }
 
     /**
+     * Attempt to remove the first instance of the provided value from this {@link List}. Return
+     * whether the value was removed.
+     * @param value The value to remove.
+     */
+    public abstract remove(value: T): boolean;
+
+    public static remove<T>(list: List<T>, value: T): boolean
+    {
+        PreCondition.assertNotUndefinedAndNotNull(list, "list");
+
+        let result: boolean = false;
+        for (let i = 0; i < list.getCount(); i++)
+        {
+            if (value === list.get(i))
+            {
+                list.removeAt(i);
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Remove and return the value in this {@link List} at the provided index.
      * @param index The index to remove a value from.
      */
