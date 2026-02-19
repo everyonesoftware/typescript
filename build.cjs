@@ -17,6 +17,7 @@ function buildProject(projectName, entryPointFile)
     external: externalDependencies,
     platform: "node", // for CommonJS
     outdir: `outputs/${projectName}/`,
+    sourcemap: true,
   });
 }
 

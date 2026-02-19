@@ -35,12 +35,22 @@ export abstract class HttpHeaders implements Iterable<HttpHeader>
 
     public getContentType(): Result<HttpHeader>
     {
-        return this.get(HttpHeaders.contentTypeHeaderName);
+        return HttpHeaders.getContentType(this);
+    }
+
+    public static getContentType(headers: HttpHeaders): Result<HttpHeader>
+    {
+        return headers.get(HttpHeaders.contentTypeHeaderName);
     }
 
     public getContentTypeValue(): Result<string>
     {
-        return this.getValue(HttpHeaders.contentTypeHeaderName);
+        return HttpHeaders.getContentTypeValue(this);
+    }
+
+    public static getContentTypeValue(headers: HttpHeaders): Result<string>
+    {
+        return headers.getValue(HttpHeaders.contentTypeHeaderName);
     }
 
     /**

@@ -1,3 +1,4 @@
+import * as asyncResultTests from "./asyncResultTests";
 import * as byteTests from "./bytesTests";
 import * as comparerTests from "./comparerTests";
 import * as conditionTests from "./conditionTests";
@@ -32,8 +33,10 @@ import * as testRunnerTests from "./testRunnerTests";
 import * as toStringFunctionsTests from "./toStringFunctionsTests";
 import * as typesTests from "./typesTests";
 import * as whereIteratorTests from "./whereIteratorTests";
+import * as syncResult2Tests from "./syncResult2Tests";
 
 ConsoleTestRunner.run([
+    asyncResultTests.test,
     byteTests.test,
     comparerTests,
     conditionTests,
@@ -61,6 +64,7 @@ ConsoleTestRunner.run([
     stringIteratorTests,
     stringsTests,
     syncResultTests,
+    syncResult2Tests,
     testActionTests,
     testRunnerTests,
     toStringFunctionsTests,

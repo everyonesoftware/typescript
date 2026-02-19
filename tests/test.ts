@@ -1,4 +1,6 @@
 import { PreCondition } from "../sources/preCondition";
+import { SyncResult } from "../sources/syncResult";
+import { SyncResult2 } from "../sources/syncResult2";
 import { isUndefinedOrNull, Type } from "../sources/types";
 
 /**
@@ -181,14 +183,14 @@ export abstract class Test
      * {@link Error}. If the expected {@link Error} is not provided, then any {@link Error} will
      * satisfy this assertion.
      */
-    public abstract assertThrows(action: () => void, expectedError?: Error): void;
+    public abstract assertThrows(action: SyncResult2<unknown> | (() => void), expectedError?: Error): void;
 
     /**
      * Assert that the provided action throws the provided {@link Error} when it is run.
      * @param action The action to run.
      * @param expectedError The expected {@link Error}.
      */
-    public abstract assertThrowsAsync(action: () => Promise<unknown>, expectedError: Error): Promise<void>;
+    public abstract assertThrowsAsync(action: Promise<unknown> | (() => Promise<unknown>), expectedError: Error): Promise<void>;
 
     /**
      * Assert that the provided value is an instance of the provided {@link Type}.

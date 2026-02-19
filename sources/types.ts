@@ -333,3 +333,15 @@ export function getName(type: Type<unknown>): string
 {
     return type.name;
 }
+
+export function isPromiseLike<T>(value: unknown): value is PromiseLike<T>
+{
+    return hasFunction(value, "then", 2);
+}
+
+export function isPromise<T>(value: unknown): value is Promise<T>
+{
+    return isPromiseLike<T>(value) &&
+        hasFunction(value, "catch", 1) &&
+        hasFunction(value, "finally", 1);
+}

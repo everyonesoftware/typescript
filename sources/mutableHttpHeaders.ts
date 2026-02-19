@@ -1,29 +1,30 @@
+import { EqualFunctions } from "./equalFunctions";
 import { HttpHeader } from "./httpHeader";
 import { HttpHeaders } from "./httpHeaders";
+import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
-import { JavascriptIterable } from "./javascript";
+import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { List } from "./list";
+import { MapIterable } from "./mapIterable";
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 import { escapeAndQuote } from "./strings";
-import { isString } from "./types";
+import { ToStringFunctions } from "./toStringFunctions";
+import { isString, Type } from "./types";
 
-export class MutableHttpHeaders extends HttpHeaders
+export class MutableHttpHeaders implements HttpHeaders
 {
     private readonly headers: List<HttpHeader>;
 
     private constructor(headers?: JavascriptIterable<HttpHeader>)
     {
-        super();
-
         this.headers = List.create();
         if (headers)
         {
             this.setAll(headers);
         }
     }
-
     public static create(headers?: JavascriptIterable<HttpHeader>): MutableHttpHeaders
     {
         return new MutableHttpHeaders(headers);
@@ -120,4 +121,71 @@ export class MutableHttpHeaders extends HttpHeaders
     {
         return this.set(HttpHeaders.contentTypeHeaderName, contentType);
     }
+
+    public getContentType(): Result<HttpHeader>
+    {
+        return HttpHeaders.getContentType(this);
+    }
+
+    public getContentTypeValue(): Result<string>
+    {
+        return HttpHeaders.getContentTypeValue(this);
+    }
+
+    public toArray(): HttpHeader[]
+    {
+        return Iterable.toArray(this);
+    }
+
+    public any(): boolean
+    {
+        return Iterable.any(this);
+    }
+
+    public getCount(): number
+    {
+        return this.headers.getCount();
+    }
+
+    public equals(right: JavascriptIterable<HttpHeader>, equalFunctions?: EqualFunctions): boolean
+    {
+        return Iterable.equals(this, right, equalFunctions);
+    }
+
+    public toString(toStringFunctions?: ToStringFunctions): string
+    {
+        return Iterable.toString(this, toStringFunctions);
+    }
+
+    public map<TOutput>(mapping: (value: HttpHeader) => TOutput): MapIterable<HttpHeader, TOutput>
+    {
+        return Iterable.map(this, mapping);
+    }
+
+    public where(condition: (value: HttpHeader) => boolean): Iterable<HttpHeader>
+    {
+        return Iterable.where(this, condition);
+    }
+
+    public instanceOf<TOutput extends HttpHeader>(typeOrTypeCheck: Type<TOutput> | ((value: HttpHeader) => value is TOutput)): Iterable<TOutput>
+    {
+        return Iterable.instanceOf(this, typeOrTypeCheck);
+    }
+
+    public first(): Result<HttpHeader>
+    {
+        return Iterable.first(this);
+    }
+
+    public last(): Result<HttpHeader>
+    {
+        return Iterable.last(this);
+    }
+
+    public [Symbol.iterator](): JavascriptIterator<HttpHeader>
+    {
+        return Iterable[Symbol.iterator](this);
+    }
+
+    
 }
