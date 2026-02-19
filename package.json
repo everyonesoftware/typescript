@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc && node build.cjs",
     "clean": "rimraf coverage outputs",
-    "start": "npm run build && node outputs/everythingCLI.js",
-    "test": "npm run build && c8 node -r source-map-support/register outputs/tests.js"
+    "test": "npm run build && c8 node -r source-map-support/register outputs/tests/tests.js",
+    "server": "npm run build && node outputs/everythingServer/everythingServer.js"
   },
   "devDependencies": {
     "@types/node": "24.8.1",
