@@ -1,7 +1,7 @@
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
 import { AsyncResult } from "./asyncResult";
-import { instanceOfType, isPromise, isUndefinedOrNull, Type } from "./types";
+import { instanceOfType, isPromise, isPromiseLike, isUndefinedOrNull, Type } from "./types";
 
 export class SyncResult2<T> implements Promise<T>
 {
@@ -273,9 +273,27 @@ export class SyncResult2<T> implements Promise<T>
         return result;
     }
 
-    public finally(onfinally?: (() => void) | null | undefined): SyncResult2<T>
+    public finally(onfinally?: (() => void) | null): SyncResult2<T>
+    public finally(onfinally?: (() => Promise<void>) | null): AsyncResult<T>
+    finally(onfinally?: (() => (void | Promise<void>)) | null | undefined): AsyncResult<T> | SyncResult2<T>
     {
-        throw new NotFoundError("finally() Not Implemented");
+        let result: AsyncResult<T> | SyncResult2<T> = this;
+        if (onfinally)
+        {
+            try
+            {
+                const onfinallyResult: void | Promise<void> = onfinally();
+                if (isPromiseLike(onfinallyResult))
+                {
+                    result = AsyncResult.create(onfinallyResult).then(() => this);
+                }
+            }
+            catch (error)
+            {
+                result = SyncResult2.error(error);
+            }
+        }
+        return result;
     }
 
     readonly [Symbol.toStringTag]: string = "SyncResult2";

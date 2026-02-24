@@ -160,7 +160,7 @@ export class AsyncResult<T> implements Promise<T>
         return result;
     }
 
-    public finally(onfinally?: (() => void) | null | undefined): AsyncResult<T>
+    public finally(onfinally?: (() => (void | Promise<void>)) | null): AsyncResult<T>
     {
         return AsyncResult.create(this.promise.finally(onfinally));
     }

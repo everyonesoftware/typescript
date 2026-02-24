@@ -657,6 +657,69 @@ export function test(runner: TestRunner): void
                     }
                 });
             });
+
+            runner.testFunction("finally()", () =>
+            {
+                runner.test("with successful parent and non-throwing onfinally function", async (test: Test) =>
+                {
+                    const parentResult: AsyncResult<number> = AsyncResult.value(5);
+                    let counter: number = 0;
+                    const finallyResult: AsyncResult<number> = parentResult.finally(() => { counter++; });
+                    test.assertSame(counter, 0);
+                    for (let i = 0; i < 3; i++)
+                    {
+                        test.assertSame(await finallyResult, 5);
+                        test.assertSame(counter, 1);
+                    }
+                });
+
+                runner.test("with successful parent and throwing onfinally function", async (test: Test) =>
+                {
+                    const parentResult: AsyncResult<number> = AsyncResult.value(5);
+                    let counter: number = 0;
+                    const finallyResult: AsyncResult<number> = parentResult.finally(() =>
+                    {
+                        counter++;
+                        throw new RangeError("oops!");
+                    });
+                    test.assertSame(counter, 0);
+                    for (let i = 0; i < 3; i++)
+                    {
+                        await test.assertThrowsAsync(finallyResult, new RangeError("oops!"));
+                        test.assertSame(counter, 1);
+                    }
+                });
+
+                runner.test("with error parent and non-throwing onfinally function", async (test: Test) =>
+                {
+                    const parentResult: AsyncResult<number> = AsyncResult.error(new Error("abc"));
+                    let counter: number = 0;
+                    const finallyResult: AsyncResult<number> = parentResult.finally(() => { counter++; });
+                    test.assertSame(counter, 0);
+                    for (let i = 0; i < 3; i++)
+                    {
+                        await test.assertThrowsAsync(finallyResult, new Error("abc"));
+                        test.assertSame(counter, 1);
+                    }
+                });
+
+                runner.test("with error parent and throwing onfinally function", async (test: Test) =>
+                {
+                    const parentResult: AsyncResult<number> = AsyncResult.error(new Error("abc"));
+                    let counter: number = 0;
+                    const convertErrorResult: AsyncResult<number> = parentResult.finally(() =>
+                    {
+                        counter++;
+                        throw new RangeError("def");
+                    });
+                    test.assertSame(counter, 0);
+                    for (let i = 0; i < 3; i++)
+                    {
+                        await test.assertThrowsAsync(convertErrorResult, new RangeError("def"));
+                        test.assertSame(counter, 1);
+                    }
+                });
+            });
         });
     });
 }
