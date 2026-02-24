@@ -1,6 +1,7 @@
+import { AsyncResult } from "./asyncResult";
 import { PostCondition } from "./postCondition";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { Result2 } from "./result2";
 
 export abstract class CharacterWriteStream
 {
@@ -9,7 +10,7 @@ export abstract class CharacterWriteStream
      * @param text The text to write.
      * @returns The number of characters that were written.
      */
-    public abstract writeString(text: string): Result<number>
+    public abstract writeString(text: string): Result2<number>
 
     /**
      * Write the provided text (if provided) and then write a newline character sequence to this
@@ -17,24 +18,24 @@ export abstract class CharacterWriteStream
      * @param text The optional text to write before the newline character sequence.
      * @returns The number of characters that were written.
      */
-    public writeLine(text?: string): Result<number>
+    public writeLine(text?: string): Result2<number>
     {
         return CharacterWriteStream.writeLine(this, text);
     }
 
-    public static writeLine(writeStream: CharacterWriteStream, text?: string): Result<number>
+    public static writeLine(writeStream: CharacterWriteStream, text?: string): Result2<number>
     {
         PreCondition.assertNotUndefinedAndNotNull(writeStream, "writeStream");
 
-        return Result.create(() =>
+        return AsyncResult.create(async () =>
         {
             let result: number = 0;
 
             if (text)
             {
-                result += writeStream.writeString(text).await();
+                result += await writeStream.writeString(text);
             }
-            result += writeStream.writeString("\n").await();
+            result += await writeStream.writeString("\n");
 
             PostCondition.assertGreaterThan(result, 0, "result");
 

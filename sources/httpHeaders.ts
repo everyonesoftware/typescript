@@ -6,6 +6,7 @@ import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { MapIterable } from "./mapIterable";
 import { MutableHttpHeaders } from "./mutableHttpHeaders";
 import { Result } from "./result";
+import { Result2 } from "./result2";
 import { ToStringFunctions } from "./toStringFunctions";
 import { Type } from "./types";
 
@@ -25,30 +26,30 @@ export abstract class HttpHeaders implements Iterable<HttpHeader>
      * Get the header with the provided name.
      * @param headerName The name of the header.
      */
-    public abstract get(headerName: string): Result<HttpHeader>;
+    public abstract get(headerName: string): Result2<HttpHeader>;
 
     /**
      * Get the value of the header with the provided name.
      * @param headerName The name of the header.
      */
-    public abstract getValue(headerName: string): Result<string>;
+    public abstract getValue(headerName: string): Result2<string>;
 
-    public getContentType(): Result<HttpHeader>
+    public getContentType(): Result2<HttpHeader>
     {
         return HttpHeaders.getContentType(this);
     }
 
-    public static getContentType(headers: HttpHeaders): Result<HttpHeader>
+    public static getContentType(headers: HttpHeaders): Result2<HttpHeader>
     {
         return headers.get(HttpHeaders.contentTypeHeaderName);
     }
 
-    public getContentTypeValue(): Result<string>
+    public getContentTypeValue(): Result2<string>
     {
         return HttpHeaders.getContentTypeValue(this);
     }
 
-    public static getContentTypeValue(headers: HttpHeaders): Result<string>
+    public static getContentTypeValue(headers: HttpHeaders): Result2<string>
     {
         return headers.getValue(HttpHeaders.contentTypeHeaderName);
     }

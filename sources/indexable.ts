@@ -1,11 +1,13 @@
 import { EmptyError } from "./emptyError";
+import { Iterator } from "./iterator";
 import { IndexableIterator } from "./indexableIterator";
 import { Iterable } from "./iterable";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { MapIterable } from "./mapIterable";
 import { MutableIndexable } from "./mutableIndexable";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { Result2 } from "./result2";
+import { SyncResult2 } from "./syncResult2";
 import { Type } from "./types";
 
 /**
@@ -22,19 +24,19 @@ export abstract class Indexable<T> implements Iterable<T>
 
     public abstract toArray(): T[];
 
-    public any(): boolean
+    public any(): SyncResult2<boolean>
     {
         return Indexable.any(this);
     }
 
-    public static any<T>(indexable: Indexable<T>): boolean
+    public static any<T>(indexable: Indexable<T>): SyncResult2<boolean>
     {
-        return indexable.getCount() > 0;
+        return SyncResult2.create(() => indexable.iterate().next());
     }
 
-    public abstract getCount(): number;
+    public abstract getCount(): SyncResult2<number>;
 
-    public abstract equals(right: Iterable<T>): boolean;
+    public abstract equals(right: Iterable<T>): SyncResult2<boolean>;
 
     public abstract toString(): string;
 
@@ -50,12 +52,12 @@ export abstract class Indexable<T> implements Iterable<T>
      * Get the value at the provided index.
      * @param index The index of the value to return.
      */
-    public abstract get(index: number): T;
+    public abstract get(index: number): SyncResult2<T>;
 
     /**
      * Get the first value in this {@link Indexable}.
      */
-    public first(): Result<T>
+    public first(): SyncResult2<T>
     {
         return Indexable.first(this);
     }
@@ -63,19 +65,25 @@ export abstract class Indexable<T> implements Iterable<T>
     /**
      * Get the first value in the provided {@link Indexable}.
      */
-    public static first<T>(indexable: Indexable<T>): Result<T>
+    public static first<T>(indexable: Indexable<T>): SyncResult2<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(indexable, "indexable");
 
-        return indexable.any()
-            ? Result.value(indexable.get(0))
-            : Result.error(new EmptyError());
+        return SyncResult2.create(() =>
+        {
+            const iterator: Iterator<T> = indexable.iterate();
+            if (!iterator.next())
+            {
+                throw new EmptyError();
+            }
+            return iterator.getCurrent();
+        });
     }
 
     /**
      * Get the last value in this {@link Indexable}.
      */
-    public last(): Result<T>
+    public last(): SyncResult2<T>
     {
         return Indexable.last(this);
     }
@@ -83,13 +91,26 @@ export abstract class Indexable<T> implements Iterable<T>
     /**
      * Get the last value in the provided {@link Indexable}.
      */
-    public static last<T>(indexable: Indexable<T>): Result<T>
+    public static last<T>(indexable: Indexable<T>): SyncResult2<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(indexable, "indexable");
 
-        return indexable.any()
-            ? Result.value(indexable.get(indexable.getCount() - 1))
-            : Result.error(new EmptyError());
+        return SyncResult2.create(() =>
+        {
+            const iterator: Iterator<T> = indexable.iterate();
+            if (!iterator.next())
+            {
+                throw new EmptyError();
+            }
+
+            let result: T = iterator.getCurrent();
+            while (iterator.next())
+            {
+                result = iterator.getCurrent();
+            }
+
+            return result;
+        });
     }
 }
 

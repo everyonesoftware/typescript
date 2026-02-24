@@ -1,8 +1,9 @@
 import { HttpHeader } from "./httpHeader";
 import { HttpHeaders } from "./httpHeaders";
 import { HttpMethod } from "./httpMethod";
+import { MutableHttpHeaders } from "./mutableHttpHeaders";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult2 } from "./syncResult2";
 
 /**
  * A HTTP request that is sent out by a {@link HttpClient}.
@@ -11,7 +12,7 @@ export class HttpOutgoingRequest
 {
     private method: HttpMethod;
     private url: string;
-    private readonly headers: HttpHeaders;
+    private readonly headers: MutableHttpHeaders;
     private body: string;
 
     private constructor(method: HttpMethod, url: string)
@@ -89,12 +90,12 @@ export class HttpOutgoingRequest
         return this.headers;
     }
 
-    public getHeader(headerName: string): Result<HttpHeader>
+    public getHeader(headerName: string): SyncResult2<HttpHeader>
     {
         return this.headers.get(headerName);
     }
 
-    public getHeaderValue(headerName: string): Result<string>
+    public getHeaderValue(headerName: string): SyncResult2<string>
     {
         return this.headers.getValue(headerName);
     }

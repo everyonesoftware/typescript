@@ -10,6 +10,7 @@ import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
 import { Result } from "./result";
 import { escapeAndQuote } from "./strings";
+import { SyncResult2 } from "./syncResult2";
 import { ToStringFunctions } from "./toStringFunctions";
 import { isString, Type } from "./types";
 
@@ -35,11 +36,11 @@ export class MutableHttpHeaders implements HttpHeaders
         return this.headers.iterate();
     }
 
-    public get(headerName: string): Result<HttpHeader>
+    public get(headerName: string): SyncResult2<HttpHeader>
     {
         PreCondition.assertNotEmpty(headerName, "headerName");
 
-        return Result.create(() =>
+        return SyncResult2.create(() =>
         {
             let result: HttpHeader | undefined;
 
@@ -61,7 +62,7 @@ export class MutableHttpHeaders implements HttpHeaders
         });
     }
 
-    public getValue(headerName: string): Result<string>
+    public getValue(headerName: string): SyncResult2<string>
     {
         return this.get(headerName)
             .then((header: HttpHeader) => header.getValue());
@@ -122,14 +123,14 @@ export class MutableHttpHeaders implements HttpHeaders
         return this.set(HttpHeaders.contentTypeHeaderName, contentType);
     }
 
-    public getContentType(): Result<HttpHeader>
+    public getContentType(): SyncResult2<HttpHeader>
     {
-        return HttpHeaders.getContentType(this);
+        return this.get(HttpHeaders.contentTypeHeaderName);
     }
 
-    public getContentTypeValue(): Result<string>
+    public getContentTypeValue(): SyncResult2<string>
     {
-        return HttpHeaders.getContentTypeValue(this);
+        return this.getValue(HttpHeaders.contentTypeHeaderName);
     }
 
     public toArray(): HttpHeader[]

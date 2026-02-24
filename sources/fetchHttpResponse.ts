@@ -4,8 +4,8 @@ import { HttpIncomingResponse } from "./httpIncomingResponse";
 import { MutableHttpHeaders } from "./mutableHttpHeaders";
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
 import { escapeAndQuote } from "./strings";
+import { SyncResult2 } from "./syncResult2";
 
 /**
  * An {@link HttpIncomingResponse} that comes from a {@link FetchHttpClient}.
@@ -33,9 +33,9 @@ export class FetchHttpResponse extends HttpIncomingResponse
         return this.response.status;
     }
 
-    public getHeaders(): Result<HttpHeaders>
+    public getHeaders(): SyncResult2<HttpHeaders>
     {
-        return Result.create(() =>
+        return SyncResult2.create(() =>
         {
             const result: MutableHttpHeaders = HttpHeaders.create();
             for (const header of this.response.headers)
@@ -46,11 +46,11 @@ export class FetchHttpResponse extends HttpIncomingResponse
         });
     }
 
-    public getHeader(headerName: string): Result<HttpHeader>
+    public getHeader(headerName: string): SyncResult2<HttpHeader>
     {
         PreCondition.assertNotEmpty(headerName, "headerName");
 
-        return Result.create(() =>
+        return SyncResult2.create(() =>
         {
             let result: HttpHeader | undefined;
 
@@ -72,11 +72,11 @@ export class FetchHttpResponse extends HttpIncomingResponse
         });
     }
     
-    public getHeaderValue(headerName: string): Result<string>
+    public getHeaderValue(headerName: string): SyncResult2<string>
     {
         PreCondition.assertNotEmpty(headerName, "headerName");
 
-        return Result.create(() =>
+        return SyncResult2.create(() =>
         {
             let result: string | undefined;
 
@@ -97,8 +97,8 @@ export class FetchHttpResponse extends HttpIncomingResponse
             return result;
         });
     }
-    
-    public getBody(): Result<string>
+
+    public getBody(): SyncResult2<string>
     {
         throw new Error("Method not implemented.");
     }

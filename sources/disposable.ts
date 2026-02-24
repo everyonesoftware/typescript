@@ -1,5 +1,5 @@
 import { BasicDisposable } from "./basicDisposable";
-import { Result } from "./result";
+import { SyncResult2 } from "./syncResult2";
 
 /**
  * An object that can be disposed.
@@ -18,10 +18,11 @@ export abstract class Disposable
     }
 
     /**
-     * Clean up any resources that this object is using. This function will return true if this
-     * invocation disposed of the object. Subsequent calls to dispose() will return false.
+     * Synchronously clean up any resources that this object is using. This function will return
+     * true if this invocation disposed of the object. Subsequent calls to dispose() will return
+     * false.
      */
-    public abstract dispose(): Result<boolean>;
+    public abstract dispose(): SyncResult2<boolean>;
 
     /**
      * Get whether this {@link Disposable} has been disposed yet.

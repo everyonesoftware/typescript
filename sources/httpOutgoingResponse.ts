@@ -2,7 +2,7 @@ import { HttpHeader } from "./httpHeader";
 import { HttpHeaders } from "./httpHeaders";
 import { MutableHttpHeaders } from "./mutableHttpHeaders";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult2 } from "./syncResult2";
 
 /**
  * A HTTP response that is sent out by an {@link HttpServer}.
@@ -56,7 +56,7 @@ export class HttpOutgoingResponse
      * doesn't exist.
      * @param headerName The name of the header to get.
      */
-    public getHeader(headerName: string): Result<HttpHeader>
+    public getHeader(headerName: string): SyncResult2<HttpHeader>
     {
         return this.headers.get(headerName);
     }
@@ -66,7 +66,7 @@ export class HttpOutgoingResponse
      * header doesn't exist.
      * @param headerName The name of the header value to get.
      */
-    public getHeaderValue(headerName: string): Result<string>
+    public getHeaderValue(headerName: string): SyncResult2<string>
     {
         return this.headers.getValue(headerName);
     }

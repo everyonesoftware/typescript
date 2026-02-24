@@ -1,6 +1,6 @@
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult2 } from "./syncResult2";
 
 export enum HttpMethod
 {
@@ -58,9 +58,9 @@ export enum HttpMethod
  * Parse a {@link HttpMethod} from the provided text.
  * @param text The text to parse.
  */
-export function parseHttpMethod(text: string): Result<HttpMethod>
+export function parseHttpMethod(text: string): SyncResult2<HttpMethod>
 {
-    return Result.create(() =>
+    return SyncResult2.create(() =>
     {
         let result: HttpMethod;
 

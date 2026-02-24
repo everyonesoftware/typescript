@@ -1,6 +1,6 @@
 import { Disposable } from "./disposable";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult2 } from "./syncResult2";
 
 /**
  * A {@link Disposable} type that can be configured with a function that will be invoked when the
@@ -30,9 +30,9 @@ export class BasicDisposable implements Disposable
         return new BasicDisposable(disposedFunction);
     }
 
-    public dispose(): Result<boolean>
+    public dispose(): SyncResult2<boolean>
     {
-        return Result.create(() =>
+        return SyncResult2.create(() =>
         {
             const result: boolean = !this.disposed;
             if (result)

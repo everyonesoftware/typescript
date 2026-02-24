@@ -6,7 +6,7 @@ import { HttpIncomingResponse } from "./httpIncomingResponse";
 import { HttpOutgoingResponse } from "./httpOutgoingResponse";
 import { HttpServer } from "./httpServer";
 import { Network } from "./network";
-import { Result } from "./result";
+import { Result2 } from "./result2";
 
 CurrentProcess.run(async (currentProcess: CurrentProcess) =>
 {
@@ -17,18 +17,18 @@ CurrentProcess.run(async (currentProcess: CurrentProcess) =>
 
     const client: HttpClient = network.createHttpClient();
     const response: HttpIncomingResponse = await client.sendGetRequest("https://www.example.com");
-    output.writeLine(response.getStatusCode().toString()).await();
+    await output.writeLine(response.getStatusCode().toString());
 
     const server: HttpServer = network.createHttpServer();
 
     server.addRequestHandler("", (request: HttpIncomingRequest, response: HttpOutgoingResponse) =>
     {
-        return Result.create(() =>
+        return Result2.createSync(() =>
         {
             response.setStatusCode(200);
             response.setBody("Hello world!");
         });
     });
 
-    server.run(10101).await();
+    await server.run(10101);
 });
