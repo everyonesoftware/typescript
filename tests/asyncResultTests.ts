@@ -21,12 +21,12 @@ export function test(runner: TestRunner): void
                 }
 
                 createErrorTest("with undefined", undefined!, new PreConditionError(
-                    "Expression: promise",
+                    "Expression: action or promise",
                     "Expected: not undefined and not null",
                     "Actual: undefined",
                 ));
                 createErrorTest("with null", null!, new PreConditionError(
-                    "Expression: promise",
+                    "Expression: action or promise",
                     "Expected: not undefined and not null",
                     "Actual: null",
                 ));

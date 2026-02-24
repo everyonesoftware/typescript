@@ -1,9 +1,9 @@
-import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
 import { AsyncResult } from "./asyncResult";
 import { instanceOfType, isPromise, isPromiseLike, isUndefinedOrNull, Type } from "./types";
+import { Result2 } from "./result2";
 
-export class SyncResult2<T> implements Promise<T>
+export class SyncResult2<T> implements Result2<T>
 {
     private value: T | undefined;
     private error: unknown | undefined;

@@ -1,7 +1,8 @@
 import { PreCondition } from "./preCondition";
-import { instanceOfType, isUndefinedOrNull, Type } from "./types";
+import { Result2 } from "./result2";
+import { instanceOfType, isPromise, isUndefinedOrNull, Type } from "./types";
 
-export class AsyncResult<T> implements Promise<T>
+export class AsyncResult<T> implements Result2<T>
 {
     private readonly promise: Promise<T>;
 
@@ -12,9 +13,13 @@ export class AsyncResult<T> implements Promise<T>
         this.promise = promise;
     }
 
-    public static create<T>(promise: Promise<T>): AsyncResult<T>
+    public static create<T>(action: () => (T | Promise<T>)): AsyncResult<T>;
+    public static create<T>(promise: Promise<T>): AsyncResult<T>;
+    static create<T>(actionOrPromise: (() => (T | Promise<T>)) | Promise<T>): AsyncResult<T>
     {
-        return new AsyncResult(promise);
+        PreCondition.assertNotUndefinedAndNotNull(actionOrPromise, "action or promise");
+
+        return new AsyncResult(isPromise<T>(actionOrPromise) ? actionOrPromise : new Promise<T>(actionOrPromise));
     }
 
     public static value<T>(value: T): AsyncResult<T>
