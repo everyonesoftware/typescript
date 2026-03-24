@@ -41,7 +41,7 @@ export function test(runner: TestRunner): void
                     runner.test(`with ${runner.toString(values)}`, (test: Test) =>
                     {
                         const iterator: Iterator<T> = Iterator.create(values);
-                        test.assertEqual(iterator.toArray(), values);
+                        test.assertEqual(iterator.toArray().await(), values);
                     });
                 }
 
@@ -63,7 +63,7 @@ export function test(runner: TestRunner): void
                         
                         for (const value of values)
                         {
-                            test.assertTrue(iterator.next());
+                            test.assertTrue(iterator.next().await());
                             test.assertTrue(iterator.hasCurrent());
                             test.assertTrue(iterator.hasStarted());
                             test.assertEqual(value, iterator.getCurrent());
@@ -71,7 +71,7 @@ export function test(runner: TestRunner): void
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertFalse(iterator.next());
+                            test.assertFalse(iterator.next().await());
                             test.assertFalse(iterator.hasCurrent());
                             test.assertTrue(iterator.hasStarted());
                             test.assertThrows(
@@ -88,14 +88,14 @@ export function test(runner: TestRunner): void
                     runner.test("started", (test: Test) =>
                     {
                         const values: number[] = [1, 2, 3];
-                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        const iterator: Iterator<number> = Iterator.create(values).start().await();
                         test.assertTrue(iterator.hasStarted());
                         test.assertTrue(iterator.hasCurrent());
                         test.assertEqual(1, iterator.getCurrent());
                         
                         for (const value of values.slice(1))
                         {
-                            test.assertTrue(iterator.next());
+                            test.assertTrue(iterator.next().await());
                             test.assertTrue(iterator.hasCurrent());
                             test.assertTrue(iterator.hasStarted());
                             test.assertEqual(value, iterator.getCurrent());
@@ -103,7 +103,7 @@ export function test(runner: TestRunner): void
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertFalse(iterator.next());
+                            test.assertFalse(iterator.next().await());
                             test.assertFalse(iterator.hasCurrent());
                             test.assertTrue(iterator.hasStarted());
                             test.assertThrows(
@@ -124,7 +124,7 @@ export function test(runner: TestRunner): void
                 const iterator: Iterator<number> = Iterator.create([1, 2, 3]);
                 for (let i: number = 0; i < 2; i++)
                 {
-                    const startResult: Iterator<number> = iterator.start();
+                    const startResult: Iterator<number> = iterator.start().await();
                     test.assertSame(startResult, iterator);
                     test.assertTrue(iterator.hasStarted());
                     test.assertTrue(iterator.hasCurrent());
@@ -158,20 +158,20 @@ export function test(runner: TestRunner): void
                     runner.test("started", (test: Test) =>
                     {
                         const values: number[] = [1, 2, 3];
-                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        const iterator: Iterator<number> = Iterator.create(values).start().await();
                         test.assertTrue(iterator.hasStarted());
                         test.assertTrue(iterator.hasCurrent());
                         test.assertEqual(1, iterator.getCurrent());
 
                         for (let i = 0; i < values.length - 1; i++)
                         {
-                            test.assertEqual(values[i], iterator.takeCurrent());
+                            test.assertEqual(values[i], iterator.takeCurrent().await());
                             test.assertTrue(iterator.hasStarted());
                             test.assertTrue(iterator.hasCurrent());
                             test.assertEqual(values[i + 1], iterator.getCurrent());
                         }
 
-                        test.assertEqual(values[values.length - 1], iterator.takeCurrent());
+                        test.assertEqual(values[values.length - 1], iterator.takeCurrent().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
                     });
@@ -191,7 +191,7 @@ export function test(runner: TestRunner): void
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertTrue(iterator.any());
+                            test.assertTrue(iterator.any().await());
                             test.assertTrue(iterator.hasStarted());
                             test.assertTrue(iterator.hasCurrent());
                             test.assertEqual(values[0], iterator.getCurrent());
@@ -201,14 +201,14 @@ export function test(runner: TestRunner): void
                     runner.test("started", (test: Test) =>
                     {
                         const values: number[] = [1, 2, 3];
-                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        const iterator: Iterator<number> = Iterator.create(values).start().await();
                         test.assertTrue(iterator.hasStarted());
                         test.assertTrue(iterator.hasCurrent());
                         test.assertEqual(values[0], iterator.getCurrent());
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertTrue(iterator.any());
+                            test.assertTrue(iterator.any().await());
                             test.assertTrue(iterator.hasStarted());
                             test.assertTrue(iterator.hasCurrent());
                             test.assertEqual(values[0], iterator.getCurrent());
@@ -228,13 +228,13 @@ export function test(runner: TestRunner): void
                         test.assertFalse(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
 
-                        test.assertEqual(values.length, iterator.getCount());
+                        test.assertEqual(values.length, iterator.getCount().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertEqual(iterator.getCount(), 0);
+                            test.assertEqual(iterator.getCount().await(), 0);
                             test.assertTrue(iterator.hasStarted());
                             test.assertFalse(iterator.hasCurrent());
                         }
@@ -243,18 +243,18 @@ export function test(runner: TestRunner): void
                     runner.test("started", (test: Test) =>
                     {
                         const values: number[] = [1, 2, 3];
-                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        const iterator: Iterator<number> = Iterator.create(values).start().await();
                         test.assertTrue(iterator.hasStarted());
                         test.assertTrue(iterator.hasCurrent());
                         test.assertEqual(values[0], iterator.getCurrent());
 
-                        test.assertEqual(values.length, iterator.getCount());
+                        test.assertEqual(values.length, iterator.getCount().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertEqual(iterator.getCount(), 0);
+                            test.assertEqual(iterator.getCount().await(), 0);
                             test.assertTrue(iterator.hasStarted());
                             test.assertFalse(iterator.hasCurrent());
                         }
@@ -271,11 +271,11 @@ export function test(runner: TestRunner): void
                         const values: number[] = [1, 2, 3];
                         const iterator: Iterator<number> = Iterator.create(values);
 
-                        test.assertEqual(values, iterator.toArray());
+                        test.assertEqual(values, iterator.toArray().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
 
-                        test.assertEqual([], iterator.toArray());
+                        test.assertEqual([], iterator.toArray().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
                     });
@@ -283,13 +283,13 @@ export function test(runner: TestRunner): void
                     runner.test("started", (test: Test) =>
                     {
                         const values: number[] = [1, 2, 3];
-                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        const iterator: Iterator<number> = Iterator.create(values).start().await();
 
-                        test.assertEqual(values, iterator.toArray());
+                        test.assertEqual(values, iterator.toArray().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
 
-                        test.assertEqual([], iterator.toArray());
+                        test.assertEqual([], iterator.toArray().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
                     });
@@ -314,7 +314,7 @@ export function test(runner: TestRunner): void
 
                         for (const expectedValue of [1, 3, 5])
                         {
-                            test.assertTrue(result.next());
+                            test.assertTrue(result.next().await());
                             test.assertTrue(result.hasStarted());
                             test.assertTrue(result.hasCurrent());
                             test.assertEqual(expectedValue, result.getCurrent());
@@ -325,7 +325,7 @@ export function test(runner: TestRunner): void
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertFalse(result.next());
+                            test.assertFalse(result.next().await());
                             test.assertTrue(result.hasStarted());
                             test.assertFalse(result.hasCurrent());
                             test.assertTrue(iterator.hasStarted());
@@ -336,7 +336,7 @@ export function test(runner: TestRunner): void
                     runner.test("started", (test: Test) =>
                     {
                         const values: number[] = [1, 2, 3, 4, 5];
-                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        const iterator: Iterator<number> = Iterator.create(values).start().await();
                         const result: Iterator<number> = iterator.where(x => x % 2 === 1);
                         test.assertNotUndefinedAndNotNull(result);
                         test.assertNotSame(result, iterator);
@@ -348,7 +348,7 @@ export function test(runner: TestRunner): void
 
                         for (const expectedValue of [1, 3, 5])
                         {
-                            test.assertTrue(result.next());
+                            test.assertTrue(result.next().await());
                             test.assertTrue(result.hasStarted());
                             test.assertTrue(result.hasCurrent());
                             test.assertEqual(expectedValue, result.getCurrent());
@@ -359,7 +359,7 @@ export function test(runner: TestRunner): void
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertFalse(result.next());
+                            test.assertFalse(result.next().await());
                             test.assertTrue(result.hasStarted());
                             test.assertFalse(result.hasCurrent());
                             test.assertTrue(iterator.hasStarted());
@@ -385,7 +385,7 @@ export function test(runner: TestRunner): void
 
                         for (const value of values)
                         {
-                            test.assertTrue(result.next());
+                            test.assertTrue(result.next().await());
                             test.assertTrue(result.hasStarted());
                             test.assertTrue(result.hasCurrent());
                             test.assertEqual(value + 10, result.getCurrent());
@@ -396,7 +396,7 @@ export function test(runner: TestRunner): void
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertFalse(result.next());
+                            test.assertFalse(result.next().await());
                             test.assertTrue(result.hasStarted());
                             test.assertFalse(result.hasCurrent());
                             test.assertTrue(iterator.hasStarted());
@@ -407,7 +407,7 @@ export function test(runner: TestRunner): void
                     runner.test("started", (test: Test) =>
                     {
                         const values: number[] = [1, 2, 3];
-                        const iterator: Iterator<number> = Iterator.create(values).start();
+                        const iterator: Iterator<number> = Iterator.create(values).start().await();
                         const result: Iterator<number> = iterator.map(x => x + 10);
                         test.assertTrue(iterator.hasStarted());
                         test.assertTrue(iterator.hasCurrent());
@@ -417,7 +417,7 @@ export function test(runner: TestRunner): void
 
                         for (const value of values)
                         {
-                            test.assertTrue(result.next());
+                            test.assertTrue(result.next().await());
                             test.assertTrue(result.hasStarted());
                             test.assertTrue(result.hasCurrent());
                             test.assertEqual(value + 10, result.getCurrent());
@@ -428,7 +428,7 @@ export function test(runner: TestRunner): void
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertFalse(result.next());
+                            test.assertFalse(result.next().await());
                             test.assertTrue(result.hasStarted());
                             test.assertFalse(result.hasCurrent());
                             test.assertTrue(iterator.hasStarted());
@@ -582,7 +582,7 @@ export function test(runner: TestRunner): void
                     {
                         const iterator: Iterator<string> = Iterator.create(iterable);
                         const skipIterator: Iterator<string> = iterator.skip(maximumToSkip);
-                        test.assertEqual(expected, skipIterator.toArray());
+                        test.assertEqual(expected, skipIterator.toArray().await());
                     });
                 }
 
@@ -621,7 +621,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
             const iterator: Iterator<T> = creator();
             for (let i: number = 0; i < 2; i++)
             {
-                const startResult: Iterator<T> = iterator.start();
+                const startResult: Iterator<T> = iterator.start().await();
                 test.assertSame(startResult, iterator);
                 test.assertTrue(iterator.hasStarted());
                 test.assertFalse(iterator.hasCurrent());
@@ -650,7 +650,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
 
                 runner.test("started", (test: Test) =>
                 {
-                    const iterator: Iterator<T> = creator().start();
+                    const iterator: Iterator<T> = creator().start().await();
                     test.assertTrue(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
 
@@ -681,7 +681,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
 
                     for (let i = 0; i < 2; i++)
                     {
-                        test.assertFalse(iterator.next());
+                        test.assertFalse(iterator.next().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
                     }
@@ -689,13 +689,13 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
 
                 runner.test("started", (test: Test) =>
                 {
-                    const iterator: Iterator<T> = creator().start();
+                    const iterator: Iterator<T> = creator().start().await();
                     test.assertTrue(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
 
                     for (let i = 0; i < 2; i++)
                     {
-                        test.assertFalse(iterator.next());
+                        test.assertFalse(iterator.next().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
                     }
@@ -730,7 +730,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
             test.assertFalse(iterator.hasStarted());
             test.assertFalse(iterator.hasCurrent());
 
-            test.assertFalse(iterator.any());
+            test.assertFalse(iterator.any().await());
 
             test.assertTrue(iterator.hasStarted());
             test.assertFalse(iterator.hasCurrent());
@@ -744,7 +744,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
 
             for (let i = 0; i < 2; i++)
             {
-                test.assertEqual(iterator.getCount(), 0);
+                test.assertEqual(iterator.getCount().await(), 0);
                 test.assertTrue(iterator.hasStarted());
                 test.assertFalse(iterator.hasCurrent());
             }
@@ -758,7 +758,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
 
             for (let i = 0; i < 2; i++)
             {
-                const array: T[] = iterator.toArray();
+                const array: T[] = iterator.toArray().await();
                 test.assertEqual(array, []);
                 test.assertTrue(iterator.hasStarted());
                 test.assertFalse(iterator.hasCurrent());
@@ -805,7 +805,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
                     test.assertFalse(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
 
-                    test.assertFalse(result.next());
+                    test.assertFalse(result.next().await());
                     test.assertTrue(result.hasStarted());
                     test.assertFalse(result.hasCurrent());
                     test.assertTrue(iterator.hasStarted());
@@ -814,7 +814,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
 
                 runner.test("started", (test: Test) =>
                 {
-                    const iterator: Iterator<T> = creator().start();
+                    const iterator: Iterator<T> = creator().start().await();
                     test.assertTrue(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
 
@@ -826,7 +826,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
                     test.assertTrue(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
 
-                    test.assertFalse(result.next());
+                    test.assertFalse(result.next().await());
                     test.assertTrue(result.hasStarted());
                     test.assertFalse(result.hasCurrent());
                     test.assertTrue(iterator.hasStarted());
@@ -869,7 +869,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
                     test.assertFalse(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
 
-                    const mapIterator: MapIterator<T,number> = iterator.map(_ => 5);
+                    const mapIterator: Iterator<number> = iterator.map(_ => 5);
                     test.assertFalse(mapIterator.hasStarted());
                     test.assertFalse(mapIterator.hasCurrent());
                     test.assertFalse(iterator.hasStarted());
@@ -878,17 +878,17 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
 
                 runner.test("started", (test: Test) =>
                 {
-                    const iterator: Iterator<T> = creator().start();
+                    const iterator: Iterator<T> = creator().start().await();
                     test.assertTrue(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
 
-                    const mapIterator: MapIterator<T,number> = iterator.map(_ => 5);
+                    const mapIterator: Iterator<number> = iterator.map(_ => 5);
                     test.assertFalse(mapIterator.hasStarted());
                     test.assertFalse(mapIterator.hasCurrent());
                     test.assertTrue(iterator.hasStarted());
                     test.assertFalse(iterator.hasCurrent());
 
-                    test.assertFalse(mapIterator.next());
+                    test.assertFalse(mapIterator.next().await());
                     test.assertTrue(mapIterator.hasStarted());
                     test.assertFalse(mapIterator.hasCurrent());
                     test.assertTrue(iterator.hasStarted());

@@ -30,3 +30,21 @@ export type JavascriptIterable<T> = Iterable<T>;
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
  */
 export type JavascriptMap<TKey,TValue> = Map<TKey,TValue>;
+/**
+ * The built-in {@link Map} type.
+ * 
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
+ */
+export const JavascriptMap = Map;
+
+/**
+ * The built-in {@link AsyncIterator} type.
+ * 
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncIterator
+ */
+export type JavascriptAsyncIterator<T> = AsyncIterator<T>;
+
+export interface JavascriptAsyncIterable<T>
+{
+    [Symbol.asyncIterator](): JavascriptAsyncIterator<T>;
+}

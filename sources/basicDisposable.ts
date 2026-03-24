@@ -1,12 +1,12 @@
 import { Disposable } from "./disposable";
 import { PreCondition } from "./preCondition";
-import { SyncResult2 } from "./syncResult2";
+import { SyncResult } from "./syncResult";
 
 /**
  * A {@link Disposable} type that can be configured with a function that will be invoked when the
  * object is disposed.
  */
-export class BasicDisposable implements Disposable
+export class SyncDisposable implements Disposable
 {
     private readonly disposedFunction: () => void;
     private disposed: boolean;
@@ -25,14 +25,14 @@ export class BasicDisposable implements Disposable
      * @param disposedFunction The function to invoke when the returned {@link Disposable} is
      * disposed.
      */
-    public static create(disposedFunction: () => void): Disposable
+    public static create(disposedFunction: () => void): SyncDisposable
     {
-        return new BasicDisposable(disposedFunction);
+        return new SyncDisposable(disposedFunction);
     }
 
-    public dispose(): SyncResult2<boolean>
+    public dispose(): SyncResult<boolean>
     {
-        return SyncResult2.create(() =>
+        return SyncResult.create(() =>
         {
             const result: boolean = !this.disposed;
             if (result)

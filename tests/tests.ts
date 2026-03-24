@@ -1,15 +1,14 @@
+import { ConsoleTestRunner } from "./consoleTestRunner";
 import * as asyncResultTests from "./asyncResultTests";
 import * as byteTests from "./bytesTests";
 import * as comparerTests from "./comparerTests";
 import * as conditionTests from "./conditionTests";
-import { ConsoleTestRunner } from "./consoleTestRunner";
 import * as consoleTestRunner2Tests from "./consoleTestRunnerTests";
 import * as disposableTests from "./disposableTests";
 import * as englishTests from "./englishTests";
 import * as equalFunctionsTests from "./equalFunctionsTests";
 import * as fetchHttpClientTests from "./fetchHttpClientTests";
 import * as httpClientTests from "./httpClientTests";
-import * as indexableTests from "./indexableTests";
 import * as inMemoryCharacterWriteStreamTests from "./inMemoryCharacterWriteStreamTests";
 import * as iterableTests from "./iterableTests";
 import * as iteratorTests from "./iteratorTests";
@@ -18,12 +17,11 @@ import * as listTests from "./listTests";
 import * as mapIteratorTests from "./mapIteratorTests";
 import * as mapTests from "./mapTests";
 import * as mutableConditionTests from "./mutableConditionTests";
-import * as realHttpServerTests from "./nodeJSHttpServerTests";
 import * as notFoundErrorTests from "./notFoundErrorTests";
 import * as postConditionErrorTests from "./postConditionErrorTests";
 import * as preConditionErrorTests from "./preConditionErrorTests";
 import * as propertyTests from "./propertyTests";
-import * as resultTests from "./resultTests";
+import * as realHttpServerTests from "./nodeJSHttpServerTests";
 import * as stringComparerTests from "./stringComparerTests";
 import * as stringIteratorTests from "./stringIteratorTests";
 import * as stringsTests from "./stringsTests";
@@ -33,9 +31,8 @@ import * as testRunnerTests from "./testRunnerTests";
 import * as toStringFunctionsTests from "./toStringFunctionsTests";
 import * as typesTests from "./typesTests";
 import * as whereIteratorTests from "./whereIteratorTests";
-import * as syncResult2Tests from "./syncResult2Tests";
 
-ConsoleTestRunner.run([
+await ConsoleTestRunner.run([
     asyncResultTests.test,
     byteTests.test,
     comparerTests,
@@ -46,7 +43,6 @@ ConsoleTestRunner.run([
     equalFunctionsTests.test,
     fetchHttpClientTests,
     httpClientTests,
-    indexableTests,
     inMemoryCharacterWriteStreamTests,
     iterableTests,
     iteratorTests,
@@ -59,16 +55,14 @@ ConsoleTestRunner.run([
     postConditionErrorTests,
     preConditionErrorTests,
     propertyTests,
-    resultTests,
+    realHttpServerTests,
     stringComparerTests,
     stringIteratorTests,
     stringsTests,
     syncResultTests,
-    syncResult2Tests,
     testActionTests,
     testRunnerTests,
     toStringFunctionsTests,
     typesTests,
     whereIteratorTests,
-    realHttpServerTests,
 ]);

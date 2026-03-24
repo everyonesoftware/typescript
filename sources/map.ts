@@ -4,11 +4,10 @@ import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterator } from "./javascript";
 import { JavascriptMapMap } from "./javascriptMapMap";
-import { MapIterable } from "./mapIterable";
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
 import { join } from "./strings";
+import { SyncResult } from "./syncResult";
 import { ToStringFunctions } from "./toStringFunctions";
 import { hasFunction, isUndefinedOrNull, Type } from "./types";
 
@@ -16,7 +15,7 @@ import { hasFunction, isUndefinedOrNull, Type } from "./types";
  * Get whether the provided value is {@link Map}.
  * @param value The value to check.
  */
-export function isMap(value: unknown): value is Map<unknown,unknown>
+export function isMap(value: unknown): value is Map<unknown, unknown>
 {
     return value instanceof Map ||
         (
@@ -31,7 +30,7 @@ export function isMap(value: unknown): value is Map<unknown,unknown>
 /**
  * An entry within a {@link Map}.
  */
-export interface MapEntry<TKey,TValue>
+export interface MapEntry<TKey, TValue>
 {
     /**
      * The key of the {@link MapEntry}.
@@ -46,12 +45,12 @@ export interface MapEntry<TKey,TValue>
 /**
  * A type that maps {@link TKey} values to {@link TValue} values.
  */
-export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>>
+export abstract class Map<TKey, TValue> implements Iterable<MapEntry<TKey, TValue>>
 {
     /**
      * Create a new instance of the default {@link Map} implementation.
      */
-    public static create<TKey,TValue>(): Map<TKey,TValue>
+    public static create<TKey, TValue>(): Map<TKey, TValue>
     {
         return JavascriptMapMap.create();
     }
@@ -59,49 +58,74 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
     /**
      * Iterate over the entries in this {@link Map}.
      */
-    public abstract iterate(): Iterator<MapEntry<TKey,TValue>>;
+    public abstract iterate(): Iterator<MapEntry<TKey, TValue>>;
 
-    public abstract any(): boolean;
-
-    public abstract toArray(): MapEntry<TKey,TValue>[];
-
-    public abstract equals(right: Iterable<MapEntry<TKey,TValue>>, equalFunctions?: EqualFunctions): boolean;
-
-    public static equals<TKey,TValue>(left: Map<TKey,TValue>, right: Iterable<MapEntry<TKey,TValue>>, equalFunctions?: EqualFunctions): boolean
+    public any(): SyncResult<boolean>
     {
-        if (isUndefinedOrNull(equalFunctions))
-        {
-            equalFunctions = EqualFunctions.create();
-        }
+        return Map.any(this);
+    }
 
-        let result: boolean | undefined = Comparer.equalSameUndefinedNull(left, right);
-        if (result === undefined)
+    public static any<TKey,TValue>(map: Map<TKey,TValue>): SyncResult<boolean>
+    {
+        return Iterable.any(map);
+    }
+
+    public toArray(): SyncResult<MapEntry<TKey, TValue>[]>
+    {
+        return Map.toArray(this);
+    }
+
+    public static toArray<TKey,TValue>(map: Map<TKey,TValue>): SyncResult<MapEntry<TKey,TValue>[]>
+    {
+        return Iterable.toArray(map);
+    }
+
+    public equals(right: Iterable<MapEntry<TKey, TValue>>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Map.equals(this, right, equalFunctions);
+    }
+
+    public static equals<TKey, TValue>(left: Map<TKey, TValue>, right: Iterable<MapEntry<TKey, TValue>>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return SyncResult.create(() =>
         {
-            result = true;
-            for (const entry of right)
+            if (isUndefinedOrNull(equalFunctions))
             {
-                result = left.get(entry.key)
-                    .then((value: TValue) => equalFunctions.areEqual(value, entry.value))
-                    .catch(() => false)
-                    .await();
-                if (result === false)
+                equalFunctions = EqualFunctions.create();
+            }
+
+            let result: boolean | undefined = Comparer.equalSameUndefinedNull(left, right);
+            if (result === undefined)
+            {
+                result = true;
+                for (const entry of right)
                 {
-                    break;
+                    result = left.get(entry.key)
+                        .then((value: TValue) => equalFunctions!.areEqual(value, entry.value).await())
+                        .catch(() => false)
+                        .await();
+                    if (result === false)
+                    {
+                        break;
+                    }
                 }
             }
-        }
-        return result;
+            return result;
+        });
     }
 
     /**
      * Get the {@link String} representation of this {@link Map}.
      */
-    public abstract toString(toStringFunctions?: ToStringFunctions): string;
+    public toString(toStringFunctions?: ToStringFunctions): string
+    {
+        return Map.toString(this, toStringFunctions);
+    }
 
     /**
      * Get the {@link String} representation of the provided {@link Map}.
      */
-    public static toString<TKey,TValue>(map: Map<TKey,TValue>, toStringFunctions?: ToStringFunctions): string
+    public static toString<TKey, TValue>(map: Map<TKey, TValue>, toStringFunctions?: ToStringFunctions): string
     {
         PreCondition.assertNotUndefinedAndNotNull(map, "iterable");
 
@@ -109,37 +133,93 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
         {
             toStringFunctions = ToStringFunctions.create();
         }
-        return `{${join(",", map.map((entry: MapEntry<unknown,unknown>) => `${toStringFunctions.toString(entry.key)}:${toStringFunctions.toString(entry.value)}`))}}`;
+        return `{${join(",", map.map((entry: MapEntry<unknown, unknown>) => `${toStringFunctions.toString(entry.key)}:${toStringFunctions.toString(entry.value)}`))}}`;
     }
 
-    public abstract map<TOutput>(mapping: (value: MapEntry<TKey,TValue>) => TOutput): MapIterable<MapEntry<TKey,TValue>, TOutput>;
+    public map<TOutput>(mapping: (value: MapEntry<TKey, TValue>) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
+    {
+        return Map.map(this, mapping);
+    }
 
-    public abstract where(condition: (value: MapEntry<TKey,TValue>) => boolean): Iterable<MapEntry<TKey,TValue>>;
+    public static map<TKey,TValue,TOutput>(map: Map<TKey,TValue>, mapping: (value: MapEntry<TKey,TValue>) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
+    {
+        return Iterable.map(map, mapping);
+    }
 
-    public abstract instanceOf<T extends MapEntry<TKey,TValue>>(typeOrTypeCheck: Type<T> | ((value: MapEntry<TKey,TValue>) => value is T)): Iterable<T>;
+    public where(condition: (value: MapEntry<TKey, TValue>) => (boolean | SyncResult<boolean>)): Iterable<MapEntry<TKey, TValue>>
+    {
+        return Map.where(this, condition);
+    }
 
-    public abstract [Symbol.iterator](): JavascriptIterator<MapEntry<TKey,TValue>>;
+    public static where<TKey,TValue>(map: Map<TKey,TValue>, condition: (value: MapEntry<TKey,TValue>) => (boolean | SyncResult<boolean>)): Iterable<MapEntry<TKey,TValue>>
+    {
+        return Iterable.where(map, condition);
+    }
+
+    public instanceOf<T extends MapEntry<TKey, TValue>>(typeOrTypeCheck: Type<T> | ((value: MapEntry<TKey, TValue>) => value is T)): Iterable<T>
+    {
+        return Map.instanceOf(this, typeOrTypeCheck);
+    }
+
+    public static instanceOf<TKey,TValue,T extends MapEntry<TKey, TValue>>(map: Map<TKey,TValue>, typeOrTypeCheck: Type<T> | ((value: MapEntry<TKey, TValue>) => value is T)): Iterable<T>
+    {
+        return Iterable.instanceOf(map, typeOrTypeCheck);
+    }
+
+    public [Symbol.iterator](): JavascriptIterator<MapEntry<TKey, TValue>>
+    {
+        return Map[Symbol.iterator](this);
+    }
+
+    public static [Symbol.iterator]<TKey,TValue>(map: Map<TKey,TValue>): JavascriptIterator<MapEntry<TKey,TValue>>
+    {
+        return Iterable[Symbol.iterator](map);
+    }
 
     /**
      * Get the number of entries in this {@link Map}.
      */
-    public abstract getCount(): number;
+    public getCount(): SyncResult<number>
+    {
+        return Map.getCount(this);
+    }
 
-    public abstract first(): Result<MapEntry<TKey,TValue>>;
+    public static getCount<TKey,TValue>(map: Map<TKey,TValue>): SyncResult<number>
+    {
+        return Iterable.getCount(map);
+    }
 
-    public abstract last(): Result<MapEntry<TKey,TValue>>;
+    public first(condition?: (entry: MapEntry<TKey,TValue>) => (boolean | SyncResult<boolean>)): SyncResult<MapEntry<TKey, TValue>>
+    {
+        return Map.first(this, condition);
+    }
+
+    public static first<TKey,TValue>(map: Map<TKey,TValue>, condition?: (entry: MapEntry<TKey,TValue>) => (boolean | SyncResult<boolean>)): SyncResult<MapEntry<TKey, TValue>>
+    {
+        return Iterable.first(map, condition);
+    }
+
+    public last(condition?: (entry: MapEntry<TKey,TValue>) => (boolean | SyncResult<boolean>)): SyncResult<MapEntry<TKey, TValue>>
+    {
+        return Map.last(this, condition);
+    }
+
+    public static last<TKey,TValue>(map: Map<TKey,TValue>, condition?: (entry: MapEntry<TKey,TValue>) => (boolean | SyncResult<boolean>)): SyncResult<MapEntry<TKey, TValue>>
+    {
+        return Iterable.last(map, condition);
+    }
 
     /**
      * Get whether this {@link Map} contains the provided key.
      * @param key The key to look for.
      */
-    public abstract containsKey(key: TKey): boolean;
+    public abstract containsKey(key: TKey): SyncResult<boolean>;
 
     /**
      * Get the value associated with the provided key.
      * @param key The key of the value to get.
      */
-    public abstract get(key: TKey): Result<TValue>;
+    public abstract get(key: TKey): SyncResult<TValue>;
 
     /**
      * Set the key/value association in this {@link Map}.
@@ -157,7 +237,7 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
      * @param valueCreator The {@link Function} that will be invoked if the {@link TKey} doesn't
      * exist in this {@link Map}.
      */
-    public getOrSet(key: TKey, valueCreator: () => TValue): Result<TValue>
+    public getOrSet(key: TKey, valueCreator: () => (TValue | SyncResult<TValue>)): SyncResult<TValue>
     {
         return Map.getOrSet(this, key, valueCreator);
     }
@@ -171,7 +251,7 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
      * @param valueCreator The {@link Function} that will be invoked if the {@link TKey} doesn't
      * exist in this {@link Map}.
      */
-    public static getOrSet<TKey,TValue>(map: Map<TKey,TValue>, key: TKey, valueCreator: () => TValue): Result<TValue>
+    public static getOrSet<TKey, TValue>(map: Map<TKey, TValue>, key: TKey, valueCreator: () => (TValue | SyncResult<TValue>)): SyncResult<TValue>
     {
         PreCondition.assertNotUndefinedAndNotNull(map, "map");
         PreCondition.assertNotUndefinedAndNotNull(valueCreator, "valueCreator");
@@ -179,7 +259,8 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
         return map.get(key)
             .catch(NotFoundError, () =>
             {
-                const value: TValue = valueCreator();
+                const creatorResult: TValue | SyncResult<TValue> = valueCreator();
+                const value: TValue = creatorResult instanceof SyncResult ? creatorResult.await() : creatorResult;
                 map.set(key, value);
                 return value;
             });
@@ -191,37 +272,43 @@ export abstract class Map<TKey,TValue> implements Iterable<MapEntry<TKey,TValue>
      * return the {@link TValue} that was associated with it.
      * @param key The {@link TKey} to remove from this {@link Map}.
      */
-    public abstract remove(key: TKey): Result<TValue>;
+    public abstract remove(key: TKey): SyncResult<TValue>;
 
     /**
      * Iterate over the keys in this {@link Map}.
      */
-    public abstract iterateKeys(): Iterator<TKey>;
+    public iterateKeys(): Iterator<TKey>
+    {
+        return Map.iterateKeys(this);
+    }
 
     /**
      * Iterate over the keys in the {@link Map}.
      * @param map The map to iterate over.
      */
-    public static iterateKeys<TKey,TValue>(map: Map<TKey,TValue>): Iterator<TKey>
+    public static iterateKeys<TKey, TValue>(map: Map<TKey, TValue>): Iterator<TKey>
     {
         PreCondition.assertNotUndefinedAndNotNull(map, "map");
 
-        return map.iterate().map((entry: MapEntry<TKey,TValue>) => entry.key);
+        return map.iterate().map((entry: MapEntry<TKey, TValue>) => entry.key);
     }
 
     /**
      * Iterate over the values in this {@link Map}.
      */
-    public abstract iterateValues(): Iterator<TValue>;
+    public iterateValues(): Iterator<TValue>
+    {
+        return Map.iterateValues(this);
+    }
 
     /**
      * Iterate over the keys in the {@link Map}.
      * @param map The map to iterate over.
      */
-    public static iterateValues<TKey,TValue>(map: Map<TKey,TValue>): Iterator<TValue>
+    public static iterateValues<TKey, TValue>(map: Map<TKey, TValue>): Iterator<TValue>
     {
         PreCondition.assertNotUndefinedAndNotNull(map, "map");
 
-        return map.iterate().map((entry: MapEntry<TKey,TValue>) => entry.value);
+        return map.iterate().map((entry: MapEntry<TKey, TValue>) => entry.value);
     }
 }

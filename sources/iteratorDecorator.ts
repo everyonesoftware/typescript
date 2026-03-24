@@ -1,8 +1,7 @@
 import { Iterator } from "./iterator";
-import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
-import { MapIterator } from "./mapIterator";
+import { JavascriptIterator } from "./javascript";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult } from "./syncResult";
 import { Type } from "./types";
 
 export abstract class IteratorDecorator<T> implements Iterator<T>
@@ -18,18 +17,21 @@ export abstract class IteratorDecorator<T> implements Iterator<T>
         this.started = false;
     }
 
-    public next(): boolean
+    public next(): SyncResult<boolean>
     {
-        if (!this.hasStarted())
+        return SyncResult.create(() =>
         {
-            this.started = true;
-            this.innerIterator.start();
-        }
-        else
-        {
-            this.innerIterator.next();
-        }
-        return this.hasCurrent();
+            if (!this.hasStarted())
+            {
+                this.started = true;
+                this.innerIterator.start().await();
+            }
+            else
+            {
+                this.innerIterator.next().await();
+            }
+            return this.hasCurrent();
+        });
     }
 
     public hasStarted(): boolean
@@ -49,27 +51,27 @@ export abstract class IteratorDecorator<T> implements Iterator<T>
         return this.innerIterator.getCurrent();
     }
 
-    public start(): this
+    public start(): SyncResult<this>
     {
-        return Iterator.start<T,this>(this);
+        return Iterator.start<T, this>(this);
     }
 
-    public takeCurrent(): T
+    public takeCurrent(): SyncResult<T>
     {
         return Iterator.takeCurrent(this);
     }
 
-    public any(): boolean
+    public any(): SyncResult<boolean>
     {
         return Iterator.any(this);
     }
 
-    public getCount(): number
+    public getCount(): SyncResult<number>
     {
         return Iterator.getCount(this);
     }
 
-    public toArray(): T[]
+    public toArray(): SyncResult<T[]>
     {
         return Iterator.toArray(this);
     }
@@ -89,22 +91,22 @@ export abstract class IteratorDecorator<T> implements Iterator<T>
         return Iterator.whereInstanceOfType(this, type);
     }
 
-    public map<TOutput>(mapping: (value: T) => TOutput): MapIterator<T, TOutput>
+    public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterator<TOutput>
     {
         return Iterator.map(this, mapping);
     }
 
-    public first(condition?: (value: T) => boolean): Result<T>
+    public first(condition?: (value: T) => boolean): SyncResult<T>
     {
         return Iterator.first(this, condition);
     }
 
-    public last(): Result<T>
+    public last(condition?: (value: T) => boolean): SyncResult<T>
     {
-        return Iterator.last(this);
+        return Iterator.last(this, condition);
     }
 
-    public [Symbol.iterator](): IteratorToJavascriptIteratorAdapter<T>
+    public [Symbol.iterator](): JavascriptIterator<T>
     {
         return Iterator[Symbol.iterator](this);
     }

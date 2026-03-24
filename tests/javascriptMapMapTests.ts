@@ -12,7 +12,7 @@ export function test(runner: TestRunner): void
             runner.testFunction("create()", (test: Test) =>
             {
                 const map: JavascriptMapMap<number,string> = JavascriptMapMap.create();
-                test.assertEqual(map.getCount(), 0);
+                test.assertEqual(map.getCount().await(), 0);
             });
 
             mapTests(runner, JavascriptMapMap.create);

@@ -3,7 +3,7 @@ import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterator } from "./javascript";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult } from "./syncResult";
 import { Type } from "./types";
 
 /**
@@ -12,9 +12,9 @@ import { Type } from "./types";
 export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
 {
     private readonly innerIterable: Iterable<TInput>;
-    private readonly mapping: (value: TInput) => TOutput;
+    private readonly mapping: (value: TInput) => (TOutput | SyncResult<TOutput>);
 
-    protected constructor(innerIterable: Iterable<TInput>, mapping: (value: TInput) => TOutput)
+    protected constructor(innerIterable: Iterable<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>))
     {
         PreCondition.assertNotUndefinedAndNotNull(innerIterable, "innerIterable");
         PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
@@ -23,7 +23,7 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
         this.mapping = mapping;
     }
 
-    public static create<TInput,TOutput>(innerIterable: Iterable<TInput>, mapping: (value: TInput) => TOutput): MapIterable<TInput,TOutput>
+    public static create<TInput,TOutput>(innerIterable: Iterable<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>)): MapIterable<TInput,TOutput>
     {
         return new MapIterable<TInput,TOutput>(innerIterable, mapping);
     }
@@ -33,12 +33,12 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
         return this.innerIterable.iterate().map(this.mapping);
     }
 
-    public toArray(): TOutput[]
+    public toArray(): SyncResult<TOutput[]>
     {
         return Iterable.toArray(this);
     }
 
-    public equals(right: Iterable<TOutput>, equalFunctions?: EqualFunctions): boolean
+    public equals(right: Iterable<TOutput>, equalFunctions?: EqualFunctions): SyncResult<boolean>
     {
         return Iterable.equals(this, right, equalFunctions);
     }
@@ -48,7 +48,7 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
         return Iterable.toString(this);
     }
 
-    public map<TOutput2>(mapping: (value: TOutput) => TOutput2): MapIterable<TOutput, TOutput2>
+    public map<TOutput2>(mapping: (value: TOutput) => (TOutput2 | SyncResult<TOutput2>)): Iterable<TOutput2>
     {
         return Iterable.map(this, mapping);
     }
@@ -68,22 +68,22 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
         return Iterable[Symbol.iterator](this);
     }
 
-    public any(): boolean
+    public any(): SyncResult<boolean>
     {
         return this.innerIterable.any();
     }
 
-    public getCount(): number
+    public getCount(): SyncResult<number>
     {
         return this.innerIterable.getCount();
     }
 
-    public first(): Result<TOutput>
+    public first(): SyncResult<TOutput>
     {
         return Iterable.first(this);
     }
 
-    public last(): Result<TOutput>
+    public last(): SyncResult<TOutput>
     {
         return Iterable.last(this);
     }

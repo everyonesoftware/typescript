@@ -26,7 +26,7 @@ export function test(runner: TestRunner): void
                     runner.test(`with ${andList([left, right].map(x => runner.toString(x)))}`, (test: Test) =>
                     {
                         const functions: EqualFunctions = EqualFunctions.create();
-                        test.assertEqual(functions.areEqual(left, right), expected);
+                        test.assertEqual(functions.areEqual(left, right).await(), expected);
                     });
                 }
 
@@ -208,14 +208,14 @@ export function test(runner: TestRunner): void
                         return result;
                     });
                     test.assertSame(functions, result);
-                    test.assertTrue(functions.areEqual(0, 0));
-                    test.assertTrue(functions.areEqual(1, 1));
-                    test.assertTrue(functions.areEqual(0, 2));
-                    test.assertTrue(functions.areEqual(1, 3));
-                    test.assertFalse(functions.areEqual(-1, 5));
-                    test.assertFalse(functions.areEqual(0, 1));
-                    test.assertTrue(functions.areEqual(false, false));
-                    test.assertFalse(functions.areEqual(false, true));
+                    test.assertTrue(functions.areEqual(0, 0).await());
+                    test.assertTrue(functions.areEqual(1, 1).await());
+                    test.assertTrue(functions.areEqual(0, 2).await());
+                    test.assertTrue(functions.areEqual(1, 3).await());
+                    test.assertFalse(functions.areEqual(-1, 5).await());
+                    test.assertFalse(functions.areEqual(0, 1).await());
+                    test.assertTrue(functions.areEqual(false, false).await());
+                    test.assertFalse(functions.areEqual(false, true).await());
                 });
             });
         });

@@ -2,9 +2,8 @@ import { EqualFunctions } from "./equalFunctions";
 import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
-import { MapIterable } from "./mapIterable";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult } from "./syncResult";
 import { Type } from "./types";
 
 export abstract class IterableDecorator<T> implements Iterable<T>
@@ -18,22 +17,22 @@ export abstract class IterableDecorator<T> implements Iterable<T>
         this.innerIterable = innerIterable;
     }
 
-    public any(): boolean
+    public any(): SyncResult<boolean>
     {
         return this.innerIterable.any();
     }
 
-    public getCount(): number
+    public getCount(): SyncResult<number>
     {
         return this.innerIterable.getCount();
     }
 
-    public equals(right: JavascriptIterable<T>, equalFunctions?: EqualFunctions): boolean
+    public equals(right: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
     {
         return this.innerIterable.equals(right, equalFunctions);
     }
 
-    public toArray(): T[]
+    public toArray(): SyncResult<T[]>
     {
         return this.innerIterable.toArray();
     }
@@ -48,19 +47,19 @@ export abstract class IterableDecorator<T> implements Iterable<T>
         return this.innerIterable.instanceOf(typeOrTypeCheck);
     }
 
-    public map<TOutput>(mapping: (value: T) => TOutput): MapIterable<T, TOutput>
+    public map<TOutput>(mapping: (value: T) => TOutput): Iterable<TOutput>
     {
         return this.innerIterable.map(mapping);
     }
 
-    public first(): Result<T>
+    public first(condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
-        return this.innerIterable.first();
+        return this.innerIterable.first(condition);
     }
 
-    public last(): Result<T>
+    public last(condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
-        return this.innerIterable.last();
+        return this.innerIterable.last(condition);
     }
 
     public iterate(): Iterator<T>

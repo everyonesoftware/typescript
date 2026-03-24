@@ -1,10 +1,11 @@
-import { FetchHttpResponse } from "./fetchHttpResponse";
+import { FetchHttpIncomingResponse } from "./fetchHttpResponse";
 import { HttpClient } from "./httpClient";
 import { HttpOutgoingRequest } from "./httpOutgoingRequest";
 import { HttpHeader } from "./httpHeader";
 import { HttpMethod } from "./httpMethod";
 import { PostCondition } from "./postCondition";
 import { PreCondition } from "./preCondition";
+import { AsyncResult } from "./asyncResult";
 
 /**
  * A {@link HttpClient} that uses {@link fetch}() to make network requests.
@@ -21,24 +22,29 @@ export class FetchHttpClient extends HttpClient
         return new FetchHttpClient();
     }
 
-    public async sendRequest(request: HttpOutgoingRequest): Promise<FetchHttpResponse>
+    public sendRequest(request: HttpOutgoingRequest): AsyncResult<FetchHttpIncomingResponse>
     {
         PreCondition.assertNotUndefinedAndNotNull(request, "request");
 
-        const requestInit: RequestInit = {
-            method: FetchHttpClient.convertMethod(request.getMethod()),
-            headers: request.getHeaders()
-                .map<[string,string]>((header: HttpHeader) => [header.getName(), header.getValue()])
-                .toArray(),
-            body: request.getBody() || undefined,
-        };
+        return AsyncResult.create(async () =>
+        {
+            const requestInit: RequestInit = {
+                method: FetchHttpClient.convertMethod(request.getMethod()),
+                headers: request.getHeaders()
+                    .map<[string, string]>((header: HttpHeader) => [header.getName(), header.getValue()])
+                    .toArray()
+                    .await(),
+                body: request.getBody() || undefined,
+            };
 
-        const fetchResponse: Response = await fetch(request.getURL(), requestInit);
-        const result: FetchHttpResponse = FetchHttpResponse.create(fetchResponse);
+            const fetchResponse: Response = await fetch(request.getURL(), requestInit);
+            return FetchHttpIncomingResponse.create(fetchResponse);
+        });
+    }
 
-        PostCondition.assertNotUndefinedAndNotNull(result, "result");
-
-        return result;
+    public override sendGetRequest(url: string): AsyncResult<FetchHttpIncomingResponse>
+    {
+        return this.sendRequest(HttpOutgoingRequest.create(HttpMethod.GET, url));
     }
 
     public static convertMethod(method: HttpMethod): string

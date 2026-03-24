@@ -1,12 +1,12 @@
 import { Comparable } from "./comparable";
 import { Comparer } from "./comparer";
 import { EqualFunctions } from "./equalFunctions";
-import { Indexable } from "./indexable";
 import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
+import { List } from "./list";
 import { MapIterable } from "./mapIterable";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult } from "./syncResult";
 import { ToStringFunctions } from "./toStringFunctions";
 import { instanceOf, isIterable, isUndefinedOrNull, Type } from "./types";
 import { WhereIterable } from "./whereIterable";
@@ -18,7 +18,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
 {
     public static create<T>(values?: JavascriptIterable<T>): Iterable<T>
     {
-        return Indexable.create(values);
+        return List.create(values);
     }
 
     /**
@@ -41,12 +41,15 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
     /**
      * Get all of the values in this {@link Iterable} in an {@link Array}.
      */
-    public abstract toArray(): T[];
+    public toArray(): SyncResult<T[]>
+    {
+        return Iterable.toArray(this);
+    }
 
     /**
      * Get all of the values in the provided {@link Iterable} in an {@link Array}.
      */
-    public static toArray<T>(iterable: Iterable<T>): T[]
+    public static toArray<T>(iterable: Iterable<T>): SyncResult<T[]>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
@@ -56,12 +59,15 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
     /**
      * Get whether this {@link Iterable} contains any values.
      */
-    public abstract any(): boolean;
+    public any(): SyncResult<boolean>
+    {
+        return Iterable.any(this);
+    }
 
     /**
      * Get whether the provided {@link JavascriptIterable} contains any values.
      */
-    public static any<T>(iterable: JavascriptIterable<T>): boolean
+    public static any<T>(iterable: JavascriptIterable<T>): SyncResult<boolean>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
@@ -71,12 +77,15 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
     /**
      * Get the number of values in this {@link Iterable}.
      */
-    public abstract getCount(): number;
+    public getCount(): SyncResult<number>
+    {
+        return Iterable.getCount(this);
+    }
 
     /**
      * Get the number of values in the provided {@link Iterable}.
      */
-    public static getCount<T>(iterable: Iterable<T>): number
+    public static getCount<T>(iterable: Iterable<T>): SyncResult<number>
     {
         return iterable.iterate().getCount();
     }
@@ -87,47 +96,56 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      * @param equalFunctions The optional {@link EqualFunctions} to use to determine if the two
      * {@link Iterable}s are equal.
      */
-    public abstract equals(right: JavascriptIterable<T>, equalFunctions?: EqualFunctions): boolean;
-
-    public static equals<T>(left: JavascriptIterable<T>, right: JavascriptIterable<T>, equalFunctions?: EqualFunctions): boolean
+    public equals(right: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
     {
-        if (isUndefinedOrNull(equalFunctions))
-        {
-            equalFunctions = EqualFunctions.create();
-        }
+        return Iterable.equals(this, right, equalFunctions);
+    }
 
-        let result: boolean | undefined = Comparer.equalSameUndefinedNull(left, right);
-        if (result === undefined)
+    public static equals<T>(left: JavascriptIterable<T>, right: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return SyncResult.create(() =>
         {
-            result = true;
-
-            const leftIterator: Iterator<T> = Iterator.create(left).start();
-            const rightIterator: Iterator<T> = Iterator.create(right).start();
-            while (leftIterator.hasCurrent() && rightIterator.hasCurrent())
+            if (isUndefinedOrNull(equalFunctions))
             {
-                result = equalFunctions.areEqual(leftIterator.getCurrent(), rightIterator.getCurrent());
-                if (result === false)
+                equalFunctions = EqualFunctions.create();
+            }
+
+            let result: boolean | undefined = Comparer.equalSameUndefinedNull(left, right);
+            if (result === undefined)
+            {
+                result = true;
+
+                const leftIterator: Iterator<T> = Iterator.create(left).start().await();
+                const rightIterator: Iterator<T> = Iterator.create(right).start().await();
+                while (leftIterator.hasCurrent() && rightIterator.hasCurrent())
                 {
-                    break;
+                    result = equalFunctions.areEqual(leftIterator.getCurrent(), rightIterator.getCurrent()).await();
+                    if (result === false)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        leftIterator.next().await();
+                        rightIterator.next().await();
+                    }
                 }
-                else
+                if (result)
                 {
-                    leftIterator.next();
-                    rightIterator.next();
+                    result = (leftIterator.hasCurrent() === rightIterator.hasCurrent());
                 }
             }
-            if (result)
-            {
-                result = (leftIterator.hasCurrent() === rightIterator.hasCurrent());
-            }
-        }
-        return result;
+            return result;
+        });
     }
 
     /**
      * Get the {@link String} representation of this {@link Iterable}.
      */
-    public abstract toString(toStringFunctions?: ToStringFunctions): string;
+    public toString(toStringFunctions?: ToStringFunctions): string
+    {
+        return Iterable.toString(this, toStringFunctions);
+    }
 
     /**
      * Get the {@link String} representation of the provided {@link Iterable}.
@@ -149,7 +167,10 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      * @param mapping The mapping function to use to convert values of type {@link T} to
      * {@link TOutput}.
      */
-    public abstract map<TOutput>(mapping: (value: T) => TOutput): MapIterable<T,TOutput>;
+    public map<TOutput>(mapping: (value: T) => TOutput): Iterable<TOutput>
+    {
+        return Iterable.map(this, mapping);
+    }
 
     /**
      * Get a {@link MapIterable} that maps all of the {@link T} values in the provided
@@ -157,7 +178,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      * @param mapping The mapping function to use to convert values of type {@link T} to
      * {@link TOutput}.
      */
-    public static map<TInput,TOutput>(iterable: Iterable<TInput>, mapping: (value: TInput) => TOutput): MapIterable<TInput,TOutput>
+    public static map<TInput, TOutput>(iterable: Iterable<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
         PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
@@ -170,7 +191,10 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      * provided condition.
      * @param condition The condition to run against each of the values in this {@link Iterable}.
      */
-    public abstract where(condition: (value: T) => boolean): Iterable<T>;
+    public where(condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
+    {
+        return Iterable.where(this, condition);
+    }
 
     /**
      * Get an {@link Iterable} that contains values from the provided {@link Iterable} that match
@@ -179,7 +203,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      * @param condition The condition that the values must match to be contained in the new
      * {@link Iterable}.
      */
-    public static where<T>(iterable: JavascriptIterable<T>, condition: (value: T) => boolean): Iterable<T>
+    public static where<T>(iterable: JavascriptIterable<T>, condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
         PreCondition.assertNotUndefinedAndNotNull(condition, "condition");
@@ -197,7 +221,10 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      * @param typeOrTypeCheck The {@link Type} or type check function that returned values must
      * match.
      */
-    public abstract instanceOf<TOutput extends T>(typeOrTypeCheck: Type<TOutput> | ((value: T) => value is TOutput)): Iterable<TOutput>;
+    public instanceOf<TOutput extends T>(typeOrTypeCheck: Type<TOutput> | ((value: T) => value is TOutput)): Iterable<TOutput>
+    {
+        return Iterable.instanceOf(this, typeOrTypeCheck);
+    }
 
     /**
      * Get an {@link Iterable} that contains values from the provided {@link Iterable} that match
@@ -206,7 +233,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      * @param typeOrTypeCheck The {@link Type} or type check function that returned values must
      * match.
      */
-    public static instanceOf<TInput,TOutput extends TInput>(iterable: JavascriptIterable<TInput>, typeOrTypeCheck: Type<TOutput> | ((value: TInput) => value is TOutput)): Iterable<TOutput>
+    public static instanceOf<TInput, TOutput extends TInput>(iterable: JavascriptIterable<TInput>, typeOrTypeCheck: Type<TOutput> | ((value: TInput) => value is TOutput)): Iterable<TOutput>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
         PreCondition.assertNotUndefinedAndNotNull(typeOrTypeCheck, "typeOrTypeCheck");
@@ -218,46 +245,46 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
     /**
      * Get the first value in this {@link Iterable}.
      */
-    public first(): Result<T>
+    public first(condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
-        return Iterable.first(this);
+        return Iterable.first(this, condition);
     }
 
     /**
      * Get the first value from the provided {@link JavascriptIterable}.
      * @param iterable The {@link JavascriptIterable} to get the first value from.
      */
-    public static first<T>(iterable: JavascriptIterable<T>): Result<T>
+    public static first<T>(iterable: JavascriptIterable<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
-        return Iterator.create(iterable).first();
+        return Iterator.create(iterable).first(condition);
     }
 
     /**
      * Get the last value in this {@link Iterable}.
      */
-    public last(): Result<T>
+    public last(condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
-        return Iterable.last(this);
+        return Iterable.last(this, condition);
     }
 
     /**
      * Get the last value from the provided {@link JavascriptIterable}.
      * @param iterable The {@link JavascriptIterable} to get the last value from.
      */
-    public static last<T>(iterable: JavascriptIterable<T>): Result<T>
+    public static last<T>(iterable: JavascriptIterable<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
-        return Iterator.create(iterable).last();
+        return Iterator.create(iterable).last(condition);
     }
 
     /**
      * Find the maximum value in the provided {@link Iterable}.
      * @param iterable The values to find the maximum of.
      */
-    public static findMaximum<T extends Comparable<T>>(iterable: JavascriptIterable<T> | Iterable<T>): Result<T>
+    public static findMaximum<T extends Comparable<T>>(iterable: JavascriptIterable<T> | Iterable<T>): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 

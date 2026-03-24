@@ -6,7 +6,7 @@ import { HttpIncomingResponse } from "./httpIncomingResponse";
 import { HttpOutgoingResponse } from "./httpOutgoingResponse";
 import { HttpServer } from "./httpServer";
 import { Network } from "./network";
-import { Result2 } from "./result2";
+import { Result } from "./result";
 
 CurrentProcess.run(async (currentProcess: CurrentProcess) =>
 {
@@ -23,12 +23,12 @@ CurrentProcess.run(async (currentProcess: CurrentProcess) =>
 
     server.addRequestHandler("", (request: HttpIncomingRequest, response: HttpOutgoingResponse) =>
     {
-        return Result2.createSync(() =>
+        return Result.createSync(() =>
         {
             response.setStatusCode(200);
             response.setBody("Hello world!");
         });
     });
 
-    await server.run(10101);
+    await server.start(10101);
 });

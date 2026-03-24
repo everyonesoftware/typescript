@@ -1,7 +1,5 @@
-import { Indexable } from "../sources/indexable";
 import { Iterable } from "../sources/iterable";
 import { List } from "../sources/list";
-import { MutableIndexable } from "../sources/mutableIndexable";
 import {
     asBoolean, hasFunction, hasProperty, isArray, isBoolean, isFunction, isNumber, isObject,
     isObjectOrArrayOrNull, isString
@@ -140,8 +138,6 @@ export function test(runner: TestRunner): void
             isArrayTest("", false);
             isArrayTest("hello", false);
             isArrayTest(Iterable.create(), false);
-            isArrayTest(Indexable.create(), false);
-            isArrayTest(MutableIndexable.create(), false);
             isArrayTest(List.create(), false);
 
             isArrayTest([], true);
@@ -172,8 +168,6 @@ export function test(runner: TestRunner): void
             isObjectOrArrayOrNullTest(new Array(), true);
             isObjectOrArrayOrNullTest(Array.from([1, 2]), true);
             isObjectOrArrayOrNullTest(Iterable.create(), true);
-            isObjectOrArrayOrNullTest(Indexable.create(), true);
-            isObjectOrArrayOrNullTest(MutableIndexable.create(), true);
             isObjectOrArrayOrNullTest(List.create(), true);
         });
 
@@ -199,8 +193,6 @@ export function test(runner: TestRunner): void
             
             isObjectTest({}, true);
             isObjectTest(Iterable.create(), true);
-            isObjectTest(Indexable.create(), true);
-            isObjectTest(MutableIndexable.create(), true);
             isObjectTest(List.create(), true);
         });
 

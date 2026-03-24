@@ -1,3 +1,5 @@
+import { FetchHttpClient } from "../sources/fetchHttpClient";
+import { FetchHttpIncomingResponse } from "../sources/fetchHttpResponse";
 import { NodeJSHttpServer as NodeJSHttpServer } from "../sources/nodeJSHttpServer";
 import { PreConditionError } from "../sources/preConditionError";
 import { Test } from "./test";
@@ -14,46 +16,58 @@ export function test(runner: TestRunner): void
                 const httpServer: NodeJSHttpServer = NodeJSHttpServer.create();
                 test.assertNotUndefinedAndNotNull(httpServer);
                 test.assertFalse(httpServer.isDisposed());
-                // test.assertFalse(httpServer.isListening());
+                test.assertFalse(httpServer.isStarted());
             });
 
-            runner.testFunction("dispose()", (test: Test) =>
+            runner.testFunction("dispose()", async (test: Test) =>
             {
                 const httpServer: NodeJSHttpServer = NodeJSHttpServer.create();
-                
-                test.assertTrue(httpServer.dispose().await());
+
+                test.assertTrue(await httpServer.dispose());
                 test.assertTrue(httpServer.isDisposed());
-                // test.assertFalse(httpServer.isListening());
+                test.assertFalse(httpServer.isStarted());
 
                 for (let i = 0; i < 3; i++)
                 {
-                    test.assertFalse(httpServer.dispose().await());
+                    test.assertFalse(await httpServer.dispose());
                     test.assertTrue(httpServer.isDisposed());
-                    // test.assertFalse(httpServer.isListening());
+                    test.assertFalse(httpServer.isStarted());
                 }
             });
 
-            runner.testFunction("listen()", () =>
+            runner.testFunction("start()", () =>
             {
-                runner.test("when disposed", (test: Test) =>
+                runner.test("when disposed", async (test: Test) =>
                 {
                     const httpServer: NodeJSHttpServer = NodeJSHttpServer.create();
-                    test.assertTrue(httpServer.dispose().await());
+                    test.assertTrue(await httpServer.dispose());
 
-                    // test.assertThrows(() => httpServer.listen(3000), new PreConditionError(
-                    //     "Expression: this.isDisposed()",
-                    //     "Expected: false",
-                    //     "Actual: true",
-                    // ));
-                    // test.assertTrue(httpServer.isDisposed());
-                    // test.assertFalse(httpServer.isListening());
+                    test.assertThrows(() => httpServer.start(3000), new PreConditionError(
+                        "Expression: this.isDisposed()",
+                        "Expected: false",
+                        "Actual: true",
+                    ));
+                    test.assertTrue(httpServer.isDisposed());
+                    test.assertFalse(httpServer.isStarted());
                 });
 
-                runner.test("simple scenario", (test: Test) =>
+                runner.test("simple scenario", async (test: Test) =>
                 {
                     const httpServer: NodeJSHttpServer = NodeJSHttpServer.create();
 
-                    // httpServer.listen(3000).await();
+                    httpServer.start(3000);
+                    try
+                    {
+                        const httpClient: FetchHttpClient = FetchHttpClient.create();
+                        const response: FetchHttpIncomingResponse = await httpClient.sendGetRequest("http://localhost:3000");
+
+                        test.assertNotUndefinedAndNotNull(response);
+                        test.assertEqual(200, response.getStatusCode());
+                    }
+                    finally
+                    {
+                        await httpServer.dispose();
+                    }
                 });
             });
         });

@@ -314,7 +314,7 @@ export function test(runner: TestRunner): void
 
                     const skippedTests: Iterable<SkippedTest> = runner2.getSkippedTests();
                     test.assertNotUndefinedAndNotNull(skippedTests);
-                    const skippedTest: SkippedTest = skippedTests.first().await();
+                    const skippedTest: SkippedTest = await skippedTests.first();
                     test.assertNotUndefinedAndNotNull(skippedTest);
                     test.assertEqual(
                         List.create(["fake-group", "fake-test"]),
@@ -569,8 +569,8 @@ export function test(runner: TestRunner): void
 
                     const skippedTests: Iterable<SkippedTest> = runner2.getSkippedTests();
                     test.assertNotUndefinedAndNotNull(skippedTests);
-                    test.assertEqual(1, skippedTests.getCount());
-                    const skippedTest: SkippedTest = skippedTests.first().await();
+                    test.assertEqual(1, await skippedTests.getCount());
+                    const skippedTest: SkippedTest = await skippedTests.first();
                     test.assertNotUndefinedAndNotNull(skippedTest);
                     test.assertEqual(Iterable.create(["fake-test-1"]), skippedTest.getFullTestNameParts());
                     test.assertEqual("fake-skip-message", skippedTest.getSkipMessage());
@@ -602,8 +602,8 @@ export function test(runner: TestRunner): void
 
                     const failedTests: Iterable<FailedTest> = runner2.getFailedTests();
                     test.assertNotUndefinedAndNotNull(failedTests);
-                    test.assertEqual(1, failedTests.getCount());
-                    const failedTest: FailedTest = failedTests.first().await();
+                    test.assertEqual(1, await failedTests.getCount());
+                    const failedTest: FailedTest = await failedTests.first();
                     test.assertNotUndefinedAndNotNull(failedTest);
                     test.assertEqual(Iterable.create(["fake-test-1"]), failedTest.getFullTestNameParts());
                     const errorMessage: string = failedTest.getErrorMessage();
@@ -637,8 +637,8 @@ export function test(runner: TestRunner): void
 
                     const failedTests: Iterable<FailedTest> = runner2.getFailedTests();
                     test.assertNotUndefinedAndNotNull(failedTests);
-                    test.assertEqual(1, failedTests.getCount());
-                    const failedTest: FailedTest = failedTests.first().await();
+                    test.assertEqual(1, await failedTests.getCount());
+                    const failedTest: FailedTest = await failedTests.first();
                     test.assertNotUndefinedAndNotNull(failedTest);
                     test.assertEqual(Iterable.create(["fake-test-1"]), failedTest.getFullTestNameParts());
                     const errorMessage: string = failedTest.getErrorMessage();

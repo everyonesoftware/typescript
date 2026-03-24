@@ -46,10 +46,10 @@ export function test(runner: TestRunner): void
 
                 function createTest<T>(testName: string, innerIterator: Iterator<T>, condition: (value: T) => boolean, expected: T[]): void
                 {
-                    runner.test(testName, (test: Test) =>
+                    runner.test(testName, async (test: Test) =>
                     {
                         const iterator: WhereIterator<T> = WhereIterator.create(innerIterator, condition);
-                        test.assertEqual(iterator.toArray(), expected);
+                        test.assertEqual(await iterator.toArray(), expected);
                     });
                 }
 

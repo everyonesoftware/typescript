@@ -1,6 +1,6 @@
 import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
-import { JavascriptIterable, JavascriptIterator } from "./javascript";
+import { JavascriptAsyncIterable, JavascriptAsyncIterator, JavascriptIterable, JavascriptIterator } from "./javascript";
 
 /**
  * A {@link Type} that can be used to pass types as parameters.
@@ -322,6 +322,30 @@ export function isJavascriptIterable<T>(value: unknown): value is JavascriptIter
 export function isIterable<T>(value: unknown): value is Iterable<T>
 {
     return isJavascriptIterable(value) &&
+        hasFunction(value, "iterate", 0);
+}
+
+/**
+ * Get whether the provided value is a {@link JavascriptAsyncIterator}.
+ * @param value The value to check.
+ */
+export function isJavascriptAsyncIterator<T>(value: unknown): value is JavascriptAsyncIterator<T>
+{
+    return hasFunction(value, "next");
+}
+
+/**
+ * Get whether the provided value is a {@link JavascriptAsyncIterable}.
+ * @param value The value to check.
+ */
+export function isJavascriptAsyncIterable<T>(value: unknown): value is JavascriptAsyncIterable<T>
+{
+    return hasFunction(value, Symbol.asyncIterator);
+}
+
+export function isAsyncIterable<T>(value: unknown): value is AsyncIterable<T>
+{
+    return isJavascriptAsyncIterable(value) &&
         hasFunction(value, "iterate", 0);
 }
 

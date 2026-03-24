@@ -17,55 +17,55 @@ export function test(runner: TestRunner): void
                 {
                     const list: List<number> = List.create();
                     test.assertNotUndefinedAndNotNull(list);
-                    test.assertEqual(list.toArray(), []);
+                    test.assertEqual(list.toArray().await(), []);
                     test.assertEqual(list.toString(), "[]");
-                    test.assertEqual(list.getCount(), 0);
+                    test.assertEqual(list.getCount().await(), 0);
                 });
 
                 runner.test("with undefined", (test: Test) =>
                 {
                     const list: List<number> = List.create(undefined);
                     test.assertNotUndefinedAndNotNull(list);
-                    test.assertEqual(list.toArray(), []);
+                    test.assertEqual(list.toArray().await(), []);
                     test.assertEqual(list.toString(), "[]");
-                    test.assertEqual(list.getCount(), 0);
+                    test.assertEqual(list.getCount().await(), 0);
                 });
 
                 runner.test("with empty array", (test: Test) =>
                 {
                     const list: List<number> = List.create<number>([]);
                     test.assertNotUndefinedAndNotNull(list);
-                    test.assertEqual(list.toArray(), []);
+                    test.assertEqual(list.toArray().await(), []);
                     test.assertSame(list.toString(), "[]");
-                    test.assertSame(list.getCount(), 0);
+                    test.assertSame(list.getCount().await(), 0);
                 });
 
                 runner.test("with non-empty array", (test: Test) =>
                 {
                     const list: List<number> = List.create([1, 2, 3]);
                     test.assertNotUndefinedAndNotNull(list);
-                    test.assertEqual(list.toArray(), [1, 2, 3]);
+                    test.assertEqual(list.toArray().await(), [1, 2, 3]);
                     test.assertSame(list.toString(), "[1,2,3]");
-                    test.assertSame(list.getCount(), 3);
+                    test.assertSame(list.getCount().await(), 3);
                 });
 
                 runner.test("with empty Iterable<T>", (test: Test) =>
                 {
                     const list: List<number> = List.create(List.create());
                     test.assertNotUndefinedAndNotNull(list);
-                    test.assertEqual(list.toArray(), []);
+                    test.assertEqual(list.toArray().await(), []);
                     test.assertSame(list.toString(), "[]");
-                    test.assertSame(list.getCount(), 0);
+                    test.assertSame(list.getCount().await(), 0);
                 });
 
                 runner.test("with non-empty Iterable<T>", (test: Test) =>
                 {
                     const list: List<number> = List.create(List.create([1, 2, 3]));
                     test.assertNotUndefinedAndNotNull(list);
-                    test.assertEqual(list.toArray(), [1, 2, 3]);
+                    test.assertEqual(list.toArray().await(), [1, 2, 3]);
                     test.assertTrue(isIterable(list));
                     test.assertSame(list.toString(), "[1,2,3]");
-                    test.assertSame(list.getCount(), 3);
+                    test.assertSame(list.getCount().await(), 3);
                 });
             });
 
@@ -113,7 +113,7 @@ export function test(runner: TestRunner): void
                     {
                         const setResult: List<number> = list.set(index, value);
                         test.assertSame(list, setResult);
-                        test.assertEqual(list.toArray(), expected);
+                        test.assertEqual(list.toArray().await(), expected);
                     });
                 }
 
@@ -164,7 +164,7 @@ export function test(runner: TestRunner): void
                 {
                     runner.test(`with ${runner.andList([list, index])}`, (test: Test) =>
                     {
-                        test.assertSame(list.get(index), expected);
+                        test.assertSame(list.get(index).await(), expected);
                     });
                 }
 
@@ -181,7 +181,7 @@ export function test(runner: TestRunner): void
                     {
                         const addResult: List<number> = list.add(value);
                         test.assertSame(addResult, list);
-                        test.assertEqual(list.toArray(), expected);
+                        test.assertEqual(list.toArray().await(), expected);
                     });
                 }
 
@@ -198,7 +198,7 @@ export function test(runner: TestRunner): void
                     {
                         const addResult: List<number> = list.addAll(values);
                         test.assertSame(addResult, list);
-                        test.assertEqual(list.toArray(), expected);
+                        test.assertEqual(list.toArray().await(), expected);
                     });
                 }
 
@@ -256,7 +256,7 @@ export function test(runner: TestRunner): void
                     {
                         const insertResult: List<number> = list.insert(index, value);
                         test.assertSame(insertResult, list);
-                        test.assertEqual(list.toArray(), expected);
+                        test.assertEqual(list.toArray().await(), expected);
                     });
                 }
 
@@ -307,7 +307,7 @@ export function test(runner: TestRunner): void
                     {
                         const insertResult: List<number> = list.insertAll(index, values);
                         test.assertSame(insertResult, list);
-                        test.assertEqual(list.toArray(), expected);
+                        test.assertEqual(list.toArray().await(), expected);
                     });
                 }
 

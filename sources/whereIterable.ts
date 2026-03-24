@@ -2,15 +2,16 @@ import { Iterable } from "./iterable";
 import { IterableDecorator } from "./iterableDecorator";
 import { Iterator } from "./iterator";
 import { PreCondition } from "./preCondition";
+import { SyncResult } from "./syncResult";
 
 /**
  * An {@link Iterable} that only returns values that match a condition.
  */
 export class WhereIterable<T> extends IterableDecorator<T>
 {
-    private readonly condition: (value: T) => boolean;
+    private readonly condition: (value: T) => (boolean | SyncResult<boolean>);
     
-    private constructor(innerIterable: Iterable<T>, condition: (value: T) => boolean)
+    private constructor(innerIterable: Iterable<T>, condition: (value: T) => (boolean | SyncResult<boolean>))
     {
         PreCondition.assertNotUndefinedAndNotNull(innerIterable, "innerIterable");
         PreCondition.assertNotUndefinedAndNotNull(condition, "condition");
@@ -20,7 +21,7 @@ export class WhereIterable<T> extends IterableDecorator<T>
         this.condition = condition;
     }
 
-    public static create<T>(innerIterable: Iterable<T>, condition: (value: T) => boolean): WhereIterable<T>
+    public static create<T>(innerIterable: Iterable<T>, condition: (value: T) => (boolean | SyncResult<boolean>)): WhereIterable<T>
     {
         return new WhereIterable(innerIterable, condition);
     }

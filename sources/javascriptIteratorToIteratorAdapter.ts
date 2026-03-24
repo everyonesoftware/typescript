@@ -1,9 +1,8 @@
 import { Iterator } from "./iterator";
 import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
 import { JavascriptIterable, JavascriptIterator, JavascriptIteratorResult } from "./javascript";
-import { MapIterator } from "./mapIterator";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult } from "./syncResult";
 import { isJavascriptIterable, Type } from "./types";
 
 export class JavascriptIteratorToIteratorAdapter<T> implements Iterator<T>
@@ -27,11 +26,15 @@ export class JavascriptIteratorToIteratorAdapter<T> implements Iterator<T>
         return new JavascriptIteratorToIteratorAdapter(javascriptIterator);
     }
 
-    public next(): boolean
+    public next(): SyncResult<boolean>
     {
-        this.javascriptIteratorResult = this.javascriptIterator.next();
-        return this.hasCurrent();
+        return SyncResult.create(() =>
+        {
+            this.javascriptIteratorResult = this.javascriptIterator.next();
+            return this.hasCurrent();
+        });
     }
+
     public hasStarted(): boolean
     {
         return this.javascriptIteratorResult !== undefined;
@@ -49,47 +52,47 @@ export class JavascriptIteratorToIteratorAdapter<T> implements Iterator<T>
         return this.javascriptIteratorResult!.value;
     }
 
-    public start(): this
+    public start(): SyncResult<this>
     {
-        return Iterator.start<T,this>(this);
+        return Iterator.start<T, this>(this);
     }
 
-    public takeCurrent(): T
+    public takeCurrent(): SyncResult<T>
     {
         return Iterator.takeCurrent(this);
     }
 
-    public any(): boolean
+    public any(): SyncResult<boolean>
     {
         return Iterator.any(this);
     }
 
-    public getCount(): number
+    public getCount(): SyncResult<number>
     {
         return Iterator.getCount(this);
     }
 
-    public toArray(): T[]
+    public toArray(): SyncResult<T[]>
     {
         return Iterator.toArray(this);
     }
 
-    public map<TOutput>(mapping: (value: T) => TOutput): MapIterator<T, TOutput>
+    public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterator<TOutput>
     {
         return Iterator.map(this, mapping);
     }
 
-    public [Symbol.iterator](): IteratorToJavascriptIteratorAdapter<T>
+    public [Symbol.iterator](): JavascriptIterator<T>
     {
         return Iterator[Symbol.iterator](this);
     }
 
-    public first(condition?: (value: T) => boolean): Result<T>
+    public first(condition?: (value: T) => boolean): SyncResult<T>
     {
         return Iterator.first(this, condition);
     }
 
-    public last(): Result<T>
+    public last(): SyncResult<T>
     {
         return Iterator.last(this);
     }

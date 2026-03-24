@@ -1,6 +1,6 @@
 import { HttpHeader } from "./httpHeader";
 import { HttpHeaders } from "./httpHeaders";
-import { Result2 } from "./result2";
+import { Result } from "./result";
 
 /**
  * The response from a {@link HttpClient}'s sendRequest() method.
@@ -9,11 +9,11 @@ export abstract class HttpIncomingResponse
 {
     public abstract getStatusCode(): number;
 
-    public abstract getHeaders(): Result2<HttpHeaders>;
+    public abstract getHeaders(): Result<HttpHeaders>;
 
-    public abstract getHeader(headerName: string): Result2<HttpHeader>;
+    public abstract getHeader(headerName: string): Result<HttpHeader>;
 
-    public abstract getHeaderValue(headerName: string): Result2<string>;
+    public abstract getHeaderValue(headerName: string): Result<string>;
 
-    public abstract getBody(): Result2<string>;
+    public abstract getBody(): Result<string>;
 }

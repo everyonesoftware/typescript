@@ -101,7 +101,7 @@ export class MutableCondition implements Condition
      */
     public areEqual(left: unknown, right: unknown): boolean
     {
-        return this.equalFunctions.areEqual(left, right);
+        return this.equalFunctions.areEqual(left, right).await();
     }
 
     /**

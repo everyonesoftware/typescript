@@ -1,5 +1,5 @@
 import { InMemoryCharacterWriteStream } from "../sources/inMemoryCharacterWriteStream";
-import { Result } from "../sources/result";
+import { SyncResult } from "../sources/syncResult";
 import { isUndefined } from "../sources/types";
 import * as characterWriteStreamTests from "./characterWriteStreamTests";
 import { Test } from "./test";
@@ -41,17 +41,25 @@ export function test(runner: TestRunner): void
             {
                 const writeStream = InMemoryCharacterWriteStream.create();
 
-                const result1: InMemoryCharacterWriteStream = writeStream.setNewlineSequence("d");
+                const result1: InMemoryCharacterWriteStream = writeStream.setNewlineSequence("e");
                 test.assertSame(writeStream, result1);
-                test.assertEqual("d", writeStream.getNewlineSequence());
+                test.assertEqual("e", writeStream.getNewlineSequence());
                 test.assertEqual("", writeStream.getWrittenText());
 
-                const result2: Result<number> = writeStream.writeString("ab");
-                test.assertEqual("", writeStream.getWrittenText());
+                const result2: SyncResult<number> = writeStream.writeString("ab");
+                test.assertEqual("ab", writeStream.getWrittenText());
                 for (let i = 0; i < 3; i++)
                 {
                     test.assertEqual(2, result2.await());
                     test.assertEqual("ab", writeStream.getWrittenText());
+                }
+
+                const result3: SyncResult<number> = writeStream.writeLine("cd");
+                test.assertEqual("abcde", writeStream.getWrittenText());
+                for (let i = 0; i < 3; i++)
+                {
+                    test.assertEqual(3, result3.await());
+                    test.assertEqual("abcde", writeStream.getWrittenText());
                 }
             });
 

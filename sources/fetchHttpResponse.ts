@@ -5,12 +5,12 @@ import { MutableHttpHeaders } from "./mutableHttpHeaders";
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
 import { escapeAndQuote } from "./strings";
-import { SyncResult2 } from "./syncResult2";
+import { SyncResult } from "./syncResult";
 
 /**
  * An {@link HttpIncomingResponse} that comes from a {@link FetchHttpClient}.
  */
-export class FetchHttpResponse extends HttpIncomingResponse
+export class FetchHttpIncomingResponse extends HttpIncomingResponse
 {
     private readonly response: Response;
 
@@ -23,9 +23,9 @@ export class FetchHttpResponse extends HttpIncomingResponse
         this.response = response;
     }
 
-    public static create(response: Response): FetchHttpResponse
+    public static create(response: Response): FetchHttpIncomingResponse
     {
-        return new FetchHttpResponse(response);
+        return new FetchHttpIncomingResponse(response);
     }
 
     public getStatusCode(): number
@@ -33,9 +33,9 @@ export class FetchHttpResponse extends HttpIncomingResponse
         return this.response.status;
     }
 
-    public getHeaders(): SyncResult2<HttpHeaders>
+    public getHeaders(): SyncResult<HttpHeaders>
     {
-        return SyncResult2.create(() =>
+        return SyncResult.create(() =>
         {
             const result: MutableHttpHeaders = HttpHeaders.create();
             for (const header of this.response.headers)
@@ -46,11 +46,11 @@ export class FetchHttpResponse extends HttpIncomingResponse
         });
     }
 
-    public getHeader(headerName: string): SyncResult2<HttpHeader>
+    public getHeader(headerName: string): SyncResult<HttpHeader>
     {
         PreCondition.assertNotEmpty(headerName, "headerName");
 
-        return SyncResult2.create(() =>
+        return SyncResult.create(() =>
         {
             let result: HttpHeader | undefined;
 
@@ -72,11 +72,11 @@ export class FetchHttpResponse extends HttpIncomingResponse
         });
     }
     
-    public getHeaderValue(headerName: string): SyncResult2<string>
+    public getHeaderValue(headerName: string): SyncResult<string>
     {
         PreCondition.assertNotEmpty(headerName, "headerName");
 
-        return SyncResult2.create(() =>
+        return SyncResult.create(() =>
         {
             let result: string | undefined;
 
@@ -98,7 +98,7 @@ export class FetchHttpResponse extends HttpIncomingResponse
         });
     }
 
-    public getBody(): SyncResult2<string>
+    public getBody(): SyncResult<string>
     {
         throw new Error("Method not implemented.");
     }

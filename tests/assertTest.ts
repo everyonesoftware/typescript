@@ -1,10 +1,9 @@
 import * as assert from "assert";
 
 import { PreCondition } from "../sources/preCondition";
-import { as, isFunction, Type } from "../sources/types";
+import { isFunction, Type } from "../sources/types";
 import { Test } from "./test";
 import { SyncResult } from "../sources/syncResult";
-import { SyncResult2 } from "../sources/syncResult2";
 
 /**
  * A {@link Test} type that uses the standard "assert" module to make assertions.
@@ -85,11 +84,11 @@ export class AssertTest implements Test
         Test.assertTrue(this, value);
     }
 
-    public assertThrows(action: SyncResult2<unknown> | (() => void), expectedError?: Error): void
+    public assertThrows(action: SyncResult<unknown> | (() => void), expectedError?: Error): void
     {
         if (!isFunction(action))
         {
-            const syncResult: SyncResult2<unknown> = action;
+            const syncResult: SyncResult<unknown> = action;
             action = () => { syncResult.await(); };
         }
         assert.throws(action, expectedError);

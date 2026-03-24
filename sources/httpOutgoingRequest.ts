@@ -3,7 +3,7 @@ import { HttpHeaders } from "./httpHeaders";
 import { HttpMethod } from "./httpMethod";
 import { MutableHttpHeaders } from "./mutableHttpHeaders";
 import { PreCondition } from "./preCondition";
-import { SyncResult2 } from "./syncResult2";
+import { SyncResult } from "./syncResult";
 
 /**
  * A HTTP request that is sent out by a {@link HttpClient}.
@@ -90,12 +90,12 @@ export class HttpOutgoingRequest
         return this.headers;
     }
 
-    public getHeader(headerName: string): SyncResult2<HttpHeader>
+    public getHeader(headerName: string): SyncResult<HttpHeader>
     {
         return this.headers.get(headerName);
     }
 
-    public getHeaderValue(headerName: string): SyncResult2<string>
+    public getHeaderValue(headerName: string): SyncResult<string>
     {
         return this.headers.getValue(headerName);
     }

@@ -1,13 +1,17 @@
+import { EqualFunctions } from "./equalFunctions";
+import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
+import { JavascriptIterator } from "./javascript";
 import { Map, MapEntry } from "./map";
-import { MapBase } from "./mapBase";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult } from "./syncResult";
+import { ToStringFunctions } from "./toStringFunctions";
+import { Type } from "./types";
 
 /**
  * A {@link Map} decorator type that wraps around another {@link Map}.
  */
-export abstract class MapDecorator<TKey,TValue> extends MapBase<TKey,TValue>
+export abstract class MapDecorator<TKey,TValue> extends Map<TKey,TValue>
 {
     private readonly innerMap: Map<TKey,TValue>;
 
@@ -20,53 +24,53 @@ export abstract class MapDecorator<TKey,TValue> extends MapBase<TKey,TValue>
         this.innerMap = innerMap;
     }
 
-    public override any(): boolean
+    public any(): SyncResult<boolean>
     {
         return this.innerMap.any();
     }
 
-    public override getCount(): number
+    public getCount(): SyncResult<number>
     {
         return this.innerMap.getCount();
     }
 
-    public override containsKey(key: TKey): boolean
+    public containsKey(key: TKey): SyncResult<boolean>
     {
         return this.innerMap.containsKey(key);
     }
 
-    public override get(key: TKey): Result<TValue>
+    public get(key: TKey): SyncResult<TValue>
     {
         return this.innerMap.get(key);
     }
 
-    public override set(key: TKey, value: TValue): this
+    public set(key: TKey, value: TValue): this
     {
         this.innerMap.set(key, value);
         return this;
     }
 
-    public override getOrSet(key: TKey, valueCreator: () => TValue): Result<TValue>
+    public getOrSet(key: TKey, valueCreator: () => (TValue | SyncResult<TValue>)): SyncResult<TValue>
     {
         return this.innerMap.getOrSet(key, valueCreator);
     }
 
-    public override remove(key: TKey): Result<TValue>
+    public remove(key: TKey): SyncResult<TValue>
     {
         return this.innerMap.remove(key);
     }
 
-    public override iterate(): Iterator<MapEntry<TKey,TValue>>
+    public iterate(): Iterator<MapEntry<TKey,TValue>>
     {
         return this.innerMap.iterate();
     }
 
-    public override iterateKeys(): Iterator<TKey>
+    public iterateKeys(): Iterator<TKey>
     {
         return this.innerMap.iterateKeys();
     }
 
-    public override iterateValues(): Iterator<TValue>
+    public iterateValues(): Iterator<TValue>
     {
         return this.innerMap.iterateValues();
     }

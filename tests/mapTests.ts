@@ -14,7 +14,7 @@ export function test(runner: TestRunner): void
             runner.testFunction("create()", (test: Test) =>
             {
                 const map: Map<number,string> = Map.create();
-                test.assertSame(map.getCount(), 0);
+                test.assertSame(map.getCount().await(), 0);
             });
 
             mapTests(runner, Map.create);
@@ -32,7 +32,7 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
             
             const map: Map<number,string> = creator();
             test.assertNotUndefinedAndNotNull(map);
-            test.assertEqual(map.getCount(), 0);
+            test.assertEqual(map.getCount().await(), 0);
             test.assertTrue(isMap(map));
         });
 
@@ -42,14 +42,14 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
             {
                 const map: Map<number,string> = creator();
 
-                test.assertFalse(map.containsKey(50));
+                test.assertFalse(map.containsKey(50).await());
             });
 
             runner.test("when it contains the key", (test: Test) =>
             {
                 const map: Map<number,string> = creator().set(50, "fifty");
 
-                test.assertTrue(map.containsKey(50));
+                test.assertTrue(map.containsKey(50).await());
             });
         });
 
@@ -58,9 +58,9 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
             runner.test("when it contains the key", (test: Test) =>
             {
                 const map: Map<number,string> = creator().set(1, "one");
-                test.assertEqual(map.getCount(), 1);
+                test.assertEqual(map.getCount().await(), 1);
                 test.assertEqual(map.get(1).await(), "one");
-                test.assertEqual(map.getCount(), 1);
+                test.assertEqual(map.getCount().await(), 1);
             });
 
             runner.test("when it doesn't contain the key", (test: Test) =>
@@ -70,7 +70,7 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
                 test.assertThrows(() => map.get(1).await(),
                     new NotFoundError(
                         "The key 1 was not found in the map."));
-                test.assertEqual(map.getCount(), 0);
+                test.assertEqual(map.getCount().await(), 0);
             });
         });
 
@@ -117,10 +117,10 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
         {
             function iterateKeysTests(map: Map<number,string>, expected: JavascriptIterable<number>): void
             {
-                runner.test(`with ${runner.toString(map)}`, (test: Test) =>
+                runner.test(`with ${runner.toString(map)}`, async (test: Test) =>
                 {
                     const keyIterator: Iterator<number> = map.iterateKeys();
-                    test.assertEqual(keyIterator.toArray(), [...expected]);
+                    test.assertEqual(await keyIterator.toArray(), [...expected]);
                 });
             }
 
@@ -134,10 +134,10 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
         {
             function iterateValuesTests(map: Map<number,string>, expected: JavascriptIterable<string>): void
             {
-                runner.test(`with ${runner.toString(map)}`, (test: Test) =>
+                runner.test(`with ${runner.toString(map)}`, async (test: Test) =>
                 {
                     const valueIterator: Iterator<string> = map.iterateValues();
-                    test.assertEqual(valueIterator.toArray(), [...expected]);
+                    test.assertEqual(await valueIterator.toArray(), [...expected]);
                 });
             }
 

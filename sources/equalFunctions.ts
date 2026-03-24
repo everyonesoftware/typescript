@@ -2,15 +2,16 @@ import { Comparer } from "./comparer";
 import { Iterable } from "./iterable";
 import { isMap, Map } from "./map";
 import { PreCondition } from "./preCondition";
-import { getPropertyNames, hasProperty, isJavascriptIterable, isObject, isString } from "./types";
+import { SyncResult } from "./syncResult";
+import { getPropertyNames, hasProperty, isBoolean, isJavascriptIterable, isObject, isString } from "./types";
 
 /**
  * A collection of {@link Function}s that can be used to determine if two values are equal.
  */
 export class EqualFunctions
 {
-    private readonly equalFunctions: ((left: unknown, right: unknown) => (boolean | undefined))[];
-    
+    private readonly equalFunctions: ((left: unknown, right: unknown) => (boolean | SyncResult<boolean> | undefined))[];
+
     private constructor()
     {
         this.equalFunctions = [];
@@ -21,65 +22,68 @@ export class EqualFunctions
         return new EqualFunctions();
     }
 
-    private defaultEqualFunction(left: unknown, right: unknown): boolean
+    private defaultEqualFunction(left: unknown, right: unknown): SyncResult<boolean>
     {
-        let result: boolean | undefined = Comparer.equalSameUndefinedNull(left, right);
-        if (result === undefined)
+        return SyncResult.create(() =>
         {
-            result = false;
+            let result: boolean | undefined = Comparer.equalSameUndefinedNull(left, right);
+            if (result === undefined)
+            {
+                result = false;
 
-            if (isMap(left))
-            {
-                if (isMap(right))
+                if (isMap(left))
                 {
-                    result = Map.equals(left, right, this);
-                }
-            }
-            else if (isJavascriptIterable(left) && !isString(left))
-            {
-                if (isJavascriptIterable(right) && !isString(right) && !isMap(right))
-                {
-                    result = Iterable.equals(left, right, this);
-                }
-            }
-            else if (isObject(left))
-            {
-                if (isObject(right))
-                {
-                    result = true;
-                    
-                    for (const leftPropertyName of getPropertyNames(left))
+                    if (isMap(right))
                     {
-                        if (!hasProperty(left, leftPropertyName) || !hasProperty(right, leftPropertyName))
-                        {
-                            result = false;
-                            break;
-                        }
-                        else
-                        {
-                            result = this.areEqual(left[leftPropertyName], right[leftPropertyName]);
-                        }
+                        result = Map.equals(left, right, this).await();
                     }
-
-                    if (result)
+                }
+                else if (isJavascriptIterable(left) && !isString(left))
+                {
+                    if (isJavascriptIterable(right) && !isString(right) && !isMap(right))
                     {
-                        for (const rightPropertyName of getPropertyNames(right))
+                        result = Iterable.equals(left, right, this).await();
+                    }
+                }
+                else if (isObject(left))
+                {
+                    if (isObject(right))
+                    {
+                        result = true;
+
+                        for (const leftPropertyName of getPropertyNames(left))
                         {
-                            if (!hasProperty(left, rightPropertyName) || !hasProperty(right, rightPropertyName))
+                            if (!hasProperty(left, leftPropertyName) || !hasProperty(right, leftPropertyName))
                             {
                                 result = false;
                                 break;
                             }
                             else
                             {
-                                result = this.areEqual(left[rightPropertyName], right[rightPropertyName]);
+                                result = this.areEqual(left[leftPropertyName], right[leftPropertyName]).await();
+                            }
+                        }
+
+                        if (result)
+                        {
+                            for (const rightPropertyName of getPropertyNames(right))
+                            {
+                                if (!hasProperty(left, rightPropertyName) || !hasProperty(right, rightPropertyName))
+                                {
+                                    result = false;
+                                    break;
+                                }
+                                else
+                                {
+                                    result = this.areEqual(left[rightPropertyName], right[rightPropertyName]).await();
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-        return result;
+            return result;
+        });
     }
 
     /**
@@ -87,22 +91,25 @@ export class EqualFunctions
      * @param left The left value in the comparison.
      * @param right The right value in the comparison.
      */
-    public areEqual(left: unknown, right: unknown): boolean
+    public areEqual(left: unknown, right: unknown): SyncResult<boolean>
     {
-        let result: boolean | undefined;
-        for (const equalFunction of this.equalFunctions)
+        return SyncResult.create(() =>
         {
-            result = equalFunction(left, right);
-            if (result !== undefined)
+            let result: boolean | SyncResult<boolean> | undefined;
+            for (const equalFunction of this.equalFunctions)
             {
-                break;
+                result = equalFunction(left, right);
+                if (result !== undefined)
+                {
+                    break;
+                }
             }
-        }
-        if (result === undefined)
-        {
-            result = this.defaultEqualFunction(left, right);
-        }
-        return result;
+            if (result === undefined)
+            {
+                result = this.defaultEqualFunction(left, right);
+            }
+            return isBoolean(result) ? result : result.await();
+        });
     }
 
     public add(equalFunction: (left: unknown, right: unknown) => (boolean | undefined)): this

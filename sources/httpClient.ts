@@ -2,6 +2,7 @@ import { FetchHttpClient } from "./fetchHttpClient";
 import { HttpOutgoingRequest } from "./httpOutgoingRequest";
 import { HttpIncomingResponse } from "./httpIncomingResponse";
 import { HttpMethod } from "./httpMethod";
+import { Result } from "./result";
 
 /**
  * An object that can make HTTP network requests.
@@ -17,13 +18,13 @@ export abstract class HttpClient
      * Send the provided {@link HttpOutgoingRequest}.
      * @param request The {@link HttpOutgoingRequest} to send.
      */
-    public abstract sendRequest(request: HttpOutgoingRequest): Promise<HttpIncomingResponse>;
+    public abstract sendRequest(request: HttpOutgoingRequest): Result<HttpIncomingResponse>;
 
     /**
      * Send a GET {@link HttpOutgoingRequest} to the provided URL.
      * @param url The URL to send the GET {@link HttpOutgoingRequest} to.
      */
-    public sendGetRequest(url: string): Promise<HttpIncomingResponse>
+    public sendGetRequest(url: string): Result<HttpIncomingResponse>
     {
         return this.sendRequest(HttpOutgoingRequest.create(HttpMethod.GET, url));
     }

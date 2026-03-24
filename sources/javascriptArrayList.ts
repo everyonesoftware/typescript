@@ -1,16 +1,19 @@
-import { IndexableIterator } from "./indexableIterator";
-import { JavascriptIterable } from "./javascript";
-import { ListBase } from "./listBase";
+import { EqualFunctions } from "./equalFunctions";
+import { Iterable } from "./iterable";
+import { Iterator } from "./iterator";
+import { JavascriptIterable, JavascriptIterator } from "./javascript";
+import { List } from "./list";
 import { PreCondition } from "./preCondition";
+import { SyncResult } from "./syncResult";
+import { ToStringFunctions } from "./toStringFunctions";
+import { Type } from "./types";
 
-export class JavascriptArrayList<T> extends ListBase<T>
+export class JavascriptArrayList<T> implements List<T>
 {
     private readonly array: T[];
 
     private constructor()
     {
-        super();
-
         this.array = [];
     }
 
@@ -24,44 +27,44 @@ export class JavascriptArrayList<T> extends ListBase<T>
         return result;
     }
 
-    public override set(index: number, value: T): this
+    public set(index: number, value: T): this
     {
-        PreCondition.assertAccessIndex(index, this.getCount(), "index");
+        PreCondition.assertAccessIndex(index, this.getCount().await(), "index");
 
         this.array[index] = value;
 
         return this;
     }
 
-    public override iterate(): IndexableIterator<T>
+    public iterate(): Iterator<T>
     {
-        return IndexableIterator.create(this.array);
+        return Iterator.create(this.array);
     }
 
-    public override getCount(): number
+    public getCount(): SyncResult<number>
     {
-        return this.array.length;
+        return SyncResult.value(this.array.length);
     }
 
-    public override get(index: number): T
+    public get(index: number): SyncResult<T>
     {
-        PreCondition.assertAccessIndex(index, this.getCount(), "index");
+        PreCondition.assertAccessIndex(index, this.getCount().await(), "index");
 
-        return this.array[index];
+        return SyncResult.value(this.array[index]);
     }
 
-    public override insert(index: number, value: T): this
+    public insert(index: number, value: T): this
     {
-        PreCondition.assertInsertIndex(index, this.getCount(), "index");
+        PreCondition.assertInsertIndex(index, this.getCount().await(), "index");
 
         this.array.splice(index, 0, value);
 
         return this;
     }
 
-    public override insertAll(index: number, values: JavascriptIterable<T>): this
+    public insertAll(index: number, values: JavascriptIterable<T>): this
     {
-        PreCondition.assertInsertIndex(index, this.getCount() ,"index");
+        PreCondition.assertInsertIndex(index, this.getCount().await(), "index");
         PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
         this.array.splice(index, 0, ...values);
@@ -69,17 +72,82 @@ export class JavascriptArrayList<T> extends ListBase<T>
         return this;
     }
 
-    public override removeAt(index: number): T
+    public removeAt(index: number): T
     {
-        PreCondition.assertAccessIndex(index, this.getCount(), "index");
+        PreCondition.assertAccessIndex(index, this.getCount().await(), "index");
 
         return this.array.splice(index, 1)[0];
     }
 
-    public override removeLast(): T
+    public removeLast(): T
     {
         PreCondition.assertNotEmpty(this, "this");
 
         return this.array.pop()!;
+    }
+
+    public add(value: T): this
+    {
+        return List.add(this, value);
+    }
+
+    public addAll(values: JavascriptIterable<T>): this
+    {
+        return List.addAll(this, values);
+    }
+
+    public remove(value: T, equalFunctions?: EqualFunctions): boolean
+    {
+        return List.remove(this, value, equalFunctions);
+    }
+
+    public toArray(): SyncResult<T[]>
+    {
+        return SyncResult.value(this.array.slice());
+    }
+
+    public any(): SyncResult<boolean>
+    {
+        return List.any(this);
+    }
+
+    public equals(right: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return List.equals(this, right, equalFunctions);
+    }
+
+    public toString(toStringFunctions?: ToStringFunctions): string
+    {
+        return List.toString(this, toStringFunctions);
+    }
+
+    public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
+    {
+        return List.map(this, mapping);
+    }
+
+    public where(condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
+    {
+        return List.where(this, condition);
+    }
+
+    public instanceOf<TOutput extends T>(typeOrTypeCheck: Type<TOutput> | ((value: T) => value is TOutput)): Iterable<TOutput>
+    {
+        return List.instanceOf(this, typeOrTypeCheck);
+    }
+
+    public first(condition?: ((value: T) => (boolean | SyncResult<boolean>)) | undefined): SyncResult<T>
+    {
+        return List.first(this, condition);
+    }
+
+    public last(condition?: ((value: T) => (boolean | SyncResult<boolean>)) | undefined): SyncResult<T>
+    {
+        return List.last(this, condition);
+    }
+
+    public [Symbol.iterator](): JavascriptIterator<T>
+    {
+        return List[Symbol.iterator](this);
     }
 }

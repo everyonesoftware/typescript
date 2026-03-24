@@ -1,7 +1,7 @@
 import { CharacterWriteStream } from "./characterWriteStream";
 import { PreCondition } from "./preCondition";
 import { getLength } from "./strings";
-import { SyncResult2 } from "./syncResult2";
+import { SyncResult } from "./syncResult";
 
 export class InMemoryCharacterWriteStream extends CharacterWriteStream
 {
@@ -47,9 +47,9 @@ export class InMemoryCharacterWriteStream extends CharacterWriteStream
         return this;
     }
 
-    public writeString(text: string): SyncResult2<number>
+    public writeString(text: string): SyncResult<number>
     {
-        return SyncResult2.create(() =>
+        return SyncResult.create(() =>
         {
             if (text)
             {
@@ -59,9 +59,9 @@ export class InMemoryCharacterWriteStream extends CharacterWriteStream
         });
     }
 
-    public writeLine(text?: string): SyncResult2<number>
+    public writeLine(text?: string): SyncResult<number>
     {
-        return SyncResult2.create(() =>
+        return SyncResult.create(() =>
         {
             let result: number = 0;
             if (text)

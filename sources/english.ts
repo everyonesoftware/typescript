@@ -19,10 +19,10 @@ function list(conjunction: string, values: JavascriptIterable<string>): string
 
     let result: string = "";
     let index = 0;
-    const iterator: Iterator<string> = Iterator.create(values).start();
+    const iterator: Iterator<string> = Iterator.create(values).start().await();
     while (iterator.hasCurrent())
     {
-        const currentValue: string = iterator.takeCurrent();
+        const currentValue: string = iterator.takeCurrent().await();
         if (index >= 1)
         {
             if (iterator.hasCurrent())

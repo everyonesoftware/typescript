@@ -1,9 +1,9 @@
 import { Iterator } from "./iterator";
 import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
-import { MapIterator } from "./mapIterator";
+import { JavascriptIterator } from "./javascript";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
-import { Type } from "./types";
+import { SyncResult } from "./syncResult";
+import { isBoolean, Type } from "./types";
 
 /**
  * An {@link Iterator} that only returns values that match a condition.
@@ -12,9 +12,9 @@ export class WhereIterator<T> implements Iterator<T>
 {
     private readonly innerIterator: Iterator<T>;
     private started: boolean;
-    private readonly condition: (value: T) => boolean;
-    
-    private constructor(innerIterator: Iterator<T>, condition: (value: T) => boolean)
+    private readonly condition: (value: T) => (boolean | SyncResult<boolean>);
+
+    private constructor(innerIterator: Iterator<T>, condition: (value: T) => (boolean | SyncResult<boolean>))
     {
         PreCondition.assertNotUndefinedAndNotNull(innerIterator, "innerIterator");
         PreCondition.assertNotUndefinedAndNotNull(condition, "condition");
@@ -41,55 +41,61 @@ export class WhereIterator<T> implements Iterator<T>
         return this.innerIterator.getCurrent();
     }
 
-    public static create<T>(innerIterator: Iterator<T>, condition: (value: T) => boolean): WhereIterator<T>
+    public static create<T>(innerIterator: Iterator<T>, condition: (value: T) => (boolean | SyncResult<boolean>)): WhereIterator<T>
     {
         return new WhereIterator(innerIterator, condition);
     }
 
-    public next(): boolean
+    public next(): SyncResult<boolean>
     {
-        if (!this.hasStarted())
+        return SyncResult.create(() =>
         {
-            this.innerIterator.start();
-            this.started = true;
+            if (!this.hasStarted())
+            {
+                this.innerIterator.start().await();
+                this.started = true;
+            }
+            else
+            {
+                this.innerIterator.next().await();
+            }
 
-            while (this.hasCurrent() && !this.condition(this.getCurrent()))
+            while (this.hasCurrent())
             {
-                this.innerIterator.next();
+                const conditionResult: boolean | SyncResult<boolean> = this.condition(this.getCurrent());
+                const conditionBoolean: boolean = isBoolean(conditionResult) ? conditionResult : conditionResult.await();
+                if (conditionBoolean)
+                {
+                    break;
+                }
+                
+                this.innerIterator.next().await();
             }
-        }
-        else
-        {
-            do
-            {
-                this.innerIterator.next();
-            }
-            while (this.hasCurrent() && !this.condition(this.getCurrent()));
-        }
-        return this.hasCurrent();
+            return this.hasCurrent();
+        });
     }
 
-    public start(): this
+    public start(): SyncResult<this>
     {
         return Iterator.start<T, this>(this);
     }
 
-    public takeCurrent(): T
+    public takeCurrent(): SyncResult<T>
     {
         return Iterator.takeCurrent(this);
     }
 
-    public any(): boolean
+    public any(): SyncResult<boolean>
     {
         return Iterator.any(this);
     }
 
-    public getCount(): number
+    public getCount(): SyncResult<number>
     {
         return Iterator.getCount(this);
     }
 
-    public toArray(): T[]
+    public toArray(): SyncResult<T[]>
     {
         return Iterator.toArray(this);
     }
@@ -99,7 +105,7 @@ export class WhereIterator<T> implements Iterator<T>
         return Iterator.where(this, condition);
     }
 
-    public map<TOutput>(mapping: (value: T) => TOutput): MapIterator<T, TOutput>
+    public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterator<TOutput>
     {
         return Iterator.map(this, mapping);
     }
@@ -114,12 +120,12 @@ export class WhereIterator<T> implements Iterator<T>
         return Iterator.whereInstanceOfType(this, type);
     }
 
-    public first(condition?: (value: T) => boolean): Result<T>
+    public first(condition?: (value: T) => boolean): SyncResult<T>
     {
         return Iterator.first(this, condition);
     }
 
-    public last(condition?: (value: T) => boolean): Result<T>
+    public last(condition?: (value: T) => boolean): SyncResult<T>
     {
         return Iterator.last(this, condition);
     }
@@ -134,7 +140,7 @@ export class WhereIterator<T> implements Iterator<T>
         return Iterator.skip(this, maximumToSkip);
     }
 
-    public [Symbol.iterator](): IteratorToJavascriptIteratorAdapter<T>
+    public [Symbol.iterator](): JavascriptIterator<T>
     {
         return Iterator[Symbol.iterator](this);
     }

@@ -2,7 +2,7 @@
   "name": "everything-cli",
   "version": "1.0.0",
   "description": "A CLI for building software.",
-  "main": "outputs/everythingCLI.js",
+  "type": "module",
   "scripts": {
     "build": "tsc && node build.cjs",
     "clean": "rimraf coverage outputs",

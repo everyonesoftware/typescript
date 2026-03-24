@@ -1,54 +1,20 @@
-import { Indexable } from "./indexable";
-import { IndexableIterator } from "./indexableIterator";
+import { EqualFunctions } from "./equalFunctions";
 import { Iterable } from "./iterable";
+import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { JavascriptArrayList } from "./javascriptArrayList";
-import { MapIterable } from "./mapIterable";
-import { MutableIndexable } from "./mutableIndexable";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
-import { Type } from "./types";
+import { SyncResult } from "./syncResult";
+import { ToStringFunctions } from "./toStringFunctions";
+import { isUndefinedOrNull, Type } from "./types";
 
-export abstract class List<T> implements MutableIndexable<T>
+export abstract class List<T> implements Iterable<T>
 {
+    // List cannot extend 
     public static create<T>(values?: JavascriptIterable<T>): List<T>
     {
         return JavascriptArrayList.create(values);
     }
-
-    public abstract iterate(): IndexableIterator<T>;
-
-    public abstract toArray(): T[];
-
-    public abstract equals(right: Iterable<T>): boolean;
-
-    public abstract toString(): string;
-
-    public abstract map<TOutput>(mapping: (value: T) => TOutput): MapIterable<T, TOutput>;
-
-    public abstract where(condition: (value: T) => boolean): Iterable<T>;
-
-    public abstract instanceOf<TOutput extends T>(typeOrTypeCheck: Type<TOutput> | ((value: T) => value is TOutput)): Iterable<TOutput>;
-
-    public abstract any(): boolean;
-
-    public abstract getCount(): number;
-
-    public first(): Result<T>
-    {
-        return Indexable.first(this);
-    }
-
-    public last(): Result<T>
-    {
-        return Indexable.last(this);
-    }
-
-    public abstract get(index: number): T;
-
-    public abstract set(index: number, value: T): this;
-
-    public abstract [Symbol.iterator](): JavascriptIterator<T>;
 
     /**
      * Add the provided value to the end of this {@link List}.
@@ -64,11 +30,11 @@ export abstract class List<T> implements MutableIndexable<T>
      * @param list The {@link List} to add the value to.
      * @param value The value to add.
      */
-    public static add<T,TList extends List<T>>(list: TList, value: T): TList
+    public static add<T, TList extends List<T>>(list: TList, value: T): TList
     {
         PreCondition.assertNotUndefinedAndNotNull(list, "list");
-        
-        return list.insert(list.getCount(), value);
+
+        return list.insert(list.getCount().await(), value);
     }
 
     /**
@@ -85,12 +51,12 @@ export abstract class List<T> implements MutableIndexable<T>
      * @param list The {@link List} to add the values to.
      * @param values The values to add.
      */
-    public static addAll<T,TList extends List<T>>(list: TList, values: JavascriptIterable<T>): TList
+    public static addAll<T, TList extends List<T>>(list: TList, values: JavascriptIterable<T>): TList
     {
         PreCondition.assertNotUndefinedAndNotNull(list, "list");
         PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
-        return list.insertAll(list.getCount(), values);
+        return list.insertAll(list.getCount().await(), values);
     }
 
     /**
@@ -105,7 +71,10 @@ export abstract class List<T> implements MutableIndexable<T>
      * @param index The index to insert the values at.
      * @param values The values to insert.
      */
-    public abstract insertAll(index: number, values: JavascriptIterable<T>): this;
+    public insertAll(index: number, values: JavascriptIterable<T>): this
+    {
+        return List.insertAll(this, index, values);
+    }
 
     /**
      * Insert the values at the index in this {@link List}.
@@ -113,10 +82,10 @@ export abstract class List<T> implements MutableIndexable<T>
      * @param index The index to insert the values at.
      * @param values The values to insert.
      */
-    public static insertAll<T,TList extends List<T>>(list: TList, index: number, values: JavascriptIterable<T>): TList
+    public static insertAll<T, TList extends List<T>>(list: TList, index: number, values: JavascriptIterable<T>): TList
     {
         PreCondition.assertNotUndefinedAndNotNull(list, "list");
-        PreCondition.assertInsertIndex(index, list.getCount(), "index");
+        PreCondition.assertInsertIndex(index, list.getCount().await(), "index");
         PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
         let insertIndex: number = index;
@@ -133,16 +102,24 @@ export abstract class List<T> implements MutableIndexable<T>
      * whether the value was removed.
      * @param value The value to remove.
      */
-    public abstract remove(value: T): boolean;
+    public remove(value: T, equalFunctions?: EqualFunctions): boolean
+    {
+        return List.remove(this, value, equalFunctions);
+    }
 
-    public static remove<T>(list: List<T>, value: T): boolean
+    public static remove<T>(list: List<T>, value: T, equalFunctions?: EqualFunctions): boolean
     {
         PreCondition.assertNotUndefinedAndNotNull(list, "list");
 
-        let result: boolean = false;
-        for (let i = 0; i < list.getCount(); i++)
+        if (isUndefinedOrNull(equalFunctions))
         {
-            if (value === list.get(i))
+            equalFunctions = EqualFunctions.create();
+        }
+
+        let result: boolean = false;
+        for (let i = 0; i < list.getCount().await(); i++)
+        {
+            if (equalFunctions.areEqual(value, list.get(i)).await())
             {
                 list.removeAt(i);
                 result = true;
@@ -162,12 +139,131 @@ export abstract class List<T> implements MutableIndexable<T>
     /**
      * Remove the last value in this {@link List}.
      */
-    public abstract removeLast(): T;
+    public removeLast(): T
+    {
+        return List.removeLast(this);
+    }
 
-    public static removeLast<T,TList extends List<T>>(list: TList): T
+    public static removeLast<T, TList extends List<T>>(list: TList): T
     {
         PreCondition.assertNotEmpty(list, "list");
 
-        return list.removeAt(list.getCount() - 1);
+        return list.removeAt(list.getCount().await() - 1);
+    }
+
+    public abstract set(index: number, value: T): this;
+
+    public abstract iterate(): Iterator<T>
+
+    public abstract get(index: number): SyncResult<T>;
+
+    public toArray(): SyncResult<T[]>
+    {
+        return List.toArray(this);
+    }
+
+    public static toArray<T>(list: List<T>): SyncResult<T[]>
+    {
+        return Iterable.toArray(list);
+    }
+
+    public any(): SyncResult<boolean>
+    {
+        return List.any(this);
+    }
+
+    public static any<T>(list: List<T>): SyncResult<boolean>
+    {
+        return Iterable.any(list);
+    }
+
+    public getCount(): SyncResult<number>
+    {
+        return List.getCount(this);
+    }
+
+    public static getCount<T>(list: List<T>): SyncResult<number>
+    {
+        return Iterable.getCount(list);
+    }
+
+    public equals(right: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return List.equals(this, right, equalFunctions);
+    }
+
+    public static equals<T>(left: List<T>, right: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.equals(left, right, equalFunctions);
+    }
+
+    public toString(toStringFunctions?: ToStringFunctions): string
+    {
+        return List.toString(this, toStringFunctions);
+    }
+
+    public static toString<T>(list: List<T>, toStringFunctions?: ToStringFunctions): string
+    {
+        return Iterable.toString(list, toStringFunctions);
+    }
+
+    public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
+    {
+        return List.map<T,TOutput>(this, mapping);
+    }
+
+    public static map<TInput, TOutput>(list: List<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
+    {
+        return Iterable.map<TInput, TOutput>(list, mapping);
+    }
+
+    public where(condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
+    {
+        return List.where(this, condition);
+    }
+
+    public static where<T>(iterable: JavascriptIterable<T>, condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
+    {
+        return Iterable.where(iterable, condition);
+    }
+
+    public instanceOf<TOutput extends T>(typeOrTypeCheck: Type<TOutput> | ((value: T) => value is TOutput)): Iterable<TOutput>
+    {
+        return List.instanceOf(this, typeOrTypeCheck);
+    }
+
+    public static instanceOf<TInput, TOutput extends TInput>(iterable: JavascriptIterable<TInput>, typeOrTypeCheck: Type<TOutput> | ((value: TInput) => value is TOutput)): Iterable<TOutput>
+    {
+        return Iterable.instanceOf(iterable, typeOrTypeCheck);
+    }
+
+    public first(condition?: ((value: T) => (boolean | SyncResult<boolean>)) | undefined): SyncResult<T>
+    {
+        return List.first(this, condition);
+    }
+
+    public static first<T>(iterable: JavascriptIterable<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
+    {
+        return Iterable.first(iterable, condition);
+    }
+
+    public last(condition?: ((value: T) => (boolean | SyncResult<boolean>)) | undefined): SyncResult<T>
+    {
+        return List.last(this, condition);
+    }
+
+    public static last<T>(iterable: JavascriptIterable<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
+    {
+        return Iterable.last(iterable, condition);
+    }
+
+    public [Symbol.iterator](): JavascriptIterator<T>
+    {
+        return List[Symbol.iterator](this);
+    }
+
+    public static [Symbol.iterator]<T>(list: List<T>): JavascriptIterator<T>
+    {
+        return Iterable[Symbol.iterator](list);
     }
 }

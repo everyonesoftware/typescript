@@ -1,15 +1,12 @@
 import * as http from "http";
 
-import { HttpOutgoingRequest } from "./httpOutgoingRequest";
 import { HttpServer } from "./httpServer";
 import { HttpIncomingRequest } from "./httpIncomingRequest";
-import { HttpServerRequestHandler } from "./httpServerRequestHandler";
 import { HttpOutgoingResponse } from "./httpOutgoingResponse";
-import { List } from "./list";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
-import { NodeJSHttpIncomingRequest } from "./nodeJSHttpIncomingRequest";
 import { HttpHeaders } from "./httpHeaders";
+import { AsyncResult } from "./asyncResult";
+import { Result } from "./result";
 
 /**
  * A {@link HttpServer} implementation that uses the Node.js HTTP module.
@@ -18,16 +15,12 @@ export class NodeJSHttpServer extends HttpServer
 {
     private httpServer: http.Server | undefined;
     private disposed: boolean;
-    private readonly handlers: List<HttpServerRequestHandler>;
-    private defaultHandler: (request: HttpIncomingRequest, response: HttpOutgoingResponse) => Result<void>;
 
     private constructor()
     {
         super();
 
         this.disposed = false;
-        this.handlers = List.create();
-        this.defaultHandler = NodeJSHttpServer.defaultRequestHandler;
     }
 
     public static create(): NodeJSHttpServer
@@ -35,43 +28,36 @@ export class NodeJSHttpServer extends HttpServer
         return new NodeJSHttpServer();
     }
 
-    public static defaultRequestHandler(request: HttpIncomingRequest, response: HttpOutgoingResponse): Result<void>
+    public dispose(): AsyncResult<boolean>
     {
-        PreCondition.assertNotUndefinedAndNotNull(request, "request");
-        PreCondition.assertNotUndefinedAndNotNull(response, "response");
-
-        return Result.create(() =>
+        return AsyncResult.create(new Promise<boolean>((resolve, reject) =>
         {
-            response.setStatusCode(404);
-            response.setContentTypeHeader("text/plain");
-            response.setBody("Hello, world!");
-        });
-    }
-
-    public setDefaultRequestHandler(handler: (request: HttpIncomingRequest, response: HttpOutgoingResponse) => Result<void>): void
-    {
-        throw new Error("Method not implemented.");
-    }
-
-    public dispose(): Result<boolean>
-    {
-        return Result.create(() =>
-        {
-            const result: boolean = !this.disposed;
-            if (result)
+            if (this.disposed)
+            {
+                resolve(false);
+            }
+            else if (!this.httpServer)
             {
                 this.disposed = true;
-                if (this.httpServer)
-                {
-                    this.httpServer.close((err?: Error) =>
-                    {
-                        this.httpServer = undefined;
-                        // Do something when the server is actually closed.
-                    });
-                }
+                resolve(true);
             }
-            return result;
-        });
+            else
+            {
+                this.httpServer.close((error?: Error) =>
+                {
+                    if (error)
+                    {
+                        reject(error);
+                    }
+                    else
+                    {
+                        this.disposed = true;
+                        this.httpServer = undefined;
+                        resolve(true);
+                    }
+                });
+            }
+        }));
     }
 
     public isDisposed(): boolean
@@ -79,45 +65,70 @@ export class NodeJSHttpServer extends HttpServer
         return this.disposed;
     }
 
-    public addRequestHandler(requestPath: string, handler: (request: HttpIncomingRequest, response: HttpOutgoingResponse) => Result<void>): void
+    public isStarted(): boolean
     {
-        PreCondition.assertNotEmpty(requestPath, "requestPath");
-        PreCondition.assertNotUndefinedAndNotNull(handler, "handler");
-
-        const requestHandler: HttpServerRequestHandler = HttpServerRequestHandler.create(requestPath, handler);
-        this.handlers.insert(0, requestHandler);
+        return !!this.httpServer;
     }
 
-    public run(portNumber: number): Result<void>
+    public addRequestHandler(requestPath: string, handler: (request: HttpIncomingRequest, response: HttpOutgoingResponse) => Result<void>): void
+    {
+        throw new Error("Method not implemented.");
+    }
+
+    public setDefaultRequestHandler(handler: (request: HttpIncomingRequest, response: HttpOutgoingResponse) => Result<void>): void
+    {
+        throw new Error("Method not implemented.");
+    }
+
+    public start(portNumber: number): AsyncResult<void>
     {
         PreCondition.assertGreaterThanOrEqualTo(portNumber, 1, "portNumber");
         PreCondition.assertFalse(this.isDisposed(), "this.isDisposed()");
+        PreCondition.assertUndefined(this.httpServer, "this.httpServer");
 
-        return Result.create(() =>
+        return AsyncResult.create(new Promise<void>((resolve, reject) =>
         {
-            this.httpServer = http.createServer((request: http.IncomingMessage, response: http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage }) =>
+            if (this.httpServer)
             {
-                const httpRequest: HttpIncomingRequest = NodeJSHttpIncomingRequest.create(request);
-                const httpResponse: HttpOutgoingResponse = HttpOutgoingResponse.create()
-                    .setStatusCode(200)
-                    .setHeader("Content-Type", "text/plain")
-                    .setBody("Hello world!");
+                reject(new Error("Can't run a HttpServer multiple times."));
+            }
+            else
+            {
+                this.httpServer = http.createServer();
 
-                const statusCode: number = httpResponse.getStatusCode();
-                const headers: HttpHeaders = httpResponse.getHeaders();
-
-                const responseHeaders: http.OutgoingHttpHeaders = {};
-                for (const header of headers)
+                this.httpServer.on("request", (request: http.IncomingMessage, response: http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage }) =>
                 {
-                    responseHeaders[header.getName()] = header.getValue();
-                }
+                    // const httpRequest: HttpIncomingRequest = NodeJSHttpIncomingRequest.create(request);
+                    const httpResponse: HttpOutgoingResponse = HttpOutgoingResponse.create()
+                        .setStatusCode(200)
+                        .setHeader("Content-Type", "text/plain")
+                        .setBody("Hello world!");
 
-                response.writeHead(statusCode, responseHeaders);
-                response.end(httpResponse.getBody());
+                    const statusCode: number = httpResponse.getStatusCode();
+                    const headers: HttpHeaders = httpResponse.getHeaders();
 
-                this.dispose().await();
-            });
-            this.httpServer.listen(portNumber);
-        });
+                    const responseHeaders: http.OutgoingHttpHeaders = {};
+                    for (const header of headers)
+                    {
+                        responseHeaders[header.getName()] = header.getValue();
+                    }
+
+                    response.writeHead(statusCode, responseHeaders);
+                    response.end(httpResponse.getBody());
+                });
+
+                this.httpServer.on("close", () =>
+                {
+                    resolve();
+                });
+
+                this.httpServer.on("error", (error: Error) =>
+                {
+                    reject(error);
+                });
+
+                this.httpServer.listen(portNumber);
+            }
+        }));
     }
 }

@@ -45,7 +45,14 @@ export class CurrentProcess
         {
             currentProcess.setExitCode(-1);
             const writeStream: CharacterWriteStream = currentProcess.getOutputWriteStream();
-            writeStream.writeLine(`${error}`);
+            if (error instanceof Error && error.stack)
+            {
+                writeStream.writeLine(error.stack);
+            }
+            else
+            {
+                writeStream.writeLine(`${error}`);
+            }
         }
     }
 

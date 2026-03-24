@@ -15,6 +15,7 @@ function buildProject(projectName, entryPointFile)
     bundle: true,
     minify: false,
     external: externalDependencies,
+    format: "esm",
     platform: "node", // for CommonJS
     outdir: `outputs/${projectName}/`,
     sourcemap: true,

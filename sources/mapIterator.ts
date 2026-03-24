@@ -1,19 +1,20 @@
 import { Iterator } from "./iterator";
 import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
+import { JavascriptIterator } from "./javascript";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult } from "./syncResult";
 import { Type } from "./types";
 
 /**
  * An {@link Iterator} that maps {@link TInput} values to {@link TOutput} values.
  */
-export class MapIterator<TInput,TOutput> implements Iterator<TOutput>
+export class MapIterator<TInput, TOutput> implements Iterator<TOutput>
 {
     private readonly inputIterator: Iterator<TInput>;
-    private readonly mapping: (value: TInput) => TOutput;
+    private readonly mapping: (value: TInput) => (TOutput | SyncResult<TOutput>);
     private started: boolean;
 
-    protected constructor(inputIterator: Iterator<TInput>, mapping: (value: TInput) => TOutput)
+    protected constructor(inputIterator: Iterator<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>))
     {
         PreCondition.assertNotUndefinedAndNotNull(inputIterator, "inputIterator");
         PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
@@ -23,23 +24,26 @@ export class MapIterator<TInput,TOutput> implements Iterator<TOutput>
         this.started = false;
     }
 
-    public static create<TInput,TOutput>(inputIterator: Iterator<TInput>, mapping: (value: TInput) => TOutput): MapIterator<TInput,TOutput>
+    public static create<TInput, TOutput>(inputIterator: Iterator<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>)): MapIterator<TInput, TOutput>
     {
         return new MapIterator(inputIterator, mapping);
     }
 
-    public next(): boolean
+    public next(): SyncResult<boolean>
     {
-        if (!this.hasStarted())
+        return SyncResult.create(() =>
         {
-            this.started = true;
-            this.inputIterator.start();
-        }
-        else
-        {
-            this.inputIterator.next();
-        }
-        return this.inputIterator.hasCurrent();
+            if (!this.hasStarted())
+            {
+                this.started = true;
+                this.inputIterator.start();
+            }
+            else
+            {
+                this.inputIterator.next();
+            }
+            return this.inputIterator.hasCurrent();
+        });
     }
 
     public hasStarted(): boolean
@@ -56,50 +60,51 @@ export class MapIterator<TInput,TOutput> implements Iterator<TOutput>
     {
         PreCondition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
 
-        return this.mapping(this.inputIterator.getCurrent());
+        const mappingResult: TOutput | SyncResult<TOutput> = this.mapping(this.inputIterator.getCurrent());
+        return mappingResult instanceof SyncResult ? mappingResult.await() : mappingResult;
     }
 
-    public start(): this
+    public start(): SyncResult<this>
     {
-        return Iterator.start<TOutput,this>(this);
+        return Iterator.start<TOutput, this>(this);
     }
 
-    public takeCurrent(): TOutput
+    public takeCurrent(): SyncResult<TOutput>
     {
         return Iterator.takeCurrent(this);
     }
 
-    public any(): boolean
+    public any(): SyncResult<boolean>
     {
         return Iterator.any(this);
     }
 
-    public getCount(): number
+    public getCount(): SyncResult<number>
     {
         return Iterator.getCount(this);
     }
 
-    public toArray(): TOutput[]
+    public toArray(): SyncResult<TOutput[]>
     {
         return Iterator.toArray(this);
     }
 
-    public map<TOutput2>(mapping: (value: TOutput) => TOutput2): MapIterator<TOutput, TOutput2>
+    public map<TOutput2>(mapping: (value: TOutput) => (TOutput2 | SyncResult<TOutput2>)): Iterator<TOutput2>
     {
         return Iterator.map(this, mapping);
     }
 
-    public [Symbol.iterator](): IteratorToJavascriptIteratorAdapter<TOutput>
+    public [Symbol.iterator](): JavascriptIterator<TOutput>
     {
         return Iterator[Symbol.iterator](this);
     }
 
-    public first(condition?: (value: TOutput) => boolean): Result<TOutput>
+    public first(condition?: (value: TOutput) => boolean): SyncResult<TOutput>
     {
         return Iterator.first(this, condition);
     }
 
-    public last(): Result<TOutput>
+    public last(): SyncResult<TOutput>
     {
         return Iterator.last(this);
     }

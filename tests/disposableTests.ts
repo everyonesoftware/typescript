@@ -1,6 +1,7 @@
+import { SyncDisposable } from "../sources/basicDisposable";
 import { Disposable } from "../sources/disposable";
 import { PreConditionError } from "../sources/preConditionError";
-import { Result } from "../sources/result";
+import { SyncResult } from "../sources/syncResult";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
 
@@ -46,16 +47,16 @@ export function test(runner: TestRunner): void
                 runner.test("with function that doesn't throw", (test: Test) =>
                 {
                     let value: number = 0;
-                    const disposable: Disposable = Disposable.create(() =>
+                    const disposable: SyncDisposable = Disposable.create(() =>
                     {
                         test.assertEqual(disposable.isDisposed(), value !== 0);
                         value += 1;
                     });
 
-                    const result1: Result<boolean> = disposable.dispose();
+                    const result1: SyncResult<boolean> = disposable.dispose();
                     test.assertNotUndefinedAndNotNull(result1);
-                    test.assertFalse(disposable.isDisposed());
-                    test.assertEqual(value, 0);
+                    test.assertTrue(disposable.isDisposed());
+                    test.assertEqual(value, 1);
 
                     for (let i = 0; i < 3; i++)
                     {
@@ -65,7 +66,7 @@ export function test(runner: TestRunner): void
                         test.assertEqual(value, 1);
                     }
 
-                    const result2: Result<boolean> = disposable.dispose();
+                    const result2: SyncResult<boolean> = disposable.dispose();
                     test.assertNotUndefinedAndNotNull(result2);
                     test.assertTrue(disposable.isDisposed());
                     test.assertEqual(value, 1);
@@ -82,17 +83,17 @@ export function test(runner: TestRunner): void
                 runner.test("with function that throws", (test: Test) =>
                 {
                     let value: number = 0;
-                    const disposable: Disposable = Disposable.create(() =>
+                    const disposable: SyncDisposable = Disposable.create(() =>
                     {
                         test.assertEqual(disposable.isDisposed(), value !== 0);
                         value += 1;
                         throw new Error("oops!");
                     });
 
-                    const result1: Result<boolean> = disposable.dispose();
+                    const result1: SyncResult<boolean> = disposable.dispose();
                     test.assertNotUndefinedAndNotNull(result1);
-                    test.assertFalse(disposable.isDisposed());
-                    test.assertEqual(value, 0);
+                    test.assertTrue(disposable.isDisposed());
+                    test.assertEqual(value, 1);
 
                     for (let i = 0; i < 3; i++)
                     {
@@ -101,7 +102,7 @@ export function test(runner: TestRunner): void
                         test.assertEqual(value, 1);
                     }
 
-                    const result2: Result<boolean> = disposable.dispose();
+                    const result2: SyncResult<boolean> = disposable.dispose();
                     test.assertNotUndefinedAndNotNull(result2);
                     test.assertTrue(disposable.isDisposed());
                     test.assertEqual(value, 1);

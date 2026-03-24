@@ -5,12 +5,10 @@ import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { List } from "./list";
-import { MapIterable } from "./mapIterable";
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
 import { escapeAndQuote } from "./strings";
-import { SyncResult2 } from "./syncResult2";
+import { SyncResult } from "./syncResult";
 import { ToStringFunctions } from "./toStringFunctions";
 import { isString, Type } from "./types";
 
@@ -26,6 +24,7 @@ export class MutableHttpHeaders implements HttpHeaders
             this.setAll(headers);
         }
     }
+
     public static create(headers?: JavascriptIterable<HttpHeader>): MutableHttpHeaders
     {
         return new MutableHttpHeaders(headers);
@@ -36,11 +35,11 @@ export class MutableHttpHeaders implements HttpHeaders
         return this.headers.iterate();
     }
 
-    public get(headerName: string): SyncResult2<HttpHeader>
+    public get(headerName: string): SyncResult<HttpHeader>
     {
         PreCondition.assertNotEmpty(headerName, "headerName");
 
-        return SyncResult2.create(() =>
+        return SyncResult.create(() =>
         {
             let result: HttpHeader | undefined;
 
@@ -62,7 +61,7 @@ export class MutableHttpHeaders implements HttpHeaders
         });
     }
 
-    public getValue(headerName: string): SyncResult2<string>
+    public getValue(headerName: string): SyncResult<string>
     {
         return this.get(headerName)
             .then((header: HttpHeader) => header.getValue());
@@ -92,9 +91,9 @@ export class MutableHttpHeaders implements HttpHeaders
         PreCondition.assertNotUndefinedAndNotNull(headerValue, "headerValue");
 
         let insertIndex: number = 0;
-        for (let insertIndex = 0; insertIndex < this.headers.getCount(); insertIndex++)
+        for (let insertIndex = 0; insertIndex < this.headers.getCount().await(); insertIndex++)
         {
-            const header: HttpHeader = this.headers.get(insertIndex);
+            const header: HttpHeader = this.headers.get(insertIndex).await();
             if (header.getName() === headerName)
             {
                 this.headers.removeAt(insertIndex);
@@ -123,70 +122,68 @@ export class MutableHttpHeaders implements HttpHeaders
         return this.set(HttpHeaders.contentTypeHeaderName, contentType);
     }
 
-    public getContentType(): SyncResult2<HttpHeader>
+    public getContentType(): SyncResult<HttpHeader>
     {
         return this.get(HttpHeaders.contentTypeHeaderName);
     }
 
-    public getContentTypeValue(): SyncResult2<string>
+    public getContentTypeValue(): SyncResult<string>
     {
         return this.getValue(HttpHeaders.contentTypeHeaderName);
     }
 
-    public toArray(): HttpHeader[]
-    {
-        return Iterable.toArray(this);
-    }
-
-    public any(): boolean
-    {
-        return Iterable.any(this);
-    }
-
-    public getCount(): number
+    public getCount(): SyncResult<number>
     {
         return this.headers.getCount();
     }
 
-    public equals(right: JavascriptIterable<HttpHeader>, equalFunctions?: EqualFunctions): boolean
+    public toArray(): SyncResult<HttpHeader[]>
     {
-        return Iterable.equals(this, right, equalFunctions);
+        return HttpHeaders.toArray(this);
+    }
+
+    public any(): SyncResult<boolean>
+    {
+        return HttpHeaders.any(this);
+    }
+
+    public equals(right: JavascriptIterable<HttpHeader>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return HttpHeaders.equals(this, right, equalFunctions);
     }
 
     public toString(toStringFunctions?: ToStringFunctions): string
     {
-        return Iterable.toString(this, toStringFunctions);
+        return HttpHeaders.toString(this, toStringFunctions);
     }
 
-    public map<TOutput>(mapping: (value: HttpHeader) => TOutput): MapIterable<HttpHeader, TOutput>
+    public map<TOutput>(mapping: (value: HttpHeader) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
-        return Iterable.map(this, mapping);
+        return HttpHeaders.map(this, mapping);
     }
 
-    public where(condition: (value: HttpHeader) => boolean): Iterable<HttpHeader>
+    public where(condition: (value: HttpHeader) => (boolean | SyncResult<boolean>)): Iterable<HttpHeader>
     {
-        return Iterable.where(this, condition);
+        return HttpHeaders.where(this, condition);
     }
 
     public instanceOf<TOutput extends HttpHeader>(typeOrTypeCheck: Type<TOutput> | ((value: HttpHeader) => value is TOutput)): Iterable<TOutput>
     {
-        return Iterable.instanceOf(this, typeOrTypeCheck);
+        return HttpHeaders.instanceOf(this, typeOrTypeCheck);
     }
 
-    public first(): Result<HttpHeader>
+    public first(condition?: (value: HttpHeader) => (boolean | SyncResult<boolean>)): SyncResult<HttpHeader>
     {
-        return Iterable.first(this);
+        return HttpHeaders.first(this, condition);
     }
 
-    public last(): Result<HttpHeader>
+    public last(condition?: (value: HttpHeader) => (boolean | SyncResult<boolean>)): SyncResult<HttpHeader>
     {
-        return Iterable.last(this);
+        return HttpHeaders.last(this, condition);
     }
 
     public [Symbol.iterator](): JavascriptIterator<HttpHeader>
     {
-        return Iterable[Symbol.iterator](this);
+        return HttpHeaders[Symbol.iterator](this);
     }
-
-    
 }

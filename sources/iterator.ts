@@ -6,8 +6,8 @@ import { JavascriptIteratorToIteratorAdapter } from "./javascriptIteratorToItera
 import { MapIterator } from "./mapIterator";
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
 import { SkipIterator } from "./skipIterator";
+import { SyncResult } from "./syncResult";
 import { TakeIterator } from "./takeIterator";
 import { instanceOfType, isJavascriptIterator, isUndefinedOrNull, Type } from "./types";
 import { WhereIterator } from "./whereIterator";
@@ -32,7 +32,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * Move to the next value in the collection. Return whether this {@link Iterator} points to a
      * value after the move.
      */
-    public abstract next(): boolean;
+    public abstract next(): SyncResult<boolean>;
 
     /**
      * Get whether this {@link Iterator} has started iterating over the values in the collection.
@@ -53,46 +53,60 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * Move to the first value if this {@link Iterator} hasn't started yet.
      * @returns This object for method chaining.
      */
-    public abstract start(): this;
+    public start(): SyncResult<this>
+    {
+        return Iterator.start(this);
+    }
 
     /**
      * Move the provided {@link Iterator} to its first value if it hasn't started yet.
      */
-    public static start<T,TIterator extends Iterator<T>>(iterator: TIterator): TIterator
+    public static start<T, TIterator extends Iterator<T>>(iterator: TIterator): SyncResult<TIterator>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
-        if (!iterator.hasStarted())
+        return SyncResult.create(() =>
         {
-            iterator.next();
-        }
-        return iterator;
+            if (!iterator.hasStarted())
+            {
+                iterator.next().await();
+            }
+            return iterator;
+        });
     }
 
     /**
      * Get the current value from this {@link Iterator} and advance this {@link Iterator} to the
      * next value.
      */
-    public abstract takeCurrent(): T;
+    public takeCurrent(): SyncResult<T>
+    {
+        return Iterator.takeCurrent(this);
+    }
 
-    public static takeCurrent<T>(iterator: Iterator<T>): T
+    public static takeCurrent<T>(iterator: Iterator<T>): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
         PreCondition.assertTrue(iterator.hasCurrent(), "iterator.hasCurrent()");
 
-        const result: T = iterator.getCurrent();
-        iterator.next();
-
-        return result;
+        return SyncResult.create(() =>
+        {
+            const result: T = iterator.getCurrent();
+            iterator.next().await();
+            return result;
+        });
     }
 
-    public abstract [Symbol.iterator](): IteratorToJavascriptIteratorAdapter<T>;
+    public [Symbol.iterator](): JavascriptIterator<T>
+    {
+        return Iterator[Symbol.iterator](this);
+    }
 
     /**
      * Convert the provided {@link Iterator} to a {@link IteratorToJavascriptIteratorAdapter}.
      * @param iterator The {@link Iterator} to convert.
      */
-    public static [Symbol.iterator]<T>(iterator: Iterator<T>): IteratorToJavascriptIteratorAdapter<T>
+    public static [Symbol.iterator]<T>(iterator: Iterator<T>): JavascriptIterator<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
@@ -104,76 +118,97 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * Note: This may advance the {@link Iterator} to the first value if it hasn't been
      * started yet.
      */
-    public abstract any(): boolean;
+    public any(): SyncResult<boolean>
+    {
+        return Iterator.any(this);
+    }
 
     /**
      * Get whether this {@link Iterator} contains any values.
      * Note: This may advance the {@link Iterator} to the first value if it hasn't been
      * started yet.
      */
-    public static any<T>(iterator: Iterator<T>): boolean
+    public static any<T>(iterator: Iterator<T>): SyncResult<boolean>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
-        iterator.start();
-        return iterator.hasCurrent();
+        return SyncResult.create(() =>
+        {
+            iterator.start().await();
+            return iterator.hasCurrent();
+        });
+
     }
 
     /**
      * Get the number of values in this {@link Iterator}.
      * Note: This will consume all of the values in this {@link Iterator}.
      */
-    public abstract getCount(): number;
+    public abstract getCount(): SyncResult<number>;
 
     /**
      * Get the number of values in the provided {@link Iterator}.
      * Note: This will consume all of the values in the provided {@link Iterator}.
      */
-    public static getCount<T>(iterator: Iterator<T>): number
+    public static getCount<T>(iterator: Iterator<T>): SyncResult<number>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
-        let result: number = 0;
-        if (iterator.hasCurrent())
+        return SyncResult.create(() =>
         {
-            result++;
-        }
-        while (iterator.next())
-        {
-            result++;
-        }
-
-        return result;
+            let result: number = 0;
+            if (iterator.hasCurrent())
+            {
+                result++;
+            }
+            while (iterator.next().await())
+            {
+                result++;
+            }
+            return result;
+        });
     }
 
     /**
      * Get all of the remaining values in this {@link Iterator} in a {@link T} {@link Array}.
      */
-    public abstract toArray(): T[];
+    public abstract toArray(): SyncResult<T[]>;
 
     /**
      * Get all of the remaining values in the provided {@link Iterator} in a {@link T}
      * {@link Array}.
      */
-    public static toArray<T>(iterator: Iterator<T>): T[]
+    public static toArray<T>(iterator: Iterator<T>): SyncResult<T[]>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
-        const result: T[] = [];
-        for (const value of iterator)
+        return SyncResult.create(() =>
         {
-            result.push(value);
-        }
-        return result;
+            const result: T[] = [];
+
+            if (iterator.hasCurrent())
+            {
+                result.push(iterator.getCurrent());
+            }
+            while (iterator.next().await())
+            {
+                result.push(iterator.getCurrent());
+            }
+
+            return result;
+        });
     }
 
     /**
      * Get an {@link Iterator} that will only return values that match the provided condition.
      * @param condition The condition to run against each of the values in this {@link Iterator}.
      */
-    public abstract where(condition: (value: T) => boolean) : Iterator<T>;
+    public where(condition: (value: T) => (boolean | SyncResult<boolean>)): Iterator<T>
+    {
+        return Iterator.where(this, condition);
+    }
 
-    public static where<T>(iterator: Iterator<T>, condition: (value: T) => boolean): Iterator<T>
+    public static where<T>(iterator: Iterator<T>, condition: (value: T) => (boolean | SyncResult<boolean>)): Iterator<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
         PreCondition.assertNotUndefinedAndNotNull(condition, "condition");
@@ -186,9 +221,12 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * {@link TOutput} values.
      * @param mapping The mapping that maps {@link T} values to {@link TOutput} values.
      */
-    public abstract map<TOutput>(mapping: (value: T) => TOutput): MapIterator<T,TOutput>;
+    public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterator<TOutput>
+    {
+        return Iterator.map(this, mapping);
+    }
 
-    public static map<T,TOutput>(iterator: Iterator<T>, mapping: (value: T) => TOutput): MapIterator<T,TOutput>
+    public static map<T, TOutput>(iterator: Iterator<T>, mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterator<TOutput>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
         PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
@@ -207,7 +245,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
         return Iterator.whereInstanceOf(this, typeCheck);
     }
 
-    public static whereInstanceOf<T,U extends T>(iterator: Iterator<T>, typeCheck: (value: T) => value is U): Iterator<U>
+    public static whereInstanceOf<T, U extends T>(iterator: Iterator<T>, typeCheck: (value: T) => value is U): Iterator<U>
     {
         PreCondition.assertNotUndefinedAndNotNull(typeCheck, "typeCheck");
 
@@ -225,7 +263,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
         return Iterator.whereInstanceOfType(this, type);
     }
 
-    public static whereInstanceOfType<T,U extends T>(iterator: Iterator<T>, type: Type<U>): Iterator<U>
+    public static whereInstanceOfType<T, U extends T>(iterator: Iterator<T>, type: Type<U>): Iterator<U>
     {
         PreCondition.assertNotUndefinedAndNotNull(type, "type");
 
@@ -238,7 +276,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * the first value that matches the provided condition.
      * @param condition The condition that the returned value must satisfy.
      */
-    public first(condition?: (value: T) => boolean): Result<T>
+    public first(condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
         return Iterator.first(this, condition);
     }
@@ -249,13 +287,13 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * the first value that matches the provided condition.
      * @param iterator The {@link Iterator} to get the first value from.
      */
-    public static first<T>(iterator: Iterator<T>, condition?: (value: T) => boolean): Result<T>
+    public static first<T>(iterator: Iterator<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
-        return Result.create(() =>
+        return SyncResult.create(() =>
         {
-            iterator.start();
+            iterator.start().await();
             if (isUndefinedOrNull(condition))
             {
                 if (!iterator.hasCurrent())
@@ -267,7 +305,16 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
             {
                 while (iterator.hasCurrent() && !condition(iterator.getCurrent()))
                 {
-                    iterator.next();
+                    const conditionResult: boolean | SyncResult<boolean> = condition(iterator.getCurrent());
+                    const conditionBoolean: boolean = conditionResult instanceof SyncResult ? conditionResult.await() : conditionResult;
+                    if (conditionBoolean)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        iterator.next().await();
+                    }
                 }
 
                 if (!iterator.hasCurrent())
@@ -285,7 +332,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * last value that matches the provided condition.
      * @param condition The condition that the returned value must satisfy.
      */
-    public last(condition?: (value: T) => boolean): Result<T>
+    public last(condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
         return Iterator.last(this, condition);
     }
@@ -296,19 +343,21 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * last value that matches the provided condition.
      * @param iterator The {@link Iterator} to get the last value from.
      */
-    public static last<T>(iterator: Iterator<T>, condition?: (value: T) => boolean): Result<T>
+    public static last<T>(iterator: Iterator<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
 
-        return Result.create(() =>
+        return SyncResult.create(() =>
         {
-            if (!iterator.start().hasCurrent())
+            iterator.start().await();
+
+            if (!iterator.hasCurrent())
             {
                 throw new EmptyError();
             }
 
             let result: T;
-            let found: boolean = false; 
+            let found: boolean = false;
             do
             {
                 if (!condition || condition(iterator.getCurrent()))
@@ -317,7 +366,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
                     found = true;
                 }
             }
-            while (iterator.next());
+            while (iterator.next().await());
 
             if (!found)
             {
@@ -339,11 +388,11 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * Find the maximum value in the provided {@link Iterator}.
      * @param iterator The values to find the maximum of.
      */
-    public static findMaximum<T extends Comparable<T>>(iterator: JavascriptIterator<T> | Iterator<T>): Result<T>
+    public static findMaximum<T extends Comparable<T>>(iterator: JavascriptIterator<T> | Iterator<T>): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(iterator, "iterable");
 
-        return Result.create(() =>
+        return SyncResult.create(() =>
         {
             if (isJavascriptIterator(iterator))
             {
@@ -353,7 +402,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
             let result: T = iterator.first()
                 .convertError(EmptyError, () => new EmptyError("Can't find the maximum of an empty Iterator."))
                 .await();
-            while (iterator.next())
+            while (iterator.next().await())
             {
                 const currentValue: T = iterator.getCurrent();
                 if (result.lessThan(currentValue))
@@ -361,7 +410,7 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
                     result = currentValue;
                 }
             }
-            
+
             return result;
         });
     }

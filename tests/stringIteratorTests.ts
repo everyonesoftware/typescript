@@ -68,13 +68,13 @@ export function test(runner: TestRunner): void
             {
                 function nextTest(value: string): void
                 {
-                    runner.test(`with "${runner.toString(value)}"`, (test: Test) =>
+                    runner.test(`with "${runner.toString(value)}"`, async (test: Test) =>
                     {
                         const iterator: StringIterator = StringIterator.create(value);
 
                         for (let i = 0; i < value.length; i++)
                         {
-                            test.assertTrue(iterator.next());
+                            test.assertTrue(await iterator.next());
                             test.assertTrue(iterator.hasStarted());
                             test.assertTrue(iterator.hasCurrent());
                             test.assertSame(iterator.getCurrentIndex(), i);
@@ -83,7 +83,7 @@ export function test(runner: TestRunner): void
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertFalse(iterator.next());
+                            test.assertFalse(await iterator.next());
                             test.assertTrue(iterator.hasStarted());
                             test.assertFalse(iterator.hasCurrent());
                             test.assertThrows(() => iterator.getCurrentIndex(),
@@ -111,7 +111,7 @@ export function test(runner: TestRunner): void
             {
                 function forOfTest(value: string): void
                 {
-                    runner.test(`with "${runner.toString(value)}"`, (test: Test) =>
+                    runner.test(`with "${runner.toString(value)}"`, async (test: Test) =>
                     {
                         const iterator: StringIterator = StringIterator.create(value);
 
@@ -128,7 +128,7 @@ export function test(runner: TestRunner): void
 
                         for (let i = 0; i < 2; i++)
                         {
-                            test.assertFalse(iterator.next());
+                            test.assertFalse(await iterator.next());
                             test.assertTrue(iterator.hasStarted());
                             test.assertFalse(iterator.hasCurrent());
                             test.assertThrows(() => iterator.getCurrentIndex(),

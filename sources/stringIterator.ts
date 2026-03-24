@@ -1,15 +1,13 @@
-import { IndexableIterator } from "./indexableIterator";
 import { Iterator } from "./iterator";
-import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
-import { MapIterator } from "./mapIterator";
+import { JavascriptIterator } from "./javascript";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
+import { SyncResult } from "./syncResult";
 import { Type } from "./types";
 
 /**
  * An {@link Iterator} that iterates over the characters in a {@link string}.
  */
-export class StringIterator implements IndexableIterator<string>
+export class StringIterator implements Iterator<string>
 {
     private readonly value: string;
     private currentIndex: number;
@@ -36,17 +34,20 @@ export class StringIterator implements IndexableIterator<string>
         return this.currentIndex;
     }
 
-    public next(): boolean
+    public next(): SyncResult<boolean>
     {
-        if (!this.hasStarted())
+        return SyncResult.create(() =>
         {
-            this.started = true;
-        }
-        else if (this.hasCurrent())
-        {
-            this.currentIndex++;
-        }
-        return this.hasCurrent();
+            if (!this.hasStarted())
+            {
+                this.started = true;
+            }
+            else if (this.hasCurrent())
+            {
+                this.currentIndex++;
+            }
+            return this.hasCurrent();
+        });
     }
 
     public hasStarted(): boolean
@@ -66,42 +67,42 @@ export class StringIterator implements IndexableIterator<string>
         return this.value[this.currentIndex];
     }
 
-    public start(): this
+    public start(): SyncResult<this>
     {
         return Iterator.start<string, this>(this);
     }
 
-    public takeCurrent(): string
+    public takeCurrent(): SyncResult<string>
     {
         return Iterator.takeCurrent(this);
     }
 
-    public any(): boolean
+    public any(): SyncResult<boolean>
     {
         return Iterator.any(this);
     }
 
-    public getCount(): number
+    public getCount(): SyncResult<number>
     {
         return Iterator.getCount(this);
     }
 
-    public toArray(): string[]
+    public toArray(): SyncResult<string[]>
     {
         return Iterator.toArray(this);
     }
 
-    public map<TOutput>(mapping: (value: string) => TOutput): MapIterator<string, TOutput>
+    public map<TOutput>(mapping: (value: string) => (TOutput | SyncResult<TOutput>)): Iterator<TOutput>
     {
         return Iterator.map(this, mapping);
     }
 
-    public first(): Result<string>
+    public first(): SyncResult<string>
     {
         return Iterator.first(this);
     }
 
-    public last(): Result<string>
+    public last(): SyncResult<string>
     {
         return Iterator.last(this);
     }
@@ -131,7 +132,7 @@ export class StringIterator implements IndexableIterator<string>
         return Iterator.skip(this, maximumToSkip);
     }
 
-    public [Symbol.iterator](): IteratorToJavascriptIteratorAdapter<string>
+    public [Symbol.iterator](): JavascriptIterator<string>
     {
         return Iterator[Symbol.iterator](this);
     }

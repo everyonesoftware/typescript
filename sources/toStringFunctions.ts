@@ -121,14 +121,14 @@ export class ToStringFunctions
         let result: string = "";
         result += "[";
 
-        const iterator: Iterator<unknown> = values.iterate().start();
+        const iterator: Iterator<unknown> = values.iterate().start().await();
         if (iterator.hasCurrent())
         {
-            result += this.toString(iterator.takeCurrent());
+            result += this.toString(iterator.takeCurrent().await());
             while (iterator.hasCurrent())
             {
                 result += ",";
-                result += this.toString(iterator.takeCurrent());
+                result += this.toString(iterator.takeCurrent().await());
             }
         }
 
@@ -142,7 +142,7 @@ export class ToStringFunctions
         result += "{";
 
         const iterator: Iterator<MapEntry<unknown,unknown>> = values.iterate();
-        if (iterator.next())
+        if (iterator.next().await())
         {
             let entry: MapEntry<unknown,unknown> = iterator.getCurrent();
             result += `${this.toString(entry.key)}:${this.toString(entry.value)}`;

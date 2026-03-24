@@ -4,10 +4,11 @@ import { PreCondition } from "./preCondition";
 import { HttpHeader } from "./httpHeader";
 import { HttpHeaders } from "./httpHeaders";
 import { HttpMethod, parseHttpMethod } from "./httpMethod";
-import { Result } from "./result";
 import { NotFoundError } from "./notFoundError";
 import { isArray } from "./types";
 import { escapeAndQuote } from "./strings";
+import { SyncResult } from "./syncResult";
+import { Result } from "./result";
 
 export class NodeJSHttpIncomingRequest extends HttpIncomingRequest
 {
@@ -32,9 +33,9 @@ export class NodeJSHttpIncomingRequest extends HttpIncomingRequest
         return parseHttpMethod(this.request.method!).await();
     }
 
-    public getHost(): Result<string>
+    public getHost(): SyncResult<string>
     {
-        return Result.value(process.env.HOST ?? "localhost");
+        return SyncResult.value(process.env.HOST ?? "localhost");
     }
 
     public getURLPath(): string
@@ -64,16 +65,16 @@ export class NodeJSHttpIncomingRequest extends HttpIncomingRequest
         return result;
     }
 
-    public getHeaders(): Result<HttpHeaders>
+    public getHeaders(): SyncResult<HttpHeaders>
     {
-        return Result.value(HttpHeaders.create(Object.entries(this.request.headers).map(NodeJSHttpIncomingRequest.toHttpHeader)));
+        return SyncResult.value(HttpHeaders.create(Object.entries(this.request.headers).map(NodeJSHttpIncomingRequest.toHttpHeader)));
     }
 
-    public getHeader(headerName: string): Result<HttpHeader>
+    public getHeader(headerName: string): SyncResult<HttpHeader>
     {
         PreCondition.assertNotEmpty(headerName, "headerName");
 
-        return Result.create(() =>
+        return SyncResult.create(() =>
         {
             let result: HttpHeader | undefined;
 
@@ -95,11 +96,11 @@ export class NodeJSHttpIncomingRequest extends HttpIncomingRequest
         });
     }
 
-    public getHeaderValue(headerName: string): Result<string>
+    public getHeaderValue(headerName: string): SyncResult<string>
     {
         PreCondition.assertNotEmpty(headerName, "headerName");
 
-        return Result.create(() =>
+        return SyncResult.create(() =>
         {
             let result: string | undefined;
 
@@ -123,7 +124,7 @@ export class NodeJSHttpIncomingRequest extends HttpIncomingRequest
 
     public getBody(): Result<string>
     {
-        return Result.create(() =>
+        return Result.createSync(() =>
         {
             throw new NotFoundError("Could not read the body from the incoming HTTP request.");
         });

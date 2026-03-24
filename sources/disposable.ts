@@ -1,5 +1,5 @@
-import { BasicDisposable } from "./basicDisposable";
-import { SyncResult2 } from "./syncResult2";
+import { SyncDisposable } from "./basicDisposable";
+import { Result } from "./result";
 
 /**
  * An object that can be disposed.
@@ -12,9 +12,9 @@ export abstract class Disposable
      * @param disposedFunction The function to invoke when the returned {@link Disposable} is
      * disposed.
      */
-    public static create(disposedFunction: () => void): Disposable
+    public static create(disposedFunction: () => void): SyncDisposable
     {
-        return BasicDisposable.create(disposedFunction);
+        return SyncDisposable.create(disposedFunction);
     }
 
     /**
@@ -22,7 +22,7 @@ export abstract class Disposable
      * true if this invocation disposed of the object. Subsequent calls to dispose() will return
      * false.
      */
-    public abstract dispose(): SyncResult2<boolean>;
+    public abstract dispose(): Result<boolean>;
 
     /**
      * Get whether this {@link Disposable} has been disposed yet.

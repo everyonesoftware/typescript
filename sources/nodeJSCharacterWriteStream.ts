@@ -1,7 +1,6 @@
+import { AsyncResult } from "./asyncResult";
 import { CharacterWriteStream } from "./characterWriteStream";
-import { PostCondition } from "./postCondition";
 import { PreCondition } from "./preCondition";
-import { Result } from "./result";
 
 export class NodeJSCharacterWriteStream extends CharacterWriteStream
 {
@@ -21,16 +20,23 @@ export class NodeJSCharacterWriteStream extends CharacterWriteStream
         return new NodeJSCharacterWriteStream(nodeJSWriteStream);
     }
 
-    public writeString(text: string): Result<number>
+    public writeString(text: string): AsyncResult<number>
     {
         PreCondition.assertNotUndefinedAndNotNull(text, "text");
 
-        return Result.create(() =>
+        return AsyncResult.create(new Promise<number>((resolve, reject) =>
         {
-            const writeResult: boolean = this.nodeJSWriteStream.write(text);
-            PostCondition.assertTrue(writeResult, "writeResult", "Expected the return value from writing a string to always be true.");
-
-            return text.length;
-        });
+            this.nodeJSWriteStream.write(text, (error?: Error | null) =>
+            {
+                if (error)
+                {
+                    reject(error);
+                }
+                else
+                {
+                    resolve(text.length);
+                }
+            });
+        }));
     }
 }
