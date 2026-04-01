@@ -1,3 +1,4 @@
+import { AsyncResult } from "../sources/asyncResult";
 import { PreCondition } from "../sources/preCondition";
 import { SyncResult } from "../sources/syncResult";
 import { isUndefinedOrNull, Type } from "../sources/types";
@@ -189,7 +190,7 @@ export abstract class Test
      * @param action The action to run.
      * @param expectedError The expected {@link Error}.
      */
-    public abstract assertThrowsAsync(action: Promise<unknown> | (() => Promise<unknown>), expectedError: Error): Promise<void>;
+    public abstract assertThrowsAsync(action: PromiseLike<unknown> | (() => PromiseLike<unknown>), expectedError: Error): AsyncResult<void>;
 
     /**
      * Assert that the provided value is an instance of the provided {@link Type}.

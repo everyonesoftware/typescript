@@ -150,4 +150,9 @@ export class JavascriptArrayList<T> implements List<T>
     {
         return List[Symbol.iterator](this);
     }
+
+    public contains(value: T, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return List.contains(this, value, equalFunctions);
+    }
 }

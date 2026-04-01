@@ -26,6 +26,11 @@ export abstract class HttpClient
      */
     public sendGetRequest(url: string): Result<HttpIncomingResponse>
     {
-        return this.sendRequest(HttpOutgoingRequest.create(HttpMethod.GET, url));
+        return HttpClient.sendGetRequest(this, url);
+    }
+
+    public static sendGetRequest(httpClient: HttpClient, url: string): Result<HttpIncomingResponse>
+    {
+        return httpClient.sendRequest(HttpOutgoingRequest.create(HttpMethod.GET, url));
     }
 }

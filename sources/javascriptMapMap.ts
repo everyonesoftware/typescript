@@ -2,13 +2,14 @@ import { EqualFunctions } from "./equalFunctions";
 import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterator, JavascriptMap } from "./javascript";
-import { Map, MapEntry } from "./map";
+import { MapEntry } from "./map";
+import { MutableMap } from "./mutableMap";
 import { NotFoundError } from "./notFoundError";
 import { SyncResult } from "./syncResult";
 import { ToStringFunctions } from "./toStringFunctions";
 import { Type } from "./types";
 
-export class JavascriptMapMap<TKey,TValue> implements Map<TKey,TValue>
+export class JavascriptMapMap<TKey,TValue> implements MutableMap<TKey,TValue>
 {
     private readonly javascriptMap: JavascriptMap<TKey,TValue>;
 
@@ -77,51 +78,56 @@ export class JavascriptMapMap<TKey,TValue> implements Map<TKey,TValue>
 
     public toArray(): SyncResult<MapEntry<TKey, TValue>[]>
     {
-        return Map.toArray(this);
+        return MutableMap.toArray(this);
     }
 
     public equals(right: Iterable<MapEntry<TKey, TValue>>, equalFunctions?: EqualFunctions): SyncResult<boolean>
     {
-        return Map.equals(this, right, equalFunctions);
+        return MutableMap.equals(this, right, equalFunctions);
     }
 
     public toString(toStringFunctions?: ToStringFunctions): string
     {
-        return Map.toString(this, toStringFunctions);
+        return MutableMap.toString(this, toStringFunctions);
     }
 
     public map<TOutput>(mapping: (value: MapEntry<TKey, TValue>) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
-        return Map.map(this, mapping);
+        return MutableMap.map(this, mapping);
     }
 
     public where(condition: (value: MapEntry<TKey, TValue>) => (boolean | SyncResult<boolean>)): Iterable<MapEntry<TKey, TValue>>
     {
-        return Map.where(this, condition);
+        return MutableMap.where(this, condition);
     }
 
     public instanceOf<T extends MapEntry<TKey, TValue>>(typeOrTypeCheck: Type<T> | ((value: MapEntry<TKey, TValue>) => value is T)): Iterable<T>
     {
-        return Map.instanceOf(this, typeOrTypeCheck);
+        return MutableMap.instanceOf(this, typeOrTypeCheck);
     }
 
     public first(condition?: ((entry: MapEntry<TKey, TValue>) => (boolean | SyncResult<boolean>)) | undefined): SyncResult<MapEntry<TKey, TValue>>
     {
-        return Map.first(this, condition);
+        return MutableMap.first(this, condition);
     }
 
     public last(condition?: ((entry: MapEntry<TKey, TValue>) => (boolean | SyncResult<boolean>)) | undefined): SyncResult<MapEntry<TKey, TValue>>
     {
-        return Map.last(this, condition);
+        return MutableMap.last(this, condition);
     }
 
     public getOrSet(key: TKey, valueCreator: () => TValue | SyncResult<TValue>): SyncResult<TValue>
     {
-        return Map.getOrSet(this, key, valueCreator);
+        return MutableMap.getOrSet(this, key, valueCreator);
     }
 
     public [Symbol.iterator](): JavascriptIterator<MapEntry<TKey, TValue>>
     {
-        return Map[Symbol.iterator](this);
+        return MutableMap[Symbol.iterator](this);
+    }
+
+    public contains(value: MapEntry<TKey, TValue>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return MutableMap.contains(this, value, equalFunctions);
     }
 }

@@ -186,4 +186,9 @@ export class MutableHttpHeaders implements HttpHeaders
     {
         return HttpHeaders[Symbol.iterator](this);
     }
+
+    public contains(value: HttpHeader, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return HttpHeaders.contains(this, value, equalFunctions);
+    }
 }

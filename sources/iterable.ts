@@ -167,7 +167,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
      * @param mapping The mapping function to use to convert values of type {@link T} to
      * {@link TOutput}.
      */
-    public map<TOutput>(mapping: (value: T) => TOutput): Iterable<TOutput>
+    public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
         return Iterable.map(this, mapping);
     }
@@ -289,5 +289,32 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
         PreCondition.assertNotUndefinedAndNotNull(iterable, "iterable");
 
         return Iterator.findMaximum(Iterator.create(iterable));
+    }
+
+    public contains(value: T, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.contains(this, value, equalFunctions);
+    }
+
+    public static contains<T>(iterable: Iterable<T>, value: T, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return SyncResult.create(() =>
+        {
+            if (!equalFunctions)
+            {
+                equalFunctions = EqualFunctions.create();
+            }
+
+            let result: boolean = false;
+            for (const iterableValue of iterable)
+            {
+                if (equalFunctions.areEqual(value, iterableValue).await())
+                {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
+        });
     }
 }

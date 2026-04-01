@@ -1,6 +1,7 @@
 import { Iterator } from "../sources/iterator";
 import { JavascriptIterable } from "../sources/javascript";
 import { isMap, Map } from "../sources/map";
+import { MutableMap } from "../sources/mutableMap";
 import { NotFoundError } from "../sources/notFoundError";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
@@ -13,7 +14,7 @@ export function test(runner: TestRunner): void
         {
             runner.testFunction("create()", (test: Test) =>
             {
-                const map: Map<number,string> = Map.create();
+                const map: MutableMap<number,string> = Map.create();
                 test.assertSame(map.getCount().await(), 0);
             });
 
@@ -44,25 +45,10 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
 
                 test.assertFalse(map.containsKey(50).await());
             });
-
-            runner.test("when it contains the key", (test: Test) =>
-            {
-                const map: Map<number,string> = creator().set(50, "fifty");
-
-                test.assertTrue(map.containsKey(50).await());
-            });
         });
 
         runner.testFunction("get(TKey)", () =>
         {
-            runner.test("when it contains the key", (test: Test) =>
-            {
-                const map: Map<number,string> = creator().set(1, "one");
-                test.assertEqual(map.getCount().await(), 1);
-                test.assertEqual(map.get(1).await(), "one");
-                test.assertEqual(map.getCount().await(), 1);
-            });
-
             runner.test("when it doesn't contain the key", (test: Test) =>
             {
                 const map: Map<number,string> = creator();
@@ -72,30 +58,6 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
                         "The key 1 was not found in the map."));
                 test.assertEqual(map.getCount().await(), 0);
             });
-        });
-
-        runner.testFunction("set(TKey,TValue)", () =>
-        {
-            function setTest(map: Map<number,string>, key: number, value: string): void
-            {
-                runner.test(`with ${runner.andList([map, key, value])}`, (test: Test) =>
-                {
-                    const setResult: Map<number,string> = map.set(key, value);
-                    test.assertSame(setResult, map);
-                    test.assertSame(map.get(key).await(), value);
-                });
-            }
-
-            setTest(creator(), 0, "zero");
-            setTest(creator(), 1, "1");
-            setTest(creator(), -1, "negative one");
-
-            setTest(creator(), undefined!, "hello");
-            setTest(creator(), null!, "oops");
-            setTest(creator(), 10, undefined!);
-            setTest(creator(), 11, null!);
-
-            setTest(creator().set(1, "1"), 1, "one");
         });
 
         runner.testFunction("toString()", () =>
@@ -109,8 +71,6 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
             }
 
             toStringTest(creator(), "{}");
-            toStringTest(creator().set(1, "one"), `{1:"one"}`);
-            toStringTest(creator().set(2, "2").set(1, "one"), `{2:"2",1:"one"}`);
         });
 
         runner.testFunction("iterateKeys()", () =>
@@ -125,9 +85,6 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
             }
 
             iterateKeysTests(creator(), []);
-            iterateKeysTests(creator().set(5, "five"), [5]);
-            iterateKeysTests(creator().set(5, "five").set(6, "six"), [5, 6]);
-            iterateKeysTests(creator().set(5, "5").set(6, "6").set(7, "7"), [5, 6, 7]);
         });
 
         runner.testFunction("iterateValues()", () =>
@@ -142,9 +99,6 @@ export function mapTests(runner: TestRunner, creator: () => Map<number,string>):
             }
 
             iterateValuesTests(creator(), []);
-            iterateValuesTests(creator().set(5, "five"), ["five"]);
-            iterateValuesTests(creator().set(5, "five").set(6, "six"), ["five", "six"]);
-            iterateValuesTests(creator().set(5, "5").set(6, "6").set(7, "7"), ["5", "6", "7"]);
         });
     });
 }

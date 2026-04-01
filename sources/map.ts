@@ -3,7 +3,7 @@ import { EqualFunctions } from "./equalFunctions";
 import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterator } from "./javascript";
-import { JavascriptMapMap } from "./javascriptMapMap";
+import { MutableMap } from "./mutableMap";
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
 import { join } from "./strings";
@@ -48,11 +48,11 @@ export interface MapEntry<TKey, TValue>
 export abstract class Map<TKey, TValue> implements Iterable<MapEntry<TKey, TValue>>
 {
     /**
-     * Create a new instance of the default {@link Map} implementation.
+     * Create a new instance of the default {@link MutableMap} implementation.
      */
-    public static create<TKey, TValue>(): Map<TKey, TValue>
+    public static create<TKey, TValue>(): MutableMap<TKey, TValue>
     {
-        return JavascriptMapMap.create();
+        return MutableMap.create();
     }
 
     /**
@@ -222,59 +222,6 @@ export abstract class Map<TKey, TValue> implements Iterable<MapEntry<TKey, TValu
     public abstract get(key: TKey): SyncResult<TValue>;
 
     /**
-     * Set the key/value association in this {@link Map}.
-     * @param key The key associated with the value.
-     * @param value The value associated with the key.
-     */
-    public abstract set(key: TKey, value: TValue): this;
-
-    /**
-     * Get the {@link TValue} associated with the provided {@link TKey}. If the provided
-     * {@link TKey} doesn't exist in this {@link Map}, then invoke the provided {@link valueCreator}
-     * and associate the returned {@link TValue} with the provided {@link TKey}. Then return the new
-     * {@link TValue}.
-     * @param key The {@link TKey} of the {@link TValue} to get.
-     * @param valueCreator The {@link Function} that will be invoked if the {@link TKey} doesn't
-     * exist in this {@link Map}.
-     */
-    public getOrSet(key: TKey, valueCreator: () => (TValue | SyncResult<TValue>)): SyncResult<TValue>
-    {
-        return Map.getOrSet(this, key, valueCreator);
-    }
-
-    /**
-     * Get the {@link TValue} associated with the provided {@link TKey}. If the provided
-     * {@link TKey} doesn't exist in the {@link Map}, then invoke the provided {@link valueCreator}
-     * and associate the returned {@link TValue} with the provided {@link TKey}. Then return the new
-     * {@link TValue}.
-     * @param key The {@link TKey} of the {@link TValue} to get.
-     * @param valueCreator The {@link Function} that will be invoked if the {@link TKey} doesn't
-     * exist in this {@link Map}.
-     */
-    public static getOrSet<TKey, TValue>(map: Map<TKey, TValue>, key: TKey, valueCreator: () => (TValue | SyncResult<TValue>)): SyncResult<TValue>
-    {
-        PreCondition.assertNotUndefinedAndNotNull(map, "map");
-        PreCondition.assertNotUndefinedAndNotNull(valueCreator, "valueCreator");
-
-        return map.get(key)
-            .catch(NotFoundError, () =>
-            {
-                const creatorResult: TValue | SyncResult<TValue> = valueCreator();
-                const value: TValue = creatorResult instanceof SyncResult ? creatorResult.await() : creatorResult;
-                map.set(key, value);
-                return value;
-            });
-    }
-
-    /**
-     * Remove the provided {@link TKey} from this {@link Map}. If the {@link TKey} doesn't exist in
-     * this {@link Map}, then return a {@link NotFoundError}. If the {@link TKey} does exist, then
-     * return the {@link TValue} that was associated with it.
-     * @param key The {@link TKey} to remove from this {@link Map}.
-     */
-    public abstract remove(key: TKey): SyncResult<TValue>;
-
-    /**
      * Iterate over the keys in this {@link Map}.
      */
     public iterateKeys(): Iterator<TKey>
@@ -310,5 +257,26 @@ export abstract class Map<TKey, TValue> implements Iterable<MapEntry<TKey, TValu
         PreCondition.assertNotUndefinedAndNotNull(map, "map");
 
         return map.iterate().map((entry: MapEntry<TKey, TValue>) => entry.value);
+    }
+
+    public contains(value: MapEntry<TKey,TValue>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Map.contains(this, value, equalFunctions);
+    }
+
+    public static contains<TKey,TValue>(map: Map<TKey,TValue>, value: MapEntry<TKey,TValue>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return SyncResult.create(() =>
+        {
+            if (!equalFunctions)
+            {
+                equalFunctions = EqualFunctions.create();
+            }
+
+            return map.get(value.key)
+                .then(entryValue => equalFunctions!.areEqual(entryValue, value.value).await())
+                .catch(NotFoundError, () => false)
+                .await();
+        });
     }
 }

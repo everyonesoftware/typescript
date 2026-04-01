@@ -1,4 +1,5 @@
 import { Comparable } from "./comparable";
+import { ConcatenateIterator } from "./concatenateIterator";
 import { EmptyError } from "./emptyError";
 import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
@@ -144,7 +145,10 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
      * Get the number of values in this {@link Iterator}.
      * Note: This will consume all of the values in this {@link Iterator}.
      */
-    public abstract getCount(): SyncResult<number>;
+    public getCount(): SyncResult<number>
+    {
+        return Iterator.getCount(this);
+    }
 
     /**
      * Get the number of values in the provided {@link Iterator}.
@@ -172,7 +176,10 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
     /**
      * Get all of the remaining values in this {@link Iterator} in a {@link T} {@link Array}.
      */
-    public abstract toArray(): SyncResult<T[]>;
+    public toArray(): SyncResult<T[]>
+    {
+        return Iterator.toArray(this);
+    }
 
     /**
      * Get all of the remaining values in the provided {@link Iterator} in a {@link T}
@@ -197,6 +204,19 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
 
             return result;
         });
+    }
+
+    public concatenate(...toConcatenate: JavascriptIterable<T>[]): Iterator<T>
+    {
+        return Iterator.concatenate(this, ...toConcatenate);
+    }
+
+    public static concatenate<T>(iterator: Iterator<T>, ...toConcatenate: JavascriptIterable<T>[]): Iterator<T>
+    {
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(toConcatenate, "toConcatenate");
+
+        return ConcatenateIterator.create(iterator, ...toConcatenate);
     }
 
     /**

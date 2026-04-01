@@ -10,7 +10,8 @@ import { isUndefinedOrNull, Type } from "./types";
 
 export abstract class List<T> implements Iterable<T>
 {
-    // List cannot extend 
+    // List cannot extend Iterable because List is the default implementation of List.
+
     public static create<T>(values?: JavascriptIterable<T>): List<T>
     {
         return JavascriptArrayList.create(values);
@@ -265,5 +266,15 @@ export abstract class List<T> implements Iterable<T>
     public static [Symbol.iterator]<T>(list: List<T>): JavascriptIterator<T>
     {
         return Iterable[Symbol.iterator](list);
+    }
+
+    public contains(value: T, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return List.contains(this, value, equalFunctions);
+    }
+
+    public static contains<T>(list: List<T>, value: T, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.contains(list, value, equalFunctions);
     }
 }

@@ -1,5 +1,5 @@
 import { Iterator } from "./iterator";
-import { JavascriptIterator } from "./javascript";
+import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { PreCondition } from "./preCondition";
 import { SyncResult } from "./syncResult";
 import { Type } from "./types";
@@ -90,6 +90,11 @@ export class StringIterator implements Iterator<string>
     public toArray(): SyncResult<string[]>
     {
         return Iterator.toArray(this);
+    }
+
+    public concatenate(...toConcatenate: JavascriptIterable<string>[]): Iterator<string>
+    {
+        return Iterator.concatenate(this, ...toConcatenate);
     }
 
     public map<TOutput>(mapping: (value: string) => (TOutput | SyncResult<TOutput>)): Iterator<TOutput>

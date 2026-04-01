@@ -87,4 +87,9 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
     {
         return Iterable.last(this);
     }
+
+    public contains(value: TOutput, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.contains(this, value, equalFunctions);
+    }
 }

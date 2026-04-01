@@ -1,5 +1,5 @@
 import { Iterator } from "./iterator";
-import { JavascriptIterator } from "./javascript";
+import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { PreCondition } from "./preCondition";
 import { SyncResult } from "./syncResult";
 import { Type } from "./types";
@@ -92,6 +92,11 @@ export class TakeIterator<T> implements Iterator<T>
     public toArray(): SyncResult<T[]>
     {
         return Iterator.toArray(this);
+    }
+
+    public concatenate(...toConcatenate: JavascriptIterable<T>[]): Iterator<T>
+    {
+        return Iterator.concatenate(this, ...toConcatenate);
     }
 
     public where(condition: (value: T) => boolean): Iterator<T>

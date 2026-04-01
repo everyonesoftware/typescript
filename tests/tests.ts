@@ -1,9 +1,11 @@
 import { ConsoleTestRunner } from "./consoleTestRunner";
+import * as assertTestTests from "./assertTestTests";
 import * as asyncResultTests from "./asyncResultTests";
 import * as byteTests from "./bytesTests";
 import * as comparerTests from "./comparerTests";
 import * as conditionTests from "./conditionTests";
 import * as consoleTestRunner2Tests from "./consoleTestRunnerTests";
+import * as dateTimeTests from "./dateTimeTests";
 import * as disposableTests from "./disposableTests";
 import * as englishTests from "./englishTests";
 import * as equalFunctionsTests from "./equalFunctionsTests";
@@ -17,11 +19,13 @@ import * as listTests from "./listTests";
 import * as mapIteratorTests from "./mapIteratorTests";
 import * as mapTests from "./mapTests";
 import * as mutableConditionTests from "./mutableConditionTests";
+import * as mutableMapTests from "./mutableMapTests";
 import * as notFoundErrorTests from "./notFoundErrorTests";
 import * as postConditionErrorTests from "./postConditionErrorTests";
 import * as preConditionErrorTests from "./preConditionErrorTests";
 import * as propertyTests from "./propertyTests";
 import * as realHttpServerTests from "./nodeJSHttpServerTests";
+import * as recreationDotGovClientTests from "./recreationDotGovClientTests";
 import * as stringComparerTests from "./stringComparerTests";
 import * as stringIteratorTests from "./stringIteratorTests";
 import * as stringsTests from "./stringsTests";
@@ -31,13 +35,16 @@ import * as testRunnerTests from "./testRunnerTests";
 import * as toStringFunctionsTests from "./toStringFunctionsTests";
 import * as typesTests from "./typesTests";
 import * as whereIteratorTests from "./whereIteratorTests";
+import * as wonderlandTrailClientTests from "./wonderlandTrailClientTests";
 
 await ConsoleTestRunner.run([
+    assertTestTests,
     asyncResultTests.test,
     byteTests.test,
     comparerTests,
     conditionTests,
     consoleTestRunner2Tests,
+    dateTimeTests,
     disposableTests,
     englishTests,
     equalFunctionsTests.test,
@@ -51,11 +58,13 @@ await ConsoleTestRunner.run([
     mapIteratorTests,
     mapTests,
     mutableConditionTests,
+    mutableMapTests,
     notFoundErrorTests,
     postConditionErrorTests,
     preConditionErrorTests,
     propertyTests,
     realHttpServerTests,
+    recreationDotGovClientTests,
     stringComparerTests,
     stringIteratorTests,
     stringsTests,
@@ -65,4 +74,5 @@ await ConsoleTestRunner.run([
     toStringFunctionsTests,
     typesTests,
     whereIteratorTests,
+    wonderlandTrailClientTests,
 ]);

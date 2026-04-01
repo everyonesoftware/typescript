@@ -3,7 +3,6 @@ import { Iterator } from "../sources/iterator";
 import {
     JavascriptIterable, JavascriptIterator, JavascriptIteratorResult
 } from "../sources/javascript";
-import { MapIterator } from "../sources/mapIterator";
 import { NotFoundError } from "../sources/notFoundError";
 import { PreConditionError } from "../sources/preConditionError";
 import { Test } from "./test";
@@ -292,6 +291,111 @@ export function test(runner: TestRunner): void
                         test.assertEqual([], iterator.toArray().await());
                         test.assertTrue(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
+                    });
+                });
+            });
+
+            runner.testGroup("concatenate()", () =>
+            {
+                runner.testGroup("with non-started", () =>
+                {
+                    runner.testGroup("empty and", () =>
+                    {
+                        runner.test("empty", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([]);
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([]);
+                            test.assertEqual(concatenateIterator.toArray().await(), []);
+                        });
+
+                        runner.test("non-empty", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([]);
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([5]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [5]);
+                        });
+
+                        runner.test("two non-emptys", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([]);
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([5], [6, 7]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [5, 6, 7]);
+                        });
+                    });
+
+                    runner.testGroup("non-empty and", () =>
+                    {
+                        runner.test("empty", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([1, 2]);
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [1, 2]);
+                        });
+
+                        runner.test("non-empty", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([3]);
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([4, 5, 6]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [3, 4, 5, 6]);
+                        });
+
+                        runner.test("two non-emptys", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([7, 8, 9]);
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([10, 11, 12], [13]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [7, 8, 9, 10, 11, 12, 13]);
+                        });
+                    });
+                });
+
+                runner.testGroup("with started", () =>
+                {
+                    runner.testGroup("empty and", () =>
+                    {
+                        runner.test("empty", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([]).start().await();
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([]);
+                            test.assertEqual(concatenateIterator.toArray().await(), []);
+                        });
+
+                        runner.test("non-empty", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([]).start().await();
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([5]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [5]);
+                        });
+
+                        runner.test("two non-emptys", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([]).start().await();
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([5], [6, 7]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [5, 6, 7]);
+                        });
+                    });
+
+                    runner.testGroup("non-empty and", () =>
+                    {
+                        runner.test("empty", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([1, 2]).start().await();
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [1, 2]);
+                        });
+
+                        runner.test("non-empty", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([3]).start().await();
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([4, 5, 6]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [3, 4, 5, 6]);
+                        });
+
+                        runner.test("two non-emptys", (test: Test) =>
+                        {
+                            const iterator: Iterator<number> = Iterator.create([7, 8, 9]).start().await();
+                            const concatenateIterator: Iterator<number> = iterator.concatenate([10, 11, 12], [13]);
+                            test.assertEqual(concatenateIterator.toArray().await(), [7, 8, 9, 10, 11, 12, 13]);
+                        });
                     });
                 });
             });

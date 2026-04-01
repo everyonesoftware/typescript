@@ -4,6 +4,7 @@ import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { MutableHttpHeaders } from "./mutableHttpHeaders";
+import { NotFoundError } from "./notFoundError";
 import { Result } from "./result";
 import { SyncResult } from "./syncResult";
 import { ToStringFunctions } from "./toStringFunctions";
@@ -25,13 +26,13 @@ export abstract class HttpHeaders implements Iterable<HttpHeader>
      * Get the header with the provided name.
      * @param headerName The name of the header.
      */
-    public abstract get(headerName: string): Result<HttpHeader>;
+    public abstract get(headerName: string): SyncResult<HttpHeader>;
 
     /**
      * Get the value of the header with the provided name.
      * @param headerName The name of the header.
      */
-    public abstract getValue(headerName: string): Result<string>;
+    public abstract getValue(headerName: string): SyncResult<string>;
 
     public getContentType(): Result<HttpHeader>
     {
@@ -112,7 +113,7 @@ export abstract class HttpHeaders implements Iterable<HttpHeader>
         return Iterable.toString(headers, toStringFunctions);
     }
 
-    public map<TOutput>(mapping: (value: HttpHeader) => TOutput): Iterable<TOutput>
+    public map<TOutput>(mapping: (value: HttpHeader) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
         return HttpHeaders.map(this, mapping);
     }
@@ -170,5 +171,26 @@ export abstract class HttpHeaders implements Iterable<HttpHeader>
     public static [Symbol.iterator](headers: HttpHeaders): JavascriptIterator<HttpHeader>
     {
         return Iterable[Symbol.iterator](headers);
+    }
+
+    public contains(value: HttpHeader, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return HttpHeaders.contains(this, value, equalFunctions);
+    }
+
+    public static contains(headers: HttpHeaders, value: HttpHeader, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return SyncResult.create(() =>
+        {
+            if (!equalFunctions)
+            {
+                equalFunctions = EqualFunctions.create();
+            }
+
+            return headers.getValue(value.getName())
+                .then((headerValue: string) => equalFunctions!.areEqual(headerValue, value.getValue()).await())
+                .catch(NotFoundError, () => false)
+                .await();
+        });
     }
 }

@@ -1,3 +1,4 @@
+import { AsyncResult } from "./asyncResult";
 import { HttpHeader } from "./httpHeader";
 import { HttpHeaders } from "./httpHeaders";
 import { HttpIncomingResponse } from "./httpIncomingResponse";
@@ -98,8 +99,8 @@ export class FetchHttpIncomingResponse extends HttpIncomingResponse
         });
     }
 
-    public getBody(): SyncResult<string>
+    public getBody(): AsyncResult<string>
     {
-        throw new Error("Method not implemented.");
+        return AsyncResult.create(this.response.text());
     }
 }

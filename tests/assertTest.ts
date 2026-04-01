@@ -4,6 +4,7 @@ import { PreCondition } from "../sources/preCondition";
 import { isFunction, Type } from "../sources/types";
 import { Test } from "./test";
 import { SyncResult } from "../sources/syncResult";
+import { AsyncResult } from "../sources/asyncResult";
 
 /**
  * A {@link Test} type that uses the standard "assert" module to make assertions.
@@ -94,9 +95,9 @@ export class AssertTest implements Test
         assert.throws(action, expectedError);
     }
 
-    public async assertThrowsAsync(action: Promise<unknown> | (() => Promise<unknown>), expectedError: Error): Promise<void>
+    public assertThrowsAsync(action: Promise<unknown> | (() => Promise<unknown>), expectedError: Error): AsyncResult<void>
     {
-        await assert.rejects(action, expectedError);
+        return AsyncResult.create(assert.rejects(action, expectedError));
     }
 
     public assertInstanceOf<T>(value: unknown, type: Type<T>, typeCheck?: (value: unknown) => value is T): asserts value is T

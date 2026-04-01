@@ -1,6 +1,5 @@
 import { Iterator } from "./iterator";
-import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
-import { JavascriptIterator } from "./javascript";
+import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { PreCondition } from "./preCondition";
 import { SyncResult } from "./syncResult";
 import { isBoolean, Type } from "./types";
@@ -10,6 +9,7 @@ import { isBoolean, Type } from "./types";
  */
 export class WhereIterator<T> implements Iterator<T>
 {
+    // WhereIterator cannot extend Iterator because their create() functions are different.
     private readonly innerIterator: Iterator<T>;
     private started: boolean;
     private readonly condition: (value: T) => (boolean | SyncResult<boolean>);
@@ -22,6 +22,11 @@ export class WhereIterator<T> implements Iterator<T>
         this.innerIterator = innerIterator;
         this.started = false;
         this.condition = condition;
+    }
+
+    public static create<T>(innerIterator: Iterator<T>, condition: (value: T) => (boolean | SyncResult<boolean>)): WhereIterator<T>
+    {
+        return new WhereIterator(innerIterator, condition);
     }
 
     public hasStarted(): boolean
@@ -39,11 +44,6 @@ export class WhereIterator<T> implements Iterator<T>
         PreCondition.assertTrue(this.hasCurrent(), "this.hasCurrent()");
 
         return this.innerIterator.getCurrent();
-    }
-
-    public static create<T>(innerIterator: Iterator<T>, condition: (value: T) => (boolean | SyncResult<boolean>)): WhereIterator<T>
-    {
-        return new WhereIterator(innerIterator, condition);
     }
 
     public next(): SyncResult<boolean>
@@ -98,6 +98,11 @@ export class WhereIterator<T> implements Iterator<T>
     public toArray(): SyncResult<T[]>
     {
         return Iterator.toArray(this);
+    }
+    
+    public concatenate(...toConcatenate: JavascriptIterable<T>[]): Iterator<T>
+    {
+        return Iterator.concatenate(this, ...toConcatenate);
     }
 
     public where(condition: (value: T) => boolean): Iterator<T>
