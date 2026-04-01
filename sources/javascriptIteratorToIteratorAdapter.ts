@@ -86,6 +86,11 @@ export class JavascriptIteratorToIteratorAdapter<T> implements Iterator<T>
         return Iterator.map(this, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: T) => JavascriptIterable<TOutput>): Iterator<TOutput>
+    {
+        return Iterator.flatMap(this, mapping);
+    }
+
     public [Symbol.iterator](): JavascriptIterator<T>
     {
         return Iterator[Symbol.iterator](this);

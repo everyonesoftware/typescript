@@ -123,6 +123,11 @@ export class SkipIterator<T> implements Iterator<T>
         return Iterator.map(this, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: T) => JavascriptIterable<TOutput>): Iterator<TOutput>
+    {
+        return Iterator.flatMap(this, mapping);
+    }
+
     public first(condition?: (value: T) => boolean): SyncResult<T>
     {
         return Iterator.first(this, condition);

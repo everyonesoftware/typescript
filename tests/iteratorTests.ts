@@ -1,6 +1,7 @@
 import { EmptyError } from "../sources/emptyError";
 import { Iterator } from "../sources/iterator";
-import {
+import
+{
     JavascriptIterable, JavascriptIterator, JavascriptIteratorResult
 } from "../sources/javascript";
 import { NotFoundError } from "../sources/notFoundError";
@@ -59,7 +60,7 @@ export function test(runner: TestRunner): void
                         const iterator: Iterator<number> = Iterator.create(values);
                         test.assertFalse(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
-                        
+
                         for (const value of values)
                         {
                             test.assertTrue(iterator.next().await());
@@ -91,7 +92,7 @@ export function test(runner: TestRunner): void
                         test.assertTrue(iterator.hasStarted());
                         test.assertTrue(iterator.hasCurrent());
                         test.assertEqual(1, iterator.getCurrent());
-                        
+
                         for (const value of values.slice(1))
                         {
                             test.assertTrue(iterator.next().await());
@@ -542,6 +543,87 @@ export function test(runner: TestRunner): void
                 });
             });
 
+            runner.testFunction("flatMap()", () =>
+            {
+                runner.test("with empty non-started iterator", (test: Test) =>
+                {
+                    const iterator: Iterator<number> = Iterator.create([]);
+                    const flatMapIterator: Iterator<string> = iterator.flatMap((value: number) =>
+                    {
+                        const result: string[] = [];
+                        for (let i = 0; i < value; i++)
+                        {
+                            result.push(value.toString());
+                        }
+                        return result;
+                    });
+                    test.assertEqual(flatMapIterator.toArray().await(), []);
+                });
+
+                runner.test("with empty started iterator", (test: Test) =>
+                {
+                    const iterator: Iterator<number> = Iterator.create([]).start().await();
+                    const flatMapIterator: Iterator<string> = iterator.flatMap((value: number) =>
+                    {
+                        const result: string[] = [];
+                        for (let i = 0; i < value; i++)
+                        {
+                            result.push(value.toString());
+                        }
+                        return result;
+                    });
+                    test.assertEqual(flatMapIterator.toArray().await(), []);
+                });
+
+                runner.test("with non-empty non-started iterator", (test: Test) =>
+                {
+                    const iterator: Iterator<number> = Iterator.create([1, 2, 3]);
+                    const flatMapIterator: Iterator<string> = iterator.flatMap((value: number) =>
+                    {
+                        const result: string[] = [];
+                        for (let i = 0; i < value; i++)
+                        {
+                            result.push(value.toString());
+                        }
+                        return result;
+                    });
+                    test.assertEqual(flatMapIterator.toArray().await(), ["1", "2", "2", "3", "3", "3"]);
+                });
+
+                runner.test("with non-empty started iterator", (test: Test) =>
+                {
+                    const iterator: Iterator<number> = Iterator.create([1, 2, 3]).start().await();
+                    const flatMapIterator: Iterator<string> = iterator.flatMap((value: number) =>
+                    {
+                        const result: string[] = [];
+                        for (let i = 0; i < value; i++)
+                        {
+                            result.push(value.toString());
+                        }
+                        return result;
+                    });
+                    test.assertEqual(flatMapIterator.toArray().await(), ["1", "2", "2", "3", "3", "3"]);
+                });
+
+                runner.test("with mapping that sometimes returns an empty iterable", (test: Test) =>
+                {
+                    const iterator: Iterator<number> = Iterator.create([1, 2, 3, 4]).start().await();
+                    const flatMapIterator: Iterator<string> = iterator.flatMap((value: number) =>
+                    {
+                        const result: string[] = [];
+                        if (value % 2 === 1)
+                        {
+                            for (let i = 0; i < value; i++)
+                            {
+                                result.push(value.toString());
+                            }
+                        }
+                        return result;
+                    });
+                    test.assertEqual(flatMapIterator.toArray().await(), ["1", "3", "3", "3"]);
+                });
+            });
+
             runner.testFunction("first()", () =>
             {
                 runner.testGroup("with no condition", () =>
@@ -805,7 +887,7 @@ export function iteratorTests<T>(runner: TestRunner, creator: () => Iterator<T>)
                     }
                 });
             });
-            
+
         });
 
         runner.testFunction("[Symbol.iterator]()", (test: Test) =>

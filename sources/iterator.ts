@@ -1,6 +1,7 @@
 import { Comparable } from "./comparable";
 import { ConcatenateIterator } from "./concatenateIterator";
 import { EmptyError } from "./emptyError";
+import { FlatMapIterator } from "./flatMapIterator";
 import { IteratorToJavascriptIteratorAdapter } from "./iteratorToJavascriptIteratorAdapter";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { JavascriptIteratorToIteratorAdapter } from "./javascriptIteratorToIteratorAdapter";
@@ -252,6 +253,19 @@ export abstract class Iterator<T> implements JavascriptIterable<T>
         PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
 
         return MapIterator.create(iterator, mapping);
+    }
+
+    public flatMap<TOutput>(mapping: (value: T) => JavascriptIterable<TOutput>): Iterator<TOutput>
+    {
+        return Iterator.flatMap(this, mapping);
+    }
+
+    public static flatMap<T,TOutput>(iterator: Iterator<T>, mapping: (value: T) => JavascriptIterable<TOutput>): Iterator<TOutput>
+    {
+        PreCondition.assertNotUndefinedAndNotNull(iterator, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
+
+        return FlatMapIterator.create(iterator, mapping);
     }
 
     /**

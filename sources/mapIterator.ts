@@ -98,6 +98,11 @@ export class MapIterator<TInput, TOutput> implements Iterator<TOutput>
         return Iterator.map(this, mapping);
     }
 
+    public flatMap<TOutput2>(mapping: (value: TOutput) => JavascriptIterable<TOutput2>): Iterator<TOutput2>
+    {
+        return Iterator.flatMap(this, mapping);
+    }
+
     public [Symbol.iterator](): JavascriptIterator<TOutput>
     {
         return Iterator[Symbol.iterator](this);

@@ -123,6 +123,11 @@ export class ConcatenateIterator<T> implements Iterator<T>
         return Iterator.map(this, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: T) => JavascriptIterable<TOutput>): Iterator<TOutput>
+    {
+        return Iterator.flatMap(this, mapping);
+    }
+
     public whereInstanceOf<U extends T>(typeCheck: (value: T) => value is U): Iterator<U>
     {
         return Iterator.whereInstanceOf(this, typeCheck);

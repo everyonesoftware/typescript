@@ -102,6 +102,11 @@ export class StringIterator implements Iterator<string>
         return Iterator.map(this, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: string) => JavascriptIterable<TOutput>): Iterator<TOutput>
+    {
+        return Iterator.flatMap(this, mapping);
+    }
+
     public first(): SyncResult<string>
     {
         return Iterator.first(this);
