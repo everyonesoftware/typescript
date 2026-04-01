@@ -1,7 +1,7 @@
 import { EqualFunctions } from "./equalFunctions";
 import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
-import { JavascriptIterator } from "./javascript";
+import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { PreCondition } from "./preCondition";
 import { SyncResult } from "./syncResult";
 import { Type } from "./types";
@@ -46,6 +46,11 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
     public toString(): string
     {
         return Iterable.toString(this);
+    }
+
+    public concatenate(...toConcatenate: JavascriptIterable<TOutput>[]): Iterable<TOutput>
+    {
+        return Iterable.concatenate(this, ...toConcatenate);
     }
 
     public map<TOutput2>(mapping: (value: TOutput) => (TOutput2 | SyncResult<TOutput2>)): Iterable<TOutput2>

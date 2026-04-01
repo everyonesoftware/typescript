@@ -208,6 +208,16 @@ export abstract class List<T> implements Iterable<T>
         return Iterable.toString(list, toStringFunctions);
     }
 
+    public concatenate(...toConcatenate: JavascriptIterable<T>[]): Iterable<T>
+    {
+        return List.concatenate(this, ...toConcatenate);
+    }
+
+    public static concatenate<T>(list: List<T>, ...toConcatenate: JavascriptIterable<T>[]): Iterable<T>
+    {
+        return Iterable.concatenate(list, ...toConcatenate);
+    }
+
     public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
         return List.map<T,TOutput>(this, mapping);

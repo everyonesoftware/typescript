@@ -1,5 +1,6 @@
 import { Comparable } from "./comparable";
 import { Comparer } from "./comparer";
+import { ConcatenateIterable } from "./concatenateIterable";
 import { EqualFunctions } from "./equalFunctions";
 import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
@@ -159,6 +160,19 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
             toStringFunctions = ToStringFunctions.create();
         }
         return toStringFunctions.toString(iterable);
+    }
+
+    public concatenate(...toConcatenate: JavascriptIterable<T>[]): Iterable<T>
+    {
+        return Iterable.concatenate(this, ...toConcatenate);
+    }
+
+    public static concatenate<T>(iterable: Iterable<T>, ...toConcatenate: JavascriptIterable<T>[]): Iterable<T>
+    {
+        PreCondition.assertNotUndefinedAndNotNull(iterable, "iterator");
+        PreCondition.assertNotUndefinedAndNotNull(toConcatenate, "toConcatenate");
+
+        return ConcatenateIterable.create(iterable, ...toConcatenate);
     }
 
     /**

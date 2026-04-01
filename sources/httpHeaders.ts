@@ -113,6 +113,16 @@ export abstract class HttpHeaders implements Iterable<HttpHeader>
         return Iterable.toString(headers, toStringFunctions);
     }
 
+    public concatenate(...toConcatenate: JavascriptIterable<HttpHeader>[]): Iterable<HttpHeader>
+    {
+        return HttpHeaders.concatenate(this, ...toConcatenate);
+    }
+
+    public static concatenate(headers: HttpHeaders, ...toConcatenate: JavascriptIterable<HttpHeader>[]): Iterable<HttpHeader>
+    {
+        return Iterable.concatenate(headers, ...toConcatenate);
+    }
+
     public map<TOutput>(mapping: (value: HttpHeader) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
         return HttpHeaders.map(this, mapping);

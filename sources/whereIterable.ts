@@ -61,6 +61,11 @@ export class WhereIterable<T> implements Iterable<T>
         return Iterable.toString(this, toStringFunctions);
     }
 
+    public concatenate(...toConcatenate: JavascriptIterable<T>[]): Iterable<T>
+    {
+        return Iterable.concatenate(this, ...toConcatenate);
+    }
+
     public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
         return Iterable.map(this, mapping);

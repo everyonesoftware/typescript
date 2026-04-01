@@ -16,13 +16,11 @@ export class ConcatenateIterator<T> implements Iterator<T>
         this.innerIterators = innerIterators;
     }
 
-    public static create<T>(innerIterator: Iterator<T>, ...toConcatenate: JavascriptIterable<T>[]): ConcatenateIterator<T>
+    public static create<T>(...toConcatenate: JavascriptIterable<T>[]): ConcatenateIterator<T>
     {
-        PreCondition.assertNotUndefinedAndNotNull(innerIterator, "innerIterator");
         PreCondition.assertNotUndefinedAndNotNull(toConcatenate, "toConcatenate");
 
         const innerIterators: List<Iterator<T>> = List.create();
-        innerIterators.add(innerIterator);
         for (const value of toConcatenate)
         {
             innerIterators.add(Iterator.create(value));

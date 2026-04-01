@@ -157,6 +157,11 @@ export class MutableHttpHeaders implements HttpHeaders
         return HttpHeaders.toString(this, toStringFunctions);
     }
 
+    public concatenate(...toConcatenate: JavascriptIterable<HttpHeader>[]): Iterable<HttpHeader>
+    {
+        return HttpHeaders.concatenate(this, ...toConcatenate);
+    }
+
     public map<TOutput>(mapping: (value: HttpHeader) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
         return HttpHeaders.map(this, mapping);

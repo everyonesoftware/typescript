@@ -34,6 +34,57 @@ export function test(runner: TestRunner): void
                     test.assertEqual(await iterable.getCount(), 3);
                 });
             });
+
+            runner.testGroup("concatenate()", () =>
+            {
+                runner.testGroup("empty and", () =>
+                {
+                    runner.test("empty", (test: Test) =>
+                    {
+                        const iterable: Iterable<number> = Iterable.create([]);
+                        const concatenateIterable: Iterable<number> = iterable.concatenate([]);
+                        test.assertEqual(concatenateIterable.toArray().await(), []);
+                    });
+
+                    runner.test("non-empty", (test: Test) =>
+                    {
+                        const iterable: Iterable<number> = Iterable.create([]);
+                        const concatenateIterable: Iterable<number> = iterable.concatenate([5]);
+                        test.assertEqual(concatenateIterable.toArray().await(), [5]);
+                    });
+
+                    runner.test("two non-emptys", (test: Test) =>
+                    {
+                        const iterable: Iterable<number> = Iterable.create([]);
+                        const concatenateIterable: Iterable<number> = iterable.concatenate([5], [6, 7]);
+                        test.assertEqual(concatenateIterable.toArray().await(), [5, 6, 7]);
+                    });
+                });
+
+                runner.testGroup("non-empty and", () =>
+                {
+                    runner.test("empty", (test: Test) =>
+                    {
+                        const iterable: Iterable<number> = Iterable.create([1, 2]);
+                        const concatenateIterable: Iterable<number> = iterable.concatenate([]);
+                        test.assertEqual(concatenateIterable.toArray().await(), [1, 2]);
+                    });
+
+                    runner.test("non-empty", (test: Test) =>
+                    {
+                        const iterable: Iterable<number> = Iterable.create([3]);
+                        const concatenateIterable: Iterable<number> = iterable.concatenate([4, 5, 6]);
+                        test.assertEqual(concatenateIterable.toArray().await(), [3, 4, 5, 6]);
+                    });
+
+                    runner.test("two non-emptys", (test: Test) =>
+                    {
+                        const iterable: Iterable<number> = Iterable.create([7, 8, 9]);
+                        const concatenateIterable: Iterable<number> = iterable.concatenate([10, 11, 12], [13]);
+                        test.assertEqual(concatenateIterable.toArray().await(), [7, 8, 9, 10, 11, 12, 13]);
+                    });
+                });
+            });
         });
     });
 }

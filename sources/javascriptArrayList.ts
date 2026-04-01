@@ -121,6 +121,11 @@ export class JavascriptArrayList<T> implements List<T>
         return List.toString(this, toStringFunctions);
     }
 
+    public concatenate(...toConcatenate: JavascriptIterable<T>[]): Iterable<T>
+    {
+        return List.concatenate(this, ...toConcatenate);
+    }
+
     public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
         return List.map(this, mapping);

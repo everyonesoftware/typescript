@@ -1,7 +1,7 @@
 import { EqualFunctions } from "./equalFunctions";
 import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
-import { JavascriptIterator } from "./javascript";
+import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { JavascriptMapMap } from "./javascriptMapMap";
 import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
@@ -86,6 +86,16 @@ export abstract class MutableMap<TKey, TValue> implements Map<TKey, TValue>
     public static toString<TKey, TValue>(map: MutableMap<TKey, TValue>, toStringFunctions?: ToStringFunctions): string
     {
         return Map.toString(map, toStringFunctions);
+    }
+
+    public concatenate(...toConcatenate: JavascriptIterable<MapEntry<TKey, TValue>>[]): Iterable<MapEntry<TKey, TValue>>
+    {
+        return MutableMap.concatenate(this, ...toConcatenate);
+    }
+
+    public static concatenate<TKey,TValue>(map: MutableMap<TKey,TValue>, ...toConcatenate: JavascriptIterable<MapEntry<TKey, TValue>>[]): Iterable<MapEntry<TKey, TValue>>
+    {
+        return Map.concatenate(map, ...toConcatenate);
     }
 
     public map<TOutput>(mapping: (value: MapEntry<TKey, TValue>) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
