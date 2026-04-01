@@ -108,6 +108,16 @@ export abstract class MutableMap<TKey, TValue> implements Map<TKey, TValue>
         return Map.map(map, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: MapEntry<TKey, TValue>) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return MutableMap.flatMap(this, mapping);
+    }
+
+    public static flatMap<TKey,TValue,TOutput>(map: MutableMap<TKey,TValue>, mapping: (value: MapEntry<TKey,TValue>) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return Map.flatMap(map, mapping);
+    }
+
     public where(condition: (value: MapEntry<TKey, TValue>) => (boolean | SyncResult<boolean>)): Iterable<MapEntry<TKey, TValue>>
     {
         return MutableMap.where(this, condition);

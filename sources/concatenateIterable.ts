@@ -82,6 +82,11 @@ export class ConcatenateIterable<T> implements Iterable<T>
         return Iterable.map(this, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: T) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return Iterable.flatMap(this, mapping);
+    }
+
     public where(condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
     {
         return Iterable.where(this, condition);

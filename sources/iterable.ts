@@ -2,6 +2,7 @@ import { Comparable } from "./comparable";
 import { Comparer } from "./comparer";
 import { ConcatenateIterable } from "./concatenateIterable";
 import { EqualFunctions } from "./equalFunctions";
+import { FlatMapIterable } from "./flatMapIterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { List } from "./list";
@@ -198,6 +199,16 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
         PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
 
         return MapIterable.create(iterable, mapping);
+    }
+
+    public flatMap<TOutput>(mapping: (value: T) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return Iterable.flatMap(this, mapping);
+    }
+
+    public static flatMap<T,TOutput>(iterable: Iterable<T>, mapping: (value: T) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return FlatMapIterable.create(iterable, mapping);
     }
 
     /**

@@ -58,6 +58,11 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
         return Iterable.map(this, mapping);
     }
 
+    public flatMap<TOutput2>(mapping: (value: TOutput) => JavascriptIterable<TOutput2>): Iterable<TOutput2>
+    {
+        return Iterable.flatMap(this, mapping);
+    }
+
     public where(condition: (value: TOutput) => boolean): Iterable<TOutput>
     {
         return Iterable.where(this, condition);

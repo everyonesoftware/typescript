@@ -167,6 +167,11 @@ export class MutableHttpHeaders implements HttpHeaders
         return HttpHeaders.map(this, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: HttpHeader) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return HttpHeaders.flatMap(this, mapping);
+    }
+
     public where(condition: (value: HttpHeader) => (boolean | SyncResult<boolean>)): Iterable<HttpHeader>
     {
         return HttpHeaders.where(this, condition);

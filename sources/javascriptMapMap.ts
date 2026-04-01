@@ -101,6 +101,11 @@ export class JavascriptMapMap<TKey,TValue> implements MutableMap<TKey,TValue>
         return MutableMap.map(this, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: MapEntry<TKey, TValue>) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return MutableMap.flatMap(this, mapping);
+    }
+
     public where(condition: (value: MapEntry<TKey, TValue>) => (boolean | SyncResult<boolean>)): Iterable<MapEntry<TKey, TValue>>
     {
         return MutableMap.where(this, condition);

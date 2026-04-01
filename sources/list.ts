@@ -228,6 +228,16 @@ export abstract class List<T> implements Iterable<T>
         return Iterable.map<TInput, TOutput>(list, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: T) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return List.flatMap(this, mapping);
+    }
+
+    public static flatMap<TInput, TOutput>(list: List<TInput>, mapping: (value: TInput) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return Iterable.flatMap<TInput, TOutput>(list, mapping);
+    }
+
     public where(condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
     {
         return List.where(this, condition);

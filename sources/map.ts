@@ -156,6 +156,16 @@ export abstract class Map<TKey, TValue> implements Iterable<MapEntry<TKey, TValu
         return Iterable.map(map, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: MapEntry<TKey, TValue>) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return Map.flatMap(this, mapping);
+    }
+
+    public static flatMap<TKey,TValue,TOutput>(map: Map<TKey,TValue>, mapping: (value: MapEntry<TKey,TValue>) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return Iterable.flatMap(map, mapping);
+    } 
+
     public where(condition: (value: MapEntry<TKey, TValue>) => (boolean | SyncResult<boolean>)): Iterable<MapEntry<TKey, TValue>>
     {
         return Map.where(this, condition);

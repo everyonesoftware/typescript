@@ -133,6 +133,16 @@ export abstract class HttpHeaders implements Iterable<HttpHeader>
         return Iterable.map(headers, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: HttpHeader) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return HttpHeaders.flatMap(this, mapping);
+    }
+
+    public static flatMap<TOutput>(headers: HttpHeaders, mapping: (value: HttpHeader) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return Iterable.flatMap(headers, mapping);
+    }
+
     public where(condition: (value: HttpHeader) => boolean): Iterable<HttpHeader>
     {
         return HttpHeaders.where(this, condition);

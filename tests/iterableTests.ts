@@ -85,6 +85,57 @@ export function test(runner: TestRunner): void
                     });
                 });
             });
+
+            runner.testFunction("flatMap()", () =>
+            {
+                runner.test("with empty iterable", (test: Test) =>
+                {
+                    const iterable: Iterable<number> = Iterable.create([]);
+                    const flatMapIterable: Iterable<string> = iterable.flatMap((value: number) =>
+                    {
+                        const result: string[] = [];
+                        for (let i = 0; i < value; i++)
+                        {
+                            result.push(value.toString());
+                        }
+                        return result;
+                    });
+                    test.assertEqual(flatMapIterable.toArray().await(), []);
+                });
+
+                runner.test("with non-empty iterable", (test: Test) =>
+                {
+                    const iterable: Iterable<number> = Iterable.create([1, 2, 3]);
+                    const flatMapIterable: Iterable<string> = iterable.flatMap((value: number) =>
+                    {
+                        const result: string[] = [];
+                        for (let i = 0; i < value; i++)
+                        {
+                            result.push(value.toString());
+                        }
+                        return result;
+                    });
+                    test.assertEqual(flatMapIterable.toArray().await(), ["1", "2", "2", "3", "3", "3"]);
+                });
+
+                runner.test("with mapping that sometimes returns an empty iterable", (test: Test) =>
+                {
+                    const iterable: Iterable<number> = Iterable.create([1, 2, 3, 4]);
+                    const flatMapIterable: Iterable<string> = iterable.flatMap((value: number) =>
+                    {
+                        const result: string[] = [];
+                        if (value % 2 === 1)
+                        {
+                            for (let i = 0; i < value; i++)
+                            {
+                                result.push(value.toString());
+                            }
+                        }
+                        return result;
+                    });
+                    test.assertEqual(flatMapIterable.toArray().await(), ["1", "3", "3", "3"]);
+                });
+            });
         });
     });
 }

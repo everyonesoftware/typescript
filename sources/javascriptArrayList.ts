@@ -131,6 +131,11 @@ export class JavascriptArrayList<T> implements List<T>
         return List.map(this, mapping);
     }
 
+    public flatMap<TOutput>(mapping: (value: T) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    {
+        return List.flatMap(this, mapping);
+    }
+
     public where(condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
     {
         return List.where(this, condition);
