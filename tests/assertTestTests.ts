@@ -13,13 +13,13 @@ export function test(runner: TestRunner): void
             {
                 runner.test("with throwing action", (test: Test) =>
                 {
-                    const at: AssertTest = AssertTest.create();
+                    const at: AssertTest = AssertTest.create("fake-test-name");
                     at.assertThrows(() => { throw new Error("abc"); }, new Error("abc"));
                 });
 
                 runner.test("with non-throwing action", (test: Test) =>
                 {
-                    const at: AssertTest = AssertTest.create();
+                    const at: AssertTest = AssertTest.create("fake-test-name");
                     test.assertThrows(
                         () => at.assertThrows(() => {}, new Error("oops")),
                         new AssertionError({
@@ -35,31 +35,31 @@ export function test(runner: TestRunner): void
             {
                 runner.test("with throwing action", runner.skip("assertThrowsAsync() should catch errors in non-async functions"), async (test: Test) =>
                 {
-                    const at: AssertTest = AssertTest.create();
+                    const at: AssertTest = AssertTest.create("fake-test-name");
                     await at.assertThrowsAsync(() => { throw new Error("abc"); }, new Error("abc"));
                 });
 
                 runner.test("with throwing async action", async (test: Test) =>
                 {
-                    const at: AssertTest = AssertTest.create();
+                    const at: AssertTest = AssertTest.create("fake-test-name");
                     await at.assertThrowsAsync(async () => { throw new Error("abc"); }, new Error("abc"));
                 });
 
                 runner.test("with rejected Promise", async (test: Test) =>
                 {
-                    const at: AssertTest = AssertTest.create();
+                    const at: AssertTest = AssertTest.create("fake-test-name");
                     await at.assertThrowsAsync(Promise.reject(new Error("abc")), new Error("abc"));
                 });
 
                 runner.test("with throwing action that returns a rejected Promise", async (test: Test) =>
                 {
-                    const at: AssertTest = AssertTest.create();
+                    const at: AssertTest = AssertTest.create("fake-test-name");
                     await at.assertThrowsAsync(() => Promise.reject(new Error("abc")), new Error("abc"));
                 });
 
                 runner.test("with non-throwing async action", async (test: Test) =>
                 {
-                    const at: AssertTest = AssertTest.create();
+                    const at: AssertTest = AssertTest.create("fake-test-name");
                     await test.assertThrowsAsync(
                         async () => await at.assertThrowsAsync(async () => {}, new Error("oops")),
                         new AssertionError({

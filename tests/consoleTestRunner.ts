@@ -306,7 +306,7 @@ export class ConsoleTestRunner extends TestRunner
                         }
                         else
                         {
-                            this.currentTest = AssertTest.create();
+                            this.currentTest = AssertTest.create(testName);
                             try
                             {
                                 await testAction(this.currentTest);

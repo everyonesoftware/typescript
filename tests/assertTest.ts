@@ -11,16 +11,19 @@ import { AsyncResult } from "../sources/asyncResult";
  */
 export class AssertTest implements Test
 {
-    protected constructor()
+    private readonly name: string;
+
+    protected constructor(name: string)
     {
+        this.name = name;
     }
 
     /**
      * Create a new {@link AssertTest} object.
      */
-    public static create(): AssertTest
+    public static create(name: string): AssertTest
     {
-        return new AssertTest();
+        return new AssertTest(name);
     }
 
     public fail(message: string): never
