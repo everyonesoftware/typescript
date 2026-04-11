@@ -72,18 +72,25 @@ export class JavascriptArrayList<T> implements List<T>
         return this;
     }
 
-    public removeAt(index: number): T
+    public removeAt(index: number): SyncResult<T>
     {
         PreCondition.assertAccessIndex(index, this.getCount().await(), "index");
 
-        return this.array.splice(index, 1)[0];
+        return SyncResult.value(this.array.splice(index, 1)[0]);
     }
 
-    public removeLast(): T
+    public removeFirst(): SyncResult<T>
     {
         PreCondition.assertNotEmpty(this, "this");
 
-        return this.array.pop()!;
+        return SyncResult.value(this.array.shift()!);
+    }
+
+    public removeLast(): SyncResult<T>
+    {
+        PreCondition.assertNotEmpty(this, "this");
+
+        return SyncResult.value(this.array.pop()!);
     }
 
     public add(value: T): this

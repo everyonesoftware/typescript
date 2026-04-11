@@ -331,7 +331,7 @@ export class ConsoleTestRunner extends TestRunner
     {
         while (this.pendingActions.any().await())
         {
-            this.currentTestAction = this.pendingActions.removeLast();
+            this.currentTestAction = this.pendingActions.removeLast().await();
             try
             {
                 const result: void | Promise<void> = this.currentTestAction.runAsync();

@@ -1,20 +1,21 @@
 import { EqualFunctions } from "./equalFunctions";
 import { JavascriptIterable } from "./javascript";
+import { ListQueue } from "./listQueue";
 import { ListStack } from "./listStack";
 import { Result } from "./result";
 
 /**
- * A data structure that stores values in a first-in-last-out order.
+ * A data structure that stores values in a first-in-first-out order.
  */
-export abstract class Stack<T>
+export abstract class Queue<T>
 {
     /**
-     * Create an instance of the default {@link Stack} implementation.
-     * @returns A new {@link Stack} object.
+     * Create an instance of the default {@link Queue} implementation.
+     * @returns A new {@link Queue} object.
      */
-    public static create<T>(): ListStack<T>
+    public static create<T>(): ListQueue<T>
     {
-        return ListStack.create();
+        return ListQueue.create();
     }
 
     /**
@@ -23,19 +24,19 @@ export abstract class Stack<T>
     public abstract any(): Result<boolean>;
 
     /**
-     * Push the provided value onto the top of this {@link Stack}.
-     * @param value The value to push on the top of this {@link Stack}.
+     * Add the provided value onto the end of this {@link Queue}.
+     * @param value The value to add to the end of this {@link Queue}.
      */
     public abstract add(value: T): Result<void>;
 
     /**
-     * Push the provided values onto the top of this {@link Stack}.
-     * @param values The values to push onto this {@link Stack}.
+     * Add the provided values to the end of this {@link Queue}.
+     * @param values The values to add to the end of this {@link Queue}.
      */
     public abstract addAll(values: JavascriptIterable<T>): Result<void>;
 
     /**
-     * Remove the top value off of this {@link Stack}.
+     * Remove the next value off of this {@link Queue}.
      */
     public abstract remove(): Result<T>;
 

@@ -37,6 +37,8 @@ import * as typesTests from "./typesTests";
 import * as whereIteratorTests from "./whereIteratorTests";
 import * as wonderlandTrailClientTests from "./wonderlandTrailClientTests";
 import * as stackTests from "./stackTests";
+import * as queueTests from "./queueTests";
+import * as generatorTests from "./generatorTests";
 
 await ConsoleTestRunner.run([
     assertTestTests,
@@ -77,4 +79,6 @@ await ConsoleTestRunner.run([
     whereIteratorTests,
     wonderlandTrailClientTests,
     stackTests,
+    queueTests,
+    generatorTests,
 ]);

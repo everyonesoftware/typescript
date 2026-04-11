@@ -135,17 +135,32 @@ export abstract class List<T> implements Iterable<T>
      * Remove and return the value in this {@link List} at the provided index.
      * @param index The index to remove a value from.
      */
-    public abstract removeAt(index: number): T;
+    public abstract removeAt(index: number): SyncResult<T>;
+
+    /**
+     * Remove the first value in this {@link List}.
+     */
+    public removeFirst(): SyncResult<T>
+    {
+        return List.removeFirst(this);
+    }
+
+    public static removeFirst<T, TList extends List<T>>(list: TList): SyncResult<T>
+    {
+        PreCondition.assertNotEmpty(list, "list");
+
+        return list.removeAt(0);
+    }
 
     /**
      * Remove the last value in this {@link List}.
      */
-    public removeLast(): T
+    public removeLast(): SyncResult<T>
     {
         return List.removeLast(this);
     }
 
-    public static removeLast<T, TList extends List<T>>(list: TList): T
+    public static removeLast<T, TList extends List<T>>(list: TList): SyncResult<T>
     {
         PreCondition.assertNotEmpty(list, "list");
 
@@ -243,9 +258,9 @@ export abstract class List<T> implements Iterable<T>
         return List.where(this, condition);
     }
 
-    public static where<T>(iterable: JavascriptIterable<T>, condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
+    public static where<T>(list: List<T>, condition: (value: T) => (boolean | SyncResult<boolean>)): Iterable<T>
     {
-        return Iterable.where(iterable, condition);
+        return Iterable.where(list, condition);
     }
 
     public instanceOf<TOutput extends T>(typeOrTypeCheck: Type<TOutput> | ((value: T) => value is TOutput)): Iterable<TOutput>
@@ -253,9 +268,9 @@ export abstract class List<T> implements Iterable<T>
         return List.instanceOf(this, typeOrTypeCheck);
     }
 
-    public static instanceOf<TInput, TOutput extends TInput>(iterable: JavascriptIterable<TInput>, typeOrTypeCheck: Type<TOutput> | ((value: TInput) => value is TOutput)): Iterable<TOutput>
+    public static instanceOf<TInput, TOutput extends TInput>(list: List<TInput>, typeOrTypeCheck: Type<TOutput> | ((value: TInput) => value is TOutput)): Iterable<TOutput>
     {
-        return Iterable.instanceOf(iterable, typeOrTypeCheck);
+        return Iterable.instanceOf(list, typeOrTypeCheck);
     }
 
     public first(condition?: ((value: T) => (boolean | SyncResult<boolean>)) | undefined): SyncResult<T>
@@ -263,9 +278,9 @@ export abstract class List<T> implements Iterable<T>
         return List.first(this, condition);
     }
 
-    public static first<T>(iterable: JavascriptIterable<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
+    public static first<T>(list: List<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
-        return Iterable.first(iterable, condition);
+        return condition ? Iterable.first(list, condition) : list.get(0);
     }
 
     public last(condition?: ((value: T) => (boolean | SyncResult<boolean>)) | undefined): SyncResult<T>
@@ -273,9 +288,9 @@ export abstract class List<T> implements Iterable<T>
         return List.last(this, condition);
     }
 
-    public static last<T>(iterable: JavascriptIterable<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
+    public static last<T>(list: List<T>, condition?: (value: T) => (boolean | SyncResult<boolean>)): SyncResult<T>
     {
-        return Iterable.last(iterable, condition);
+        return condition ? Iterable.last(list, condition) : list.get(list.getCount().await() - 1);
     }
 
     public [Symbol.iterator](): JavascriptIterator<T>
