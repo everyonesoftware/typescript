@@ -4,17 +4,19 @@ import { HttpIncomingResponse } from "./httpIncomingResponse";
 import { HttpOutgoingRequest } from "./httpOutgoingRequest";
 import { Iterable } from "./iterable";
 import { PreCondition } from "./preCondition";
-import { RecreationDotGovClient } from "./recreationDotGovClient";
+import { RecreationDotGovClient, RecreationDotGovDivisionAvailability, RecreationDotGovDivisionDayAvailability } from "./recreationDotGovClient";
 import { Result } from "./result";
 import { Map } from "./map";
 import { List } from "./list";
 import { JavascriptIterable } from "./javascript";
-import { hasProperty, isObject, isUndefinedOrNull } from "./types";
+import { hasProperty, isNumber, isObject, isUndefinedOrNull } from "./types";
 import { MutableMap } from "./mutableMap";
 import { NotFoundError } from "./notFoundError";
 import { Iterator } from "./iterator";
 import { Stack } from "./stack";
 import { ListStack } from "./listStack";
+import { AsyncResult } from "./asyncResult";
+import { SyncResult } from "./syncResult";
 
 export interface WonderlandTrailLocation
 {
@@ -338,13 +340,12 @@ export class WonderlandTrailAvailability
         return this.availabilityMap.getOrSet(location, () => MutableMap.create()).await();
     }
 
-    public getDayAvailability(location: WonderlandTrailLocation, date: DateTime): WonderlandTrailAvailabilityType
+    public getDayAvailability(location: WonderlandTrailLocation, date: DateTime): SyncResult<WonderlandTrailAvailabilityType>
     {
         PreCondition.assertNotUndefinedAndNotNull(location, "location");
         PreCondition.assertNotUndefinedAndNotNull(date, "date");
 
-        const locationAvailability: MutableMap<string, WonderlandTrailAvailabilityType> | undefined = this.getAvailability(location);
-        return locationAvailability.getOrSet(date.toDateString(), () => { return {}; }).await();
+        return this.getAvailability(location).get(date.toDateString());
     }
 }
 
@@ -827,11 +828,11 @@ export class WonderlandTrailConnections
         const result: WonderlandTrailConnections = WonderlandTrailConnections.create(this.addReverseConnectionDefault);
 
         const toVisit: ListStack<WonderlandTrailConnection> = Stack.create();
-        toVisit.pushAll(this.iterateConnections(startLocation, undefined, direction));
+        toVisit.addAll(this.iterateConnections(startLocation, undefined, direction));
 
         while (toVisit.any().await())
         {
-            const currentConnection: WonderlandTrailConnection = toVisit.pop().await();
+            const currentConnection: WonderlandTrailConnection = toVisit.remove().await();
             result.addConnection(currentConnection, false);
 
             if (!currentConnection.isLoop() && currentConnection.endLocation !== endLocation)
@@ -841,18 +842,303 @@ export class WonderlandTrailConnections
                     if (!result.containsConnection(endLocationConnection) &&
                         !toVisit.contains(endLocationConnection))
                     {
-                        toVisit.push(endLocationConnection);
+                        toVisit.add(endLocationConnection);
                     }
 
                     if (!currentConnection.intermediateLocations.contains(endLocationConnection.endLocation))
                     {
-                        toVisit.push(currentConnection.join(endLocationConnection));
+                        toVisit.add(currentConnection.join(endLocationConnection));
                     }
                 }
             }
         }
 
         return result;
+    }
+}
+
+export class WonderlandTrailItinerary
+{
+    public readonly startDay: DateTime;
+    private readonly connections: List<WonderlandTrailConnection>;
+    private readonly availabilityTypes: List<WonderlandTrailAvailabilityType>;
+
+    private constructor(startDay: DateTime)
+    {
+        PreCondition.assertNotUndefinedAndNotNull(startDay, "startDay");
+
+        this.startDay = startDay;
+        this.connections = List.create();
+        this.availabilityTypes = List.create();
+    }
+
+    public static create(startDay: DateTime): WonderlandTrailItinerary
+    {
+        return new WonderlandTrailItinerary(startDay);
+    }
+
+    public clone(): WonderlandTrailItinerary
+    {
+        return WonderlandTrailItinerary.create(this.startDay)
+            .addConnections(this.connections)
+            .addAvailabilityTypes(this.availabilityTypes);
+    }
+
+    public getConnections(): Iterable<WonderlandTrailConnection>
+    {
+        return this.connections;
+    }
+
+    public getEndDay(): DateTime
+    {
+        return this.startDay.addDays(this.getDayCount() - 1);
+    }
+
+    public getDayCount(): number
+    {
+        return this.connections.getCount().await();
+    }
+
+    public getStartLocation(): SyncResult<WonderlandTrailLocation>
+    {
+        return this.connections.first().then(firstConnection => firstConnection.startLocation);
+    }
+
+    public getIntermediateLocations(): Iterable<WonderlandTrailLocation>
+    {
+        const result: List<WonderlandTrailLocation> = List.create();
+        for (const connection of this.connections)
+        {
+            if (result.any().await())
+            {
+                result.add(connection.startLocation);
+            }
+            result.addAll(connection.intermediateLocations);
+        }
+        return result;
+    }
+
+    public getEndLocation(): SyncResult<WonderlandTrailLocation>
+    {
+        return this.connections.last().then(lastConnection => lastConnection.endLocation);
+    }
+
+    public getPath(): Iterable<WonderlandTrailLocation>
+    {
+        const result: List<WonderlandTrailLocation> = List.create();
+        for (const connection of this.connections)
+        {
+            if (!result.any().await())
+            {
+                result.add(connection.startLocation);
+            }
+            result.add(connection.endLocation);
+        }
+        return result;
+    }
+
+    public getPathStrings(includeAvailabilityTypes?: boolean): Iterable<string>
+    {
+        includeAvailabilityTypes = includeAvailabilityTypes ?? true;
+
+        const result: List<string> = List.create();
+        let availabilityTypeIndex: number = 0;
+        const availabilityTypeCount: number = this.availabilityTypes.getCount().await();
+
+        for (const connection of this.connections)
+        {
+            if (!result.any().await())
+            {
+                result.add(connection.startLocation.name);
+            }
+
+            let pathString: string = connection.endLocation.name;
+            if (includeAvailabilityTypes && availabilityTypeIndex < availabilityTypeCount)
+            {
+                pathString += " ";
+
+                const availabilityType: WonderlandTrailAvailabilityType = this.availabilityTypes.get(availabilityTypeIndex).await();
+                availabilityTypeIndex++;
+
+                if (availabilityType.individualSite !== undefined)
+                {
+                    if (availabilityType.groupSite !== undefined)
+                    {
+                        pathString += `(Individual ${availabilityType.individualSite}/Group ${availabilityType.groupSite})`;
+                    }
+                    else
+                    {
+                        pathString += `(Individual ${availabilityType.individualSite})`;
+                    }
+                }
+                else
+                {
+                    pathString += `(Group ${availabilityType.groupSite})`;
+                }
+            }
+
+            result.add(pathString);
+        }
+
+        return result;
+    }
+
+    public contains(parameters: {
+        location: WonderlandTrailLocation,
+        checkItineraryStartLocation?: boolean,
+        checkItineraryIntermediateLocations?: boolean,
+        checkItineraryEndLocation?: boolean,
+    }): boolean
+    {
+        PreCondition.assertNotUndefinedAndNotNull(parameters, "parameters");
+
+        const location: WonderlandTrailLocation = parameters.location;
+        const checkItineraryStartLocation: boolean = parameters.checkItineraryStartLocation ?? true;
+        const checkItineraryIntermediateLocations: boolean = parameters.checkItineraryIntermediateLocations ?? true;
+        const checkItineraryEndLocation: boolean = parameters.checkItineraryEndLocation ?? true;
+
+        PreCondition.assertNotUndefinedAndNotNull(location, "location");
+
+        let result: boolean = false;
+
+        const connectionCount: number = this.connections.getCount().await();
+        for (let i = 0; i < connectionCount; i++)
+        {
+            if (i !== 0 || checkItineraryStartLocation)
+            {
+                result = (this.connections.get(i).await().startLocation === location);
+                if (result)
+                {
+                    break;
+                }
+            }
+
+            if (checkItineraryIntermediateLocations)
+            {
+                result = this.connections.get(i).await().intermediateLocations.contains(location).await();
+                if (result)
+                {
+                    break;
+                }
+            }
+
+            if (i === connectionCount - 1 && checkItineraryEndLocation)
+            {
+                result = (this.connections.get(i).await().endLocation === location);
+                if (result)
+                {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public containsAny(parameters: {
+        connection: WonderlandTrailConnection,
+        checkConnectionStartLocation?: boolean,
+        checkConnectionIntermediateLocations?: boolean,
+        checkConnectionEndLocation?: boolean,
+        checkItineraryStartLocation?: boolean,
+        checkItineraryIntermediateLocations?: boolean,
+        checkItineraryEndLocation?: boolean,
+    }): boolean
+    {
+        PreCondition.assertNotUndefinedAndNotNull(parameters, "parameters");
+
+        const connection: WonderlandTrailConnection = parameters.connection;
+        const checkConnectionStartLocation: boolean = parameters.checkConnectionStartLocation ?? true;
+        const checkConnectionIntermediateLocations: boolean = parameters.checkConnectionIntermediateLocations ?? true;
+        const checkConnectionEndLocation: boolean = parameters.checkConnectionEndLocation ?? true;
+        const checkItineraryStartLocation: boolean = parameters.checkItineraryStartLocation ?? true;
+        const checkItineraryIntermediateLocations: boolean = parameters.checkItineraryIntermediateLocations ?? true;
+        const checkItineraryEndLocation: boolean = parameters.checkItineraryEndLocation ?? true;
+
+        PreCondition.assertNotUndefinedAndNotNull(connection, "connection");
+
+        let result: boolean = false;
+
+        if (!result && checkConnectionStartLocation)
+        {
+            result = this.contains({
+                location: connection.startLocation,
+                checkItineraryStartLocation,
+                checkItineraryIntermediateLocations,
+                checkItineraryEndLocation,
+            });
+        }
+
+        if (!result && checkConnectionIntermediateLocations)
+        {
+            for (const connectionIntermediateLocation of connection.intermediateLocations)
+            {
+                result = this.contains({
+                    location: connectionIntermediateLocation,
+                    checkItineraryStartLocation,
+                    checkItineraryIntermediateLocations,
+                    checkItineraryEndLocation,
+                });
+                if (result)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (!result && checkConnectionEndLocation)
+        {
+            result = this.contains({
+                location: connection.endLocation,
+                checkItineraryStartLocation,
+                checkItineraryIntermediateLocations,
+                checkItineraryEndLocation,
+            });
+        }
+
+        return result;
+    }
+
+    public addConnection(connection: WonderlandTrailConnection): this
+    {
+        PreCondition.assertNotUndefinedAndNotNull(connection, "connection");
+
+        this.connections.add(connection);
+
+        return this;
+    }
+
+    public addConnections(connections: JavascriptIterable<WonderlandTrailConnection>): this
+    {
+        PreCondition.assertNotUndefinedAndNotNull(connections, "connections");
+
+        this.connections.addAll(connections);
+
+        return this;
+    }
+
+    public addAvailabilityType(availabilityType: WonderlandTrailAvailabilityType): this
+    {
+        PreCondition.assertNotUndefinedAndNotNull(availabilityType, "availabilityType");
+
+        this.availabilityTypes.add(availabilityType);
+
+        return this;
+    }
+
+    public addAvailabilityTypes(availabilityTypes: JavascriptIterable<WonderlandTrailAvailabilityType>): this
+    {
+        PreCondition.assertNotUndefinedAndNotNull(availabilityTypes, "availabilityTypes");
+
+        this.availabilityTypes.addAll(availabilityTypes);
+
+        return this;
+    }
+
+    public toString(includeAvailabilityTypes?: boolean): string
+    {
+        includeAvailabilityTypes = includeAvailabilityTypes ?? true;
+        return `startDay:${this.startDay.toDateString()},path:${this.getPathStrings(includeAvailabilityTypes)}`;
     }
 }
 
@@ -884,5 +1170,239 @@ export class WonderlandTrailClient implements HttpClient
     public sendGetRequest(url: string): Result<HttpIncomingResponse>
     {
         return HttpClient.sendGetRequest(this, url);
+    }
+
+    public getAvailability(month: number, year: number, allowWalkupPermits: boolean, allowIndividualSites: boolean, allowGroupSites: boolean): AsyncResult<WonderlandTrailAvailability>;
+    public getAvailability(options: { month: number, year: number, allowWalkupPermits: boolean, allowIndividualSites: boolean, allowGroupSites: boolean }): AsyncResult<WonderlandTrailAvailability>;
+    getAvailability(monthOrOptions: number | { month: number, year: number, allowWalkupPermits: boolean, allowIndividualSites: boolean, allowGroupSites: boolean }, year?: number, allowWalkupPermits?: boolean, allowIndividualSites?: boolean, allowGroupSites?: boolean): AsyncResult<WonderlandTrailAvailability>
+    {
+        let month: number;
+        if (isNumber(monthOrOptions))
+        {
+            month = monthOrOptions;
+            year = year!;
+            allowWalkupPermits = allowWalkupPermits!;
+            allowIndividualSites = allowIndividualSites!;
+            allowGroupSites = allowGroupSites!;
+        }
+        else
+        {
+            month = monthOrOptions.month;
+            year = monthOrOptions.year;
+            allowWalkupPermits = monthOrOptions.allowWalkupPermits;
+            allowIndividualSites = monthOrOptions.allowIndividualSites;
+            allowGroupSites = monthOrOptions.allowGroupSites;
+        }
+        return AsyncResult.create(async () =>
+        {
+            const result = WonderlandTrailAvailability.create();
+
+            for (const location of WonderlandTrailLocations.getLocations())
+            {
+                if (allowIndividualSites && location.divisionId)
+                {
+                    const divisionAvailability: RecreationDotGovDivisionAvailability = await this.recreationDotGovClient.getDivisionAvailability(
+                        WonderlandTrailClient.permitItineraryId,
+                        location.divisionId,
+                        month,
+                        year,
+                    );
+                    const divisionDayAvailabilities: Iterable<RecreationDotGovDivisionDayAvailability> = divisionAvailability.dayAvailabilities;
+                    if (divisionDayAvailabilities)
+                    {
+                        for (const divisionDayAvailability of divisionDayAvailabilities)
+                        {
+                            const hasWalkupPermits: boolean = (allowWalkupPermits && divisionDayAvailability.walkup);
+                            const hasReservationPermits: boolean = (divisionDayAvailability.reservationsRemaining > 0);
+                            if (hasWalkupPermits || hasReservationPermits)
+                            {
+                                result.addAvailability(
+                                    location,
+                                    divisionDayAvailability.date,
+                                    hasWalkupPermits ? WonderlandTrailReservationType.Walkup : WonderlandTrailReservationType.Reserved,
+                                    undefined,
+                                );
+                            }
+                        }
+                    }
+                }
+
+                if (allowGroupSites && location.groupSiteDivisionId)
+                {
+                    const groupSiteDivisionAvailability: RecreationDotGovDivisionAvailability = await this.recreationDotGovClient.getDivisionAvailability(
+                        WonderlandTrailClient.permitItineraryId,
+                        location.groupSiteDivisionId,
+                        month,
+                        year,
+                    );
+                    const groupSiteDivisionDayAvailabilities: Iterable<RecreationDotGovDivisionDayAvailability> = groupSiteDivisionAvailability.dayAvailabilities;
+                    if (groupSiteDivisionDayAvailabilities)
+                    {
+                        for (const groupSiteDayAvailability of groupSiteDivisionDayAvailabilities)
+                        {
+                            const hasWalkupPermits: boolean = (allowWalkupPermits && groupSiteDayAvailability.walkup);
+                            const hasReservationPermits: boolean = (groupSiteDayAvailability.reservationsRemaining > 0);
+                            if (hasWalkupPermits || hasReservationPermits)
+                            {
+                                result.addAvailability(
+                                    location,
+                                    groupSiteDayAvailability.date,
+                                    undefined,
+                                    hasWalkupPermits ? WonderlandTrailReservationType.Walkup : WonderlandTrailReservationType.Reserved,
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        });
+    }
+
+    public findItineraries(parameters: {
+        availability: WonderlandTrailAvailability,
+        startDate: DateTime,
+        startLocation: WonderlandTrailLocation,
+        endLocation: WonderlandTrailLocation,
+        direction: WonderlandTrailDirection,
+        maximumDayDistanceMiles?: number,
+        maximumItineraryDays?: number,
+        campsitesToAvoid?: JavascriptIterable<WonderlandTrailLocation>,
+    }): Iterable<WonderlandTrailItinerary>
+    {
+        PreCondition.assertNotUndefinedAndNotNull(parameters, "parameters");
+
+        const availability: WonderlandTrailAvailability = parameters.availability;
+        const startDate: DateTime = parameters.startDate;
+        const startLocation: WonderlandTrailLocation = parameters.startLocation;
+        const endLocation: WonderlandTrailLocation = parameters.endLocation;
+        const direction: WonderlandTrailDirection = parameters.direction;
+        const maximumDayDistanceMiles: number | undefined = parameters.maximumDayDistanceMiles;
+        const maximumItineraryDays: number | undefined = parameters.maximumItineraryDays;
+        const campsitesToAvoid: Iterable<WonderlandTrailLocation> = Iterable.create(parameters.campsitesToAvoid ?? []);
+
+        const result: List<WonderlandTrailItinerary> = List.create();
+
+        const connections: WonderlandTrailConnections = WonderlandTrailConnections.createDefault()
+            .expandConnections(startLocation, endLocation, direction);
+
+        let startLocationConnections: Iterator<WonderlandTrailConnection> = connections.iterateConnections(startLocation, undefined, direction);
+        if (!isUndefinedOrNull(maximumDayDistanceMiles))
+        {
+            startLocationConnections = startLocationConnections.where(connection => connection.distanceMiles <= maximumDayDistanceMiles);
+        }
+
+        const possibleItineraries: ListStack<WonderlandTrailItinerary> = Stack.create();
+        possibleItineraries.addAll(startLocationConnections.map(c => WonderlandTrailItinerary.create(startDate).addConnection(c)));
+
+        while (possibleItineraries.any().await())
+        {
+            const currentItinerary: WonderlandTrailItinerary = possibleItineraries.remove().await();
+            const currentItineraryEndLocation: WonderlandTrailLocation = currentItinerary.getEndLocation().await();
+
+            if ((maximumItineraryDays === undefined || currentItinerary.getDayCount() <= maximumItineraryDays) &&
+                (startLocation === currentItineraryEndLocation || endLocation === currentItineraryEndLocation || !campsitesToAvoid.contains(currentItineraryEndLocation).await()))
+            {
+                if (currentItineraryEndLocation === endLocation)
+                {
+                    result.add(currentItinerary);
+                }
+                else
+                {
+                    const dayAvailability: WonderlandTrailAvailabilityType | undefined = availability.getDayAvailability(currentItineraryEndLocation, currentItinerary.getEndDay())
+                        .catch(() => undefined)
+                        .await();
+                    if (dayAvailability)
+                    {
+                        currentItinerary.addAvailabilityType(dayAvailability);
+
+                        for (const nextDayConnection of connections.iterateConnections(currentItineraryEndLocation, undefined, direction))
+                        {
+                            if (!currentItinerary.containsAny({
+                                connection: nextDayConnection,
+                                checkConnectionStartLocation: false,
+                                checkItineraryStartLocation: false,
+                                checkItineraryEndLocation: false,
+                            }))
+                            {
+                                if (maximumDayDistanceMiles === undefined || nextDayConnection.distanceMiles <= maximumDayDistanceMiles)
+                                {
+                                    possibleItineraries.add(currentItinerary.clone().addConnection(nextDayConnection));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public findItinerariesAsync(parameters: {
+        startDay: DateTime,
+        startLocation?: WonderlandTrailLocation,
+        endLocation?: WonderlandTrailLocation,
+        direction?: WonderlandTrailDirection,
+        maximumDayDistanceMiles?: number,
+        maximumItineraryDays?: number,
+        allowWalkupPermits?: boolean,
+        allowIndividualSites?: boolean,
+        allowGroupSites?: boolean,
+        campsitesToAvoid?: JavascriptIterable<WonderlandTrailLocation>,
+    }): AsyncResult<Iterable<WonderlandTrailItinerary>>
+    {
+        PreCondition.assertNotUndefinedAndNotNull(parameters, "parameters");
+
+        const startDay: DateTime = parameters.startDay;
+        const startLocation: WonderlandTrailLocation | undefined = parameters.startLocation;
+        const endLocation: WonderlandTrailLocation | undefined = parameters.endLocation;
+        const direction: WonderlandTrailDirection | undefined = parameters.direction;
+        const maximumDayDistanceMiles: number | undefined = parameters.maximumDayDistanceMiles;
+        const maximumItineraryDays: number | undefined = parameters.maximumItineraryDays;
+        const allowWalkupPermits: boolean = parameters.allowWalkupPermits ?? true;
+        const allowIndividualSites: boolean = parameters.allowIndividualSites ?? true;
+        const allowGroupSites: boolean = parameters.allowGroupSites ?? false;
+        const campsitesToAvoid: JavascriptIterable<WonderlandTrailLocation> = parameters.campsitesToAvoid ?? [];
+
+        PreCondition.assertNotUndefinedAndNotNull(startDay, "startDay");
+
+        return AsyncResult.create(async () =>
+        {
+            const result: List<WonderlandTrailItinerary> = List.create();
+
+            const startLocationsToCheck: Iterable<WonderlandTrailLocation> =
+                (!isUndefinedOrNull(startLocation) ? Iterable.create([startLocation]) : WonderlandTrailLocations.getTrailheads());
+            const directionsToCheck: Iterable<WonderlandTrailDirection> =
+                (!isUndefinedOrNull(direction) ? Iterable.create([direction]) : Iterable.create([WonderlandTrailDirection.clockwise, WonderlandTrailDirection.counterClockwise]));
+
+            const availability: WonderlandTrailAvailability = await this.getAvailability(
+                startDay.getMonth(),
+                startDay.getYear(),
+                allowWalkupPermits,
+                allowIndividualSites,
+                allowGroupSites,
+            );
+
+            for (const startLocationToCheck of startLocationsToCheck)
+            {
+                for (const directionToCheck of directionsToCheck)
+                {
+                    result.addAll(this.findItineraries({
+                        availability,
+                        startDate: startDay,
+                        startLocation: startLocationToCheck,
+                        endLocation: endLocation ?? startLocationToCheck,
+                        direction: directionToCheck,
+                        maximumDayDistanceMiles,
+                        maximumItineraryDays,
+                        campsitesToAvoid,
+                    }))
+                }
+            }
+
+            return result;
+        });
     }
 }
