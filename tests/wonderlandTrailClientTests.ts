@@ -1,28 +1,34 @@
 import { HttpClient } from "../sources/httpClient";
 import { PreConditionError } from "../sources/preConditionError";
 import { RecreationDotGovClient, RecreationDotGovError, RecreationDotGovPermitItineraryJson } from "../sources/recreationDotGovClient";
-import { WonderlandTrailDirection, WonderlandTrailLocation, WonderlandTrailLocations } from "../sources/wonderlandTrailClient";
+import { isWonderlandTrailLocation, WonderlandTrailAvailability, WonderlandTrailAvailabilityType, WonderlandTrailConnection, WonderlandTrailDirection, WonderlandTrailLocation, WonderlandTrailLocations, WonderlandTrailReservationType } from "../sources/wonderlandTrailClient";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
 import { Iterable } from "../sources/iterable";
+import { DateTime } from "../sources/dateTime";
+import { Map } from "../sources/map";
+import { MutableMap } from "../sources/mutableMap";
+import { NotFoundError } from "../sources/notFoundError";
 
 export function test(runner: TestRunner): void
 {
     runner.testFile("wonderlandTrailClient.ts", () =>
     {
-        runner.testType("WonderlandTrailDirection", () =>
+        runner.testFunction("isWonderlandTrailLocation()", () =>
         {
-            runner.testFunction("toString()", (test: Test) =>
+            function isWonderlandTrailLocationTest(value: unknown, expected: boolean): void
             {
-                test.assertEqual("Clockwise", WonderlandTrailDirection.clockwise.toString());
-                test.assertEqual("CounterClockwise", WonderlandTrailDirection.counterClockwise.toString());
-            });
+                runner.test(`with ${runner.toString(value)}`, (test: Test) =>
+                {
+                    test.assertEqual(isWonderlandTrailLocation(value), expected);
+                });
+            }
 
-            runner.testFunction("reverse()", (test: Test) =>
-            {
-                test.assertSame(WonderlandTrailDirection.counterClockwise, WonderlandTrailDirection.clockwise.reverse());
-                test.assertSame(WonderlandTrailDirection.clockwise, WonderlandTrailDirection.counterClockwise.reverse());
-            });
+            isWonderlandTrailLocationTest(undefined, false);
+            isWonderlandTrailLocationTest(null, false);
+            isWonderlandTrailLocationTest(20, false);
+            isWonderlandTrailLocationTest({}, false);
+            isWonderlandTrailLocationTest(WonderlandTrailLocations.boxCanyon, true);
         });
 
         runner.testType("WonderlandTrailLocations", () =>
@@ -49,6 +55,328 @@ export function test(runner: TestRunner): void
                     ],
                     trailheads.map(t => t.name).toArray().await(),
                 );
+            });
+        });
+
+        runner.testType("WonderlandTrailAvailability", () =>
+        {
+            runner.testFunction("addAvailability()", () =>
+            {
+                runner.test("with undefined location", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+                    test.assertThrows(() => availability.addAvailability(undefined!, DateTime.now()), new PreConditionError(
+                        "Expression: location",
+                        "Expected: not undefined and not null",
+                        "Actual: undefined",
+                    ));
+                });
+
+                runner.test("with null location", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+                    test.assertThrows(() => availability.addAvailability(null!, DateTime.now()), new PreConditionError(
+                        "Expression: location",
+                        "Expected: not undefined and not null",
+                        "Actual: null",
+                    ));
+                });
+
+                runner.test("with undefined date", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+                    test.assertThrows(() => availability.addAvailability(WonderlandTrailLocations.boxCanyon, undefined!), new PreConditionError(
+                        "Expression: date",
+                        "Expected: not undefined and not null",
+                        "Actual: undefined",
+                    ));
+                });
+
+                runner.test("with null date", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+                    test.assertThrows(() => availability.addAvailability(WonderlandTrailLocations.boxCanyon, null!), new PreConditionError(
+                        "Expression: date",
+                        "Expected: not undefined and not null",
+                        "Actual: null",
+                    ));
+                });
+
+                runner.test("with neither individual nor group site data", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+
+                    const location: WonderlandTrailLocation = WonderlandTrailLocations.boxCanyon;
+                    const date: DateTime = DateTime.parse("2025-07-04");
+                    test.assertEqual(Map.create(), availability.getAvailability(location))
+
+                    availability.addAvailability(location, date);
+
+                    const expected: MutableMap<string, WonderlandTrailAvailabilityType> = Map.create();
+                    expected.set(date.toDateString(), { groupSite: undefined, individualSite: undefined });
+                    test.assertEqual(expected, availability.getAvailability(location));
+                });
+
+                runner.test("with individual site data", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+
+                    const location: WonderlandTrailLocation = WonderlandTrailLocations.boxCanyon;
+                    const date: DateTime = DateTime.parse("2025-07-04");
+                    test.assertEqual(Map.create(), availability.getAvailability(location))
+
+                    availability.addAvailability(location, date, WonderlandTrailReservationType.Walkup);
+
+                    const expected: MutableMap<string, WonderlandTrailAvailabilityType> = Map.create();
+                    expected.set(date.toDateString(), { groupSite: undefined, individualSite: WonderlandTrailReservationType.Walkup });
+                    test.assertEqual(expected, availability.getAvailability(location));
+                });
+
+                runner.test("with group site data", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+
+                    const location: WonderlandTrailLocation = WonderlandTrailLocations.boxCanyon;
+                    const date: DateTime = DateTime.parse("2025-07-04");
+                    test.assertEqual(Map.create(), availability.getAvailability(location))
+
+                    availability.addAvailability(location, date, undefined, WonderlandTrailReservationType.Reserved);
+
+                    const expected: MutableMap<string, WonderlandTrailAvailabilityType> = Map.create();
+                    expected.set(date.toDateString(), { groupSite: WonderlandTrailReservationType.Reserved, individualSite: undefined });
+                    test.assertEqual(expected, availability.getAvailability(location));
+                });
+            });
+
+            runner.testFunction("getAvailability()", () =>
+            {
+                function getAvailabilityErrorTest(location: WonderlandTrailLocation, expected: Error): void
+                {
+                    runner.test(`with ${runner.toString(location)}`, (test: Test) =>
+                    {
+                        const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+                        test.assertThrows(() => availability.getAvailability(location), expected);
+                    });
+                }
+
+                getAvailabilityErrorTest(undefined!, new PreConditionError(
+                    "Expression: location",
+                    "Expected: not undefined and not null",
+                    "Actual: undefined",
+                ));
+                getAvailabilityErrorTest(null!, new PreConditionError(
+                    "Expression: location",
+                    "Expected: not undefined and not null",
+                    "Actual: null",
+                ));
+
+                runner.test("when location isn't found", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+                    const location: WonderlandTrailLocation = WonderlandTrailLocations.boxCanyon;
+                    const locationAvailability: MutableMap<string, WonderlandTrailAvailabilityType> = availability.getAvailability(location);
+                    test.assertNotUndefinedAndNotNull(locationAvailability);
+                    test.assertFalse(locationAvailability.any().await());
+                    test.assertSame(locationAvailability, availability.getAvailability(location));
+                });
+
+                runner.test("when location is found", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+
+                    const location: WonderlandTrailLocation = WonderlandTrailLocations.boxCanyon;
+                    const date: DateTime = DateTime.parse("2025-07-04");
+                    availability.addAvailability(location, date, WonderlandTrailReservationType.Reserved, WonderlandTrailReservationType.Walkup);
+
+                    const locationAvailability: MutableMap<string, WonderlandTrailAvailabilityType> = availability.getAvailability(location);
+                    const expected: MutableMap<string, WonderlandTrailAvailabilityType> = Map.create();
+                    expected.set(date.toDateString(), {
+                        groupSite: WonderlandTrailReservationType.Walkup,
+                        individualSite: WonderlandTrailReservationType.Reserved,
+                    });
+                    test.assertEqual(locationAvailability, expected);
+                    test.assertSame(locationAvailability, availability.getAvailability(location));
+                });
+            });
+
+            runner.testFunction("getDayAvailability()", () =>
+            {
+                function getDayAvailabilityErrorTest(location: WonderlandTrailLocation, date: DateTime, expected: Error): void
+                {
+                    runner.test(`with ${runner.andList([location, date])}`, (test: Test) =>
+                    {
+                        const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+                        test.assertThrows(() => availability.getDayAvailability(location, date).await(), expected);
+                    });
+                }
+
+                getDayAvailabilityErrorTest(undefined!, DateTime.parse("2025-07-04"), new PreConditionError(
+                    "Expression: location",
+                    "Expected: not undefined and not null",
+                    "Actual: undefined",
+                ));
+                getDayAvailabilityErrorTest(null!, DateTime.parse("2025-07-04"), new PreConditionError(
+                    "Expression: location",
+                    "Expected: not undefined and not null",
+                    "Actual: null",
+                ));
+                getDayAvailabilityErrorTest(WonderlandTrailLocations.boxCanyon, undefined!, new PreConditionError(
+                    "Expression: date",
+                    "Expected: not undefined and not null",
+                    "Actual: undefined",
+                ));
+                getDayAvailabilityErrorTest(WonderlandTrailLocations.boxCanyon, null!, new PreConditionError(
+                    "Expression: date",
+                    "Expected: not undefined and not null",
+                    "Actual: null",
+                ));
+
+                runner.test("with not found location or date", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+                    const location: WonderlandTrailLocation = WonderlandTrailLocations.boxCanyon;
+                    const date: DateTime = DateTime.parse("2025-07-04");
+
+                    test.assertThrows(() => availability.getDayAvailability(location, date).await(), new NotFoundError(
+                        "No availability was found for Box Canyon on 2025-07-04.",
+                    ));
+                });
+
+                runner.test("when location and date are found", (test: Test) =>
+                {
+                    const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
+
+                    const location: WonderlandTrailLocation = WonderlandTrailLocations.boxCanyon;
+                    const date: DateTime = DateTime.parse("2025-07-04");
+                    availability.addAvailability(location, date, WonderlandTrailReservationType.Reserved, WonderlandTrailReservationType.Walkup);
+
+                    const dayAvailability: WonderlandTrailAvailabilityType = availability.getDayAvailability(location, date).await();
+                    const expected: WonderlandTrailAvailabilityType = {
+                        groupSite: WonderlandTrailReservationType.Walkup,
+                        individualSite: WonderlandTrailReservationType.Reserved,
+                    };
+                    test.assertEqual(dayAvailability, expected);
+                    test.assertSame(dayAvailability, availability.getDayAvailability(location, date).await());
+                });
+            });
+        });
+
+        runner.testType("WonderlandTrailDirection", () =>
+        {
+            runner.testFunction("toString()", (test: Test) =>
+            {
+                test.assertEqual("Clockwise", WonderlandTrailDirection.clockwise.toString());
+                test.assertEqual("CounterClockwise", WonderlandTrailDirection.counterClockwise.toString());
+            });
+
+            runner.testFunction("reverse()", (test: Test) =>
+            {
+                test.assertSame(WonderlandTrailDirection.counterClockwise, WonderlandTrailDirection.clockwise.reverse());
+                test.assertSame(WonderlandTrailDirection.clockwise, WonderlandTrailDirection.counterClockwise.reverse());
+            });
+        });
+
+        runner.testType("WonderlandTrailConnection", () =>
+        {
+            runner.testFunction("create()", (test: Test) =>
+            {
+                const connection: WonderlandTrailConnection = WonderlandTrailConnection.create(
+                    WonderlandTrailLocations.boxCanyon,
+                    WonderlandTrailLocations.carbonRiver,
+                    5000,
+                    2000,
+                    10,
+                    WonderlandTrailDirection.clockwise,
+                    Iterable.create([
+                        WonderlandTrailLocations.cataractValley,
+                        WonderlandTrailLocations.devilsDream,
+                    ]),
+                );
+                test.assertNotUndefinedAndNotNull(connection);
+                test.assertEqual(connection.startLocation, WonderlandTrailLocations.boxCanyon);
+                test.assertEqual(connection.endLocation, WonderlandTrailLocations.carbonRiver);
+                test.assertEqual(connection.distanceMiles, 5000);
+                test.assertEqual(connection.ascentFeet, 2000);
+                test.assertEqual(connection.descentFeet, 10);
+                test.assertEqual(connection.direction, WonderlandTrailDirection.clockwise);
+                test.assertEqual(connection.intermediateLocations, Iterable.create([
+                    WonderlandTrailLocations.cataractValley,
+                    WonderlandTrailLocations.devilsDream,
+                ]));
+            });
+
+            runner.testFunction("getLocations()", () =>
+            {
+                runner.test("when connection is not a loop", (test: Test) =>
+                {
+                    const connection: WonderlandTrailConnection = WonderlandTrailConnection.create(
+                        WonderlandTrailLocations.boxCanyon,
+                        WonderlandTrailLocations.carbonRiver,
+                        5000,
+                        2000,
+                        10,
+                        WonderlandTrailDirection.clockwise,
+                        Iterable.create([
+                            WonderlandTrailLocations.cataractValley,
+                            WonderlandTrailLocations.devilsDream,
+                        ]),
+                    );
+                    test.assertEqual(connection.getLocations(), Iterable.create([
+                        WonderlandTrailLocations.boxCanyon,
+                        WonderlandTrailLocations.cataractValley,
+                        WonderlandTrailLocations.devilsDream,
+                        WonderlandTrailLocations.carbonRiver,
+                    ]));
+                });
+
+                runner.test("when connection is a loop", (test: Test) =>
+                {
+                    const connection: WonderlandTrailConnection = WonderlandTrailConnection.create(
+                        WonderlandTrailLocations.boxCanyon,
+                        WonderlandTrailLocations.boxCanyon,
+                        5000,
+                        2000,
+                        10,
+                        WonderlandTrailDirection.clockwise,
+                        Iterable.create([
+                            WonderlandTrailLocations.cataractValley,
+                            WonderlandTrailLocations.devilsDream,
+                        ]),
+                    );
+                    test.assertEqual(connection.getLocations(), Iterable.create([
+                        WonderlandTrailLocations.boxCanyon,
+                        WonderlandTrailLocations.cataractValley,
+                        WonderlandTrailLocations.devilsDream,
+                    ]));
+                });
+            });
+
+            runner.testFunction("reverseDirection()", (test: Test) =>
+            {
+                const connection: WonderlandTrailConnection = WonderlandTrailConnection.create(
+                    WonderlandTrailLocations.boxCanyon,
+                    WonderlandTrailLocations.carbonRiver,
+                    5000,
+                    2000,
+                    10,
+                    WonderlandTrailDirection.clockwise,
+                    Iterable.create([
+                        WonderlandTrailLocations.cataractValley,
+                        WonderlandTrailLocations.devilsDream,
+                    ]),
+                );
+                const reversedConnection: WonderlandTrailConnection = connection.reverseDirection();
+                test.assertNotSame(connection, reversedConnection);
+                test.assertEqual(reversedConnection.startLocation, WonderlandTrailLocations.carbonRiver);
+                test.assertEqual(reversedConnection.endLocation, WonderlandTrailLocations.boxCanyon);
+                test.assertEqual(reversedConnection.distanceMiles, 5000);
+                test.assertEqual(reversedConnection.ascentFeet, 10);
+                test.assertEqual(reversedConnection.descentFeet, 2000);
+                test.assertEqual(reversedConnection.direction, WonderlandTrailDirection.counterClockwise);
+                test.assertEqual(reversedConnection.intermediateLocations, Iterable.create([
+                    WonderlandTrailLocations.cataractValley,
+                    WonderlandTrailLocations.devilsDream,
+                ]));
             });
         });
     });

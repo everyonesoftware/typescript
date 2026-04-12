@@ -1,4 +1,3 @@
-
 import { andList } from "../sources/english";
 import { Iterable } from "../sources/iterable";
 import { PreCondition } from "../sources/preCondition";

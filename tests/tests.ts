@@ -10,6 +10,7 @@ import * as disposableTests from "./disposableTests";
 import * as englishTests from "./englishTests";
 import * as equalFunctionsTests from "./equalFunctionsTests";
 import * as fetchHttpClientTests from "./fetchHttpClientTests";
+import * as generatorTests from "./generatorTests";
 import * as httpClientTests from "./httpClientTests";
 import * as inMemoryCharacterWriteStreamTests from "./inMemoryCharacterWriteStreamTests";
 import * as iterableTests from "./iterableTests";
@@ -24,8 +25,10 @@ import * as notFoundErrorTests from "./notFoundErrorTests";
 import * as postConditionErrorTests from "./postConditionErrorTests";
 import * as preConditionErrorTests from "./preConditionErrorTests";
 import * as propertyTests from "./propertyTests";
+import * as queueTests from "./queueTests";
 import * as realHttpServerTests from "./nodeJSHttpServerTests";
 import * as recreationDotGovClientTests from "./recreationDotGovClientTests";
+import * as stackTests from "./stackTests";
 import * as stringComparerTests from "./stringComparerTests";
 import * as stringIteratorTests from "./stringIteratorTests";
 import * as stringsTests from "./stringsTests";
@@ -36,9 +39,6 @@ import * as toStringFunctionsTests from "./toStringFunctionsTests";
 import * as typesTests from "./typesTests";
 import * as whereIteratorTests from "./whereIteratorTests";
 import * as wonderlandTrailClientTests from "./wonderlandTrailClientTests";
-import * as stackTests from "./stackTests";
-import * as queueTests from "./queueTests";
-import * as generatorTests from "./generatorTests";
 
 await ConsoleTestRunner.run([
     assertTestTests,
@@ -52,6 +52,7 @@ await ConsoleTestRunner.run([
     englishTests,
     equalFunctionsTests.test,
     fetchHttpClientTests,
+    generatorTests,
     httpClientTests,
     inMemoryCharacterWriteStreamTests,
     iterableTests,
@@ -66,8 +67,10 @@ await ConsoleTestRunner.run([
     postConditionErrorTests,
     preConditionErrorTests,
     propertyTests,
+    queueTests,
     realHttpServerTests,
     recreationDotGovClientTests,
+    stackTests,
     stringComparerTests,
     stringIteratorTests,
     stringsTests,
@@ -78,7 +81,4 @@ await ConsoleTestRunner.run([
     typesTests,
     whereIteratorTests,
     wonderlandTrailClientTests,
-    stackTests,
-    queueTests,
-    generatorTests,
 ]);

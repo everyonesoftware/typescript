@@ -27,7 +27,7 @@ export interface WonderlandTrailLocation
     readonly groupSiteDivisionId: string;
 }
 
-function isWonderlandTrailLocation(value: unknown): value is WonderlandTrailLocation
+export function isWonderlandTrailLocation(value: unknown): value is WonderlandTrailLocation
 {
     return isObject(value) &&
         hasProperty(value, "name") &&
@@ -337,6 +337,8 @@ export class WonderlandTrailAvailability
 
     public getAvailability(location: WonderlandTrailLocation): MutableMap<string, WonderlandTrailAvailabilityType>
     {
+        PreCondition.assertNotUndefinedAndNotNull(location, "location");
+
         return this.availabilityMap.getOrSet(location, () => MutableMap.create()).await();
     }
 
@@ -345,7 +347,8 @@ export class WonderlandTrailAvailability
         PreCondition.assertNotUndefinedAndNotNull(location, "location");
         PreCondition.assertNotUndefinedAndNotNull(date, "date");
 
-        return this.getAvailability(location).get(date.toDateString());
+        return this.getAvailability(location).get(date.toDateString())
+            .convertError(NotFoundError, () => new NotFoundError(`No availability was found for ${location.name} on ${date.toDateString()}.`));
     }
 }
 
