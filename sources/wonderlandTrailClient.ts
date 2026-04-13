@@ -320,6 +320,11 @@ export class WonderlandTrailAvailability
         return new WonderlandTrailAvailability();
     }
 
+    public any(): boolean
+    {
+        return this.availabilityMap.any().await();
+    }
+
     public addAvailability(location: WonderlandTrailLocation, date: DateTime, individualSite?: WonderlandTrailReservationType, groupSite?: WonderlandTrailReservationType): void
     {
         PreCondition.assertNotUndefinedAndNotNull(location, "location");
@@ -1175,9 +1180,9 @@ export class WonderlandTrailClient implements HttpClient
         return HttpClient.sendGetRequest(this, url);
     }
 
-    public getAvailability(month: number, year: number, allowWalkupPermits: boolean, allowIndividualSites: boolean, allowGroupSites: boolean): AsyncResult<WonderlandTrailAvailability>;
-    public getAvailability(options: { month: number, year: number, allowWalkupPermits: boolean, allowIndividualSites: boolean, allowGroupSites: boolean }): AsyncResult<WonderlandTrailAvailability>;
-    getAvailability(monthOrOptions: number | { month: number, year: number, allowWalkupPermits: boolean, allowIndividualSites: boolean, allowGroupSites: boolean }, year?: number, allowWalkupPermits?: boolean, allowIndividualSites?: boolean, allowGroupSites?: boolean): AsyncResult<WonderlandTrailAvailability>
+    public getAvailability(month: number, year: number, allowWalkupPermits: boolean, allowIndividualSites: boolean, allowGroupSites: boolean, earlyAccessPermitLotteryId?: string): AsyncResult<WonderlandTrailAvailability>;
+    public getAvailability(options: { month: number, year: number, allowWalkupPermits: boolean, allowIndividualSites: boolean, allowGroupSites: boolean, earlyAccessPermitLotteryId?: string }): AsyncResult<WonderlandTrailAvailability>;
+    getAvailability(monthOrOptions: number | { month: number, year: number, allowWalkupPermits: boolean, allowIndividualSites: boolean, allowGroupSites: boolean, earlyAccessPermitLotteryId?: string }, year?: number, allowWalkupPermits?: boolean, allowIndividualSites?: boolean, allowGroupSites?: boolean, earlyAccessPermitLotteryId?: string): AsyncResult<WonderlandTrailAvailability>
     {
         let month: number;
         if (isNumber(monthOrOptions))
@@ -1195,6 +1200,7 @@ export class WonderlandTrailClient implements HttpClient
             allowWalkupPermits = monthOrOptions.allowWalkupPermits;
             allowIndividualSites = monthOrOptions.allowIndividualSites;
             allowGroupSites = monthOrOptions.allowGroupSites;
+            earlyAccessPermitLotteryId = monthOrOptions.earlyAccessPermitLotteryId;
         }
         return AsyncResult.create(async () =>
         {
@@ -1209,6 +1215,7 @@ export class WonderlandTrailClient implements HttpClient
                         location.divisionId,
                         month,
                         year,
+                        earlyAccessPermitLotteryId,
                     );
                     const divisionDayAvailabilities: Iterable<RecreationDotGovDivisionDayAvailability> = divisionAvailability.dayAvailabilities;
                     if (divisionDayAvailabilities)
@@ -1237,6 +1244,7 @@ export class WonderlandTrailClient implements HttpClient
                         location.groupSiteDivisionId,
                         month,
                         year,
+                        earlyAccessPermitLotteryId,
                     );
                     const groupSiteDivisionDayAvailabilities: Iterable<RecreationDotGovDivisionDayAvailability> = groupSiteDivisionAvailability.dayAvailabilities;
                     if (groupSiteDivisionDayAvailabilities)

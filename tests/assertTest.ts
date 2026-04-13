@@ -100,7 +100,10 @@ export class AssertTest implements Test
 
     public assertThrowsAsync(action: Promise<unknown> | (() => Promise<unknown>), expectedError: Error): AsyncResult<void>
     {
-        return AsyncResult.create(assert.rejects(action, expectedError));
+        const promiseOrAsyncAction = isFunction(action)
+            ? async () => await action()
+            : action;
+        return AsyncResult.create(assert.rejects(promiseOrAsyncAction, expectedError));
     }
 
     public assertInstanceOf<T>(value: unknown, type: Type<T>, typeCheck?: (value: unknown) => value is T): asserts value is T

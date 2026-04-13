@@ -48,3 +48,12 @@ export interface JavascriptAsyncIterable<T>
 {
     [Symbol.asyncIterator](): JavascriptAsyncIterator<T>;
 }
+
+/**
+ * The built-in {@link Set} type.
+ * 
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set
+ */
+export type JavascriptSet<T> = Set<T>;
+
+export const JavascriptSet = Set;

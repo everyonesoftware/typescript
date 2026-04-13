@@ -33,7 +33,7 @@ export function test(runner: TestRunner): void
 
             runner.testFunction("assertThrowsAsync()", () =>
             {
-                runner.test("with throwing action", runner.skip("assertThrowsAsync() should catch errors in non-async functions"), async (test: Test) =>
+                runner.test("with throwing sync action", async (test: Test) =>
                 {
                     const at: AssertTest = AssertTest.create("fake-test-name");
                     await at.assertThrowsAsync(() => { throw new Error("abc"); }, new Error("abc"));

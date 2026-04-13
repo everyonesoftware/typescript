@@ -1,7 +1,5 @@
-import { HttpClient } from "../sources/httpClient";
 import { PreConditionError } from "../sources/preConditionError";
-import { RecreationDotGovClient, RecreationDotGovError, RecreationDotGovPermitItineraryJson } from "../sources/recreationDotGovClient";
-import { isWonderlandTrailLocation, WonderlandTrailAvailability, WonderlandTrailAvailabilityType, WonderlandTrailConnection, WonderlandTrailDirection, WonderlandTrailLocation, WonderlandTrailLocations, WonderlandTrailReservationType } from "../sources/wonderlandTrailClient";
+import { isWonderlandTrailLocation, WonderlandTrailAvailability, WonderlandTrailAvailabilityType, WonderlandTrailClient, WonderlandTrailConnection, WonderlandTrailDirection, WonderlandTrailLocation, WonderlandTrailLocations, WonderlandTrailReservationType } from "../sources/wonderlandTrailClient";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
 import { Iterable } from "../sources/iterable";
@@ -9,6 +7,7 @@ import { DateTime } from "../sources/dateTime";
 import { Map } from "../sources/map";
 import { MutableMap } from "../sources/mutableMap";
 import { NotFoundError } from "../sources/notFoundError";
+import { HttpClient } from "../sources/httpClient";
 
 export function test(runner: TestRunner): void
 {
@@ -377,6 +376,76 @@ export function test(runner: TestRunner): void
                     WonderlandTrailLocations.cataractValley,
                     WonderlandTrailLocations.devilsDream,
                 ]));
+            });
+        });
+
+        runner.testType("WonderlandTrailClient", () =>
+        {
+            runner.testFunction("create()", () =>
+            {
+                runner.test("with undefined HttpClient", (test: Test) =>
+                {
+                    test.assertThrows(() => WonderlandTrailClient.create(undefined!), new PreConditionError(
+                        "Expression: httpClient",
+                        "Expected: not undefined and not null",
+                        "Actual: undefined",
+                    ));
+                });
+
+                runner.test("with null HttpClient", (test: Test) =>
+                {
+                    test.assertThrows(() => WonderlandTrailClient.create(null!), new PreConditionError(
+                        "Expression: httpClient",
+                        "Expected: not undefined and not null",
+                        "Actual: null",
+                    ));
+                });
+
+                runner.test("with defined HttpClient", (test: Test) =>
+                {
+                    const httpClient: HttpClient = HttpClient.create();
+                    const client: WonderlandTrailClient = WonderlandTrailClient.create(httpClient);
+                    test.assertNotUndefinedAndNotNull(client);
+                });
+            });
+
+            runner.testFunction("getAvailability()", () =>
+            {
+                runner.test("with year in the past", async (test: Test) =>
+                {
+                    const httpClient: HttpClient = HttpClient.create();
+                    const client: WonderlandTrailClient = WonderlandTrailClient.create(httpClient);
+
+                    const availability: WonderlandTrailAvailability = await client.getAvailability(4, 2023, true, true, true);
+                    test.assertNotUndefinedAndNotNull(availability);
+                    test.assertFalse(availability.any());
+                });
+
+                runner.test("with month in the past", async (test: Test) =>
+                {
+                    const httpClient: HttpClient = HttpClient.create();
+                    const client: WonderlandTrailClient = WonderlandTrailClient.create(httpClient);
+
+                    const availability: WonderlandTrailAvailability = await client.getAvailability(3, 2026, true, true, true);
+                    test.assertNotUndefinedAndNotNull(availability);
+                    test.assertFalse(availability.any());
+                });
+
+                runner.test("with a future month in the current year", async (test: Test) =>
+                {
+                    const httpClient: HttpClient = HttpClient.create();
+                    const client: WonderlandTrailClient = WonderlandTrailClient.create(httpClient);
+
+                    const availability: WonderlandTrailAvailability = await client.getAvailability({
+                        month: 7,
+                        year: 2026,
+                        allowGroupSites: true,
+                        allowIndividualSites: true,
+                        allowWalkupPermits: true,
+                    });
+                    test.assertNotUndefinedAndNotNull(availability);
+                    test.assertFalse(availability.any());
+                });
             });
         });
     });
