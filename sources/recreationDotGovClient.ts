@@ -29,7 +29,7 @@ export interface RecreationDotGovDivisionAvailabilityJson
     }[];
 
     readonly quota_type_maps: {
-        readonly ConstantQuotaUsageDaily: {
+        readonly ConstantQuotaUsageDaily?: {
             [date: string]: {
                 readonly is_hidden: boolean;
                 readonly remaining: number;
@@ -38,7 +38,7 @@ export interface RecreationDotGovDivisionAvailabilityJson
                 readonly total: number;
             };
         };
-        readonly QuotaUsageByMemberDaily: {
+        readonly QuotaUsageByMemberDaily?: {
             [date: string]: {
                 readonly is_hidden: boolean;
                 readonly remaining: number;
@@ -223,7 +223,7 @@ export class RecreationDotGovClient implements HttpClient
                 : `https://www.recreation.gov/api/permititinerary/${permitItineraryId}/division/${divisionId}/availability/month?month=${month}&year=${year}`
             const response: HttpIncomingResponse = await this.sendGetRequest(url);
 
-            const responseBody: string = await response.getBody();
+            let responseBody: string = await response.getBody();
 
             const statusCode: number = response.getStatusCode();
             if (statusCode < 200 || 300 <= statusCode)
@@ -234,6 +234,18 @@ export class RecreationDotGovClient implements HttpClient
                 {
                     case "invalid permit id":
                         throw new RecreationDotGovError(`No permit itinerary found for id: ${JSON.stringify(permitItineraryId)}`);
+
+                    case "request year is missing or invalid":
+                        // Ignore this error and just return an empty availability.
+                        const emptyResponseBody: RecreationDotGovPayloadResponse<RecreationDotGovDivisionAvailabilityJson> = {
+                            payload: {
+                                bools: {},
+                                rules: [],
+                                quota_type_maps: {},
+                            },
+                        };
+                        responseBody = JSON.stringify(emptyResponseBody);
+                        break;
                         
                     default:
                         throw new RecreationDotGovError(`Unrecognized error: ${JSON.stringify(errorMessage)}`);

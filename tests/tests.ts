@@ -39,6 +39,7 @@ import * as toStringFunctionsTests from "./toStringFunctionsTests";
 import * as typesTests from "./typesTests";
 import * as whereIteratorTests from "./whereIteratorTests";
 import * as wonderlandTrailClientTests from "./wonderlandTrailClientTests";
+import * as setTests from "./setTests";
 
 await ConsoleTestRunner.run([
     assertTestTests,
@@ -81,4 +82,5 @@ await ConsoleTestRunner.run([
     typesTests,
     whereIteratorTests,
     wonderlandTrailClientTests,
+    setTests,
 ]);

@@ -23,7 +23,7 @@ export function test(runner: TestRunner): void
             {
                 function areEqualTest(left: unknown, right: unknown, expected: boolean): void
                 {
-                    runner.test(`with ${andList([left, right].map(x => runner.toString(x)))}`, (test: Test) =>
+                    runner.test(`with ${runner.andList([left, right])}`, (test: Test) =>
                     {
                         const functions: EqualFunctions = EqualFunctions.create();
                         test.assertEqual(functions.areEqual(left, right).await(), expected);

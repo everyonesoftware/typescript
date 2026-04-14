@@ -1,7 +1,7 @@
 import { andList } from "../sources/english";
 import { Iterable } from "../sources/iterable";
 import { PreCondition } from "../sources/preCondition";
-import { escapeAndQuote } from "../sources/strings";
+import { ToStringFunctions } from "../sources/toStringFunctions";
 import {
     getName, getParameterCount, isBoolean, isFunction, isString, Type
 } from "../sources/types";
@@ -51,20 +51,8 @@ export abstract class TestRunner
      */
     public static toString(_runner: TestRunner, value: unknown): string
     {
-        let result: string;
-        if (isString(value))
-        {
-            result = escapeAndQuote(value);
-        }
-        else if (value === undefined)
-        {
-            result = "undefined";
-        }
-        else
-        {
-            result = JSON.stringify(value);
-        }
-        return result;
+        const toStringFunctions: ToStringFunctions = ToStringFunctions.create();
+        return toStringFunctions.toString(value);
     }
 
     public skip(message?: string): TestSkip;

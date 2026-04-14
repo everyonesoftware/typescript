@@ -1,6 +1,7 @@
 import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { isMap, Map, MapEntry } from "./map";
+import { isSet, Set } from "./set";
 import { escapeAndQuote, join } from "./strings";
 import { isArray, isIterable, isNumber, isObject, isString } from "./types";
 
@@ -27,6 +28,10 @@ export class ToStringFunctions
         if (isMap(value))
         {
             result = this.mapToString(value);
+        }
+        else if (isSet(value))
+        {
+            result = this.setToString(value);
         }
         else if (isIterable(value))
         {
@@ -146,12 +151,31 @@ export class ToStringFunctions
         {
             let entry: MapEntry<unknown,unknown> = iterator.getCurrent();
             result += `${this.toString(entry.key)}:${this.toString(entry.value)}`;
-            while (iterator.next())
+            while (iterator.next().await())
             {
                 result += ",";
 
                 entry = iterator.getCurrent();
                 result += `${this.toString(entry.key)}:${this.toString(entry.value)}`;
+            }
+        }
+
+        result += "}";
+        return result;
+    }
+
+    private setToString(values: Set<unknown>): string
+    {
+        let result = "";
+        result += "{";
+
+        const iterator: Iterator<unknown> = values.iterate();
+        if (iterator.next().await())
+        {
+            result += this.toString(iterator.getCurrent());
+            while (iterator.next().await())
+            {
+                result += `,${this.toString(iterator.getCurrent())}`;
             }
         }
 
