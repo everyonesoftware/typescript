@@ -4,6 +4,7 @@ import { RecreationDotGovClient, RecreationDotGovDivisionAvailability, Recreatio
 import { WonderlandTrailClient, WonderlandTrailLocations } from "../sources/wonderlandTrailClient";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
+import { hasNetworkAccess } from "./tests";
 
 export function test(runner: TestRunner): void
 {
@@ -66,11 +67,19 @@ export function test(runner: TestRunner): void
                     "Expected: not empty",
                     "Actual: \"\"",
                 ));
-                getPermitItineraryErrorTest("oopsie!", new RecreationDotGovError(
-                    `No permit itinerary found for id: "oopsie!"`,
-                ));
 
-                runner.test("with valid permit itinerary id", async (test: Test) =>
+                runner.test("with invalid permit itinerary id", runner.skip(!hasNetworkAccess), async (test: Test) =>
+                {
+                    const client: RecreationDotGovClient = RecreationDotGovClient.create(HttpClient.create());
+                    await test.assertThrowsAsync(
+                        async () => await client.getPermitItinerary("oopsie!"),
+                        new RecreationDotGovError(
+                            `No permit itinerary found for id: "oopsie!"`,
+                        ),
+                    );
+                });
+
+                runner.test("with valid permit itinerary id", runner.skip(!hasNetworkAccess), async (test: Test) =>
                 {
                     const client: RecreationDotGovClient = RecreationDotGovClient.create(HttpClient.create());
                     const result: RecreationDotGovPermitItineraryJson = await client.getPermitItinerary(WonderlandTrailClient.permitItineraryId);
@@ -118,7 +127,7 @@ export function test(runner: TestRunner): void
                     `No permit itinerary found for id: "oopsie!"`,
                 ));
 
-                runner.test("with invalid division id", async (test: Test) =>
+                runner.test("with invalid division id", runner.skip(!hasNetworkAccess), async (test: Test) =>
                 {
                     const client: RecreationDotGovClient = RecreationDotGovClient.create(HttpClient.create());
                     const itineraryId: string = WonderlandTrailClient.permitItineraryId;
@@ -137,7 +146,7 @@ export function test(runner: TestRunner): void
                     test.assertUndefined(response.minimumGroupSize);
                 });
 
-                runner.test("with Sunrise Camp division id", async (test: Test) =>
+                runner.test("with Sunrise Camp division id", runner.skip(!hasNetworkAccess), async (test: Test) =>
                 {
                     const client: RecreationDotGovClient = RecreationDotGovClient.create(HttpClient.create());
 
@@ -157,7 +166,7 @@ export function test(runner: TestRunner): void
                     test.assertNotUndefinedAndNotNull(response.minimumGroupSize);
                 });
 
-                runner.test("with Indian Bar division id", async (test: Test) =>
+                runner.test("with Indian Bar division id", runner.skip(!hasNetworkAccess), async (test: Test) =>
                 {
                     const client: RecreationDotGovClient = RecreationDotGovClient.create(HttpClient.create());
 

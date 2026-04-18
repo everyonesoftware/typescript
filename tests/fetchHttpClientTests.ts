@@ -3,6 +3,7 @@ import { FetchHttpIncomingResponse } from "../sources/fetchHttpResponse";
 import { HttpOutgoingRequest } from "../sources/httpOutgoingRequest";
 import { Test } from "./test";
 import { TestRunner } from "./testRunner";
+import { hasNetworkAccess } from "./tests";
 
 export function test(runner: TestRunner): void
 {
@@ -18,7 +19,7 @@ export function test(runner: TestRunner): void
 
             runner.testFunction("sendRequest()", () =>
             {
-                runner.test("to URL that exists", runner.skip(false, "No network connection"), async (test: Test) =>
+                runner.test("to URL that exists", runner.skip(!hasNetworkAccess), async (test: Test) =>
                 {
                     const client: FetchHttpClient = FetchHttpClient.create();
 
