@@ -3,6 +3,7 @@ import { Iterable } from "./iterable";
 import { Iterator } from "./iterator";
 import { JavascriptIterable, JavascriptIterator } from "./javascript";
 import { JavascriptArrayList } from "./javascriptArrayList";
+import { NotFoundError } from "./notFoundError";
 import { PreCondition } from "./preCondition";
 import { SyncResult } from "./syncResult";
 import { ToStringFunctions } from "./toStringFunctions";
@@ -100,15 +101,15 @@ export abstract class List<T> implements Iterable<T>
 
     /**
      * Attempt to remove the first instance of the provided value from this {@link List}. Return
-     * whether the value was removed.
+     * whether the removed value.
      * @param value The value to remove.
      */
-    public remove(value: T, equalFunctions?: EqualFunctions): boolean
+    public remove(value: T, equalFunctions?: EqualFunctions): SyncResult<T>
     {
         return List.remove(this, value, equalFunctions);
     }
 
-    public static remove<T>(list: List<T>, value: T, equalFunctions?: EqualFunctions): boolean
+    public static remove<T>(list: List<T>, value: T, equalFunctions?: EqualFunctions): SyncResult<T>
     {
         PreCondition.assertNotUndefinedAndNotNull(list, "list");
 
@@ -117,18 +118,32 @@ export abstract class List<T> implements Iterable<T>
             equalFunctions = EqualFunctions.create();
         }
 
-        let result: boolean = false;
-        for (let i = 0; i < list.getCount().await(); i++)
+        return SyncResult.create(() =>
         {
-            if (equalFunctions.areEqual(value, list.get(i)).await())
-            {
-                list.removeAt(i);
-                result = true;
-                break;
-            }
-        }
+            let foundValue: boolean = false;
+            let result: T | undefined;
 
-        return result;
+            const count: number = list.getCount().await();
+            for (let i = 0; i < count; i++)
+            {
+                const currentValue: T = list.get(i).await();
+                if (equalFunctions.areEqual(value, currentValue).await())
+                {
+                    result = currentValue;
+                    list.removeAt(i).await();
+                    foundValue = true;
+                    break;
+                }
+            }
+
+            if (!foundValue)
+            {
+                const toStringFunctions: ToStringFunctions = ToStringFunctions.create();
+                throw new NotFoundError(`Could not find the value to remove: ${toStringFunctions.toString(value)}`);
+            }
+
+            return result!;
+        });
     }
 
     /**
@@ -235,7 +250,7 @@ export abstract class List<T> implements Iterable<T>
 
     public map<TOutput>(mapping: (value: T) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>
     {
-        return List.map<T,TOutput>(this, mapping);
+        return List.map<T, TOutput>(this, mapping);
     }
 
     public static map<TInput, TOutput>(list: List<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>)): Iterable<TOutput>

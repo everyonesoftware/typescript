@@ -41,6 +41,7 @@ import * as whereIteratorTests from "./whereIteratorTests";
 import * as wonderlandTrailClientTests from "./wonderlandTrailClientTests";
 import * as setTests from "./setTests";
 import * as depthFirstSearchTests from "./depthFirstSearchTests";
+import * as byteListTests from "./byteListTests";
 
 export const hasNetworkAccess: boolean = false;
 
@@ -87,4 +88,5 @@ await ConsoleTestRunner.run([
     wonderlandTrailClientTests,
     setTests,
     depthFirstSearchTests,
+    byteListTests,
 ]);

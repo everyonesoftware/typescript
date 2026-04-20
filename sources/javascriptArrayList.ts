@@ -103,7 +103,7 @@ export class JavascriptArrayList<T> implements List<T>
         return List.addAll(this, values);
     }
 
-    public remove(value: T, equalFunctions?: EqualFunctions): boolean
+    public remove(value: T, equalFunctions?: EqualFunctions): SyncResult<T>
     {
         return List.remove(this, value, equalFunctions);
     }
