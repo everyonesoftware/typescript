@@ -139,6 +139,7 @@ export function test(runner: TestRunner): void
             isArrayTest("hello", false);
             isArrayTest(Iterable.create(), false);
             isArrayTest(List.create(), false);
+            isArrayTest(new Uint8Array(), false);
 
             isArrayTest([], true);
             isArrayTest(["a", "b"], true);

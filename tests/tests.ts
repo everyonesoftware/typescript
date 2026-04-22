@@ -42,8 +42,9 @@ import * as wonderlandTrailClientTests from "./wonderlandTrailClientTests";
 import * as setTests from "./setTests";
 import * as depthFirstSearchTests from "./depthFirstSearchTests";
 import * as byteListTests from "./byteListTests";
+import * as byteListStreamTests from "./byteListStreamTests";
 
-export const hasNetworkAccess: boolean = false;
+export const hasNetworkAccess: boolean = true;
 
 await ConsoleTestRunner.run([
     assertTestTests,
@@ -89,4 +90,5 @@ await ConsoleTestRunner.run([
     setTests,
     depthFirstSearchTests,
     byteListTests,
+    byteListStreamTests,
 ]);

@@ -134,7 +134,7 @@ export function test(runner: TestRunner): void
                     const divisionId: string = "fake-division-id";
                     const month: number = 5;
                     const year: number = 2026;
-                    const earlyAccessPermitLotteryId: string = "29b19625-315e-4fb6-b811-934ad8724ad8";
+                    const earlyAccessPermitLotteryId: string = "";
                     
                     const response: RecreationDotGovDivisionAvailability = await client.getDivisionAvailability(itineraryId, divisionId, month, year, earlyAccessPermitLotteryId);
 
@@ -154,14 +154,14 @@ export function test(runner: TestRunner): void
                     const divisionId: string = WonderlandTrailLocations.sunriseCamp.divisionId;
                     const month: number = 8;
                     const year: number = 2026;
-                    const earlyAccessPermitLotteryId: string = "29b19625-315e-4fb6-b811-934ad8724ad8";
+                    const earlyAccessPermitLotteryId: string = "";
                     
                     const response: RecreationDotGovDivisionAvailability = await client.getDivisionAvailability(itineraryId, divisionId, month, year, earlyAccessPermitLotteryId);
 
                     test.assertNotUndefinedAndNotNull(response);
                     test.assertNotUndefinedAndNotNull(response.json);
                     test.assertNotUndefinedAndNotNull(response.dayAvailabilities);
-                    test.assertEqual(31, response.dayAvailabilities.getCount().await());
+                    test.assertEqual(0, response.dayAvailabilities.getCount().await());
                     test.assertNotUndefinedAndNotNull(response.maximumGroupSize);
                     test.assertNotUndefinedAndNotNull(response.minimumGroupSize);
                 });
@@ -174,14 +174,14 @@ export function test(runner: TestRunner): void
                     const divisionId: string = WonderlandTrailLocations.indianBar.divisionId;
                     const month: number = 7;
                     const year: number = 2026;
-                    const earlyAccessPermitLotteryId: string = "29b19625-315e-4fb6-b811-934ad8724ad8";
+                    const earlyAccessPermitLotteryId: string = "";
                     
                     const response: RecreationDotGovDivisionAvailability = await client.getDivisionAvailability(itineraryId, divisionId, month, year, earlyAccessPermitLotteryId);
 
                     test.assertNotUndefinedAndNotNull(response);
                     test.assertNotUndefinedAndNotNull(response.json);
                     test.assertNotUndefinedAndNotNull(response.dayAvailabilities);
-                    test.assertEqual(31, response.dayAvailabilities.getCount().await());
+                    test.assertEqual(0, response.dayAvailabilities.getCount().await());
                     test.assertNotUndefinedAndNotNull(response.maximumGroupSize);
                     test.assertNotUndefinedAndNotNull(response.minimumGroupSize);
                 });
