@@ -1,0 +1,106 @@
+---
+
+---
+
+<html>
+  <body>
+    <header class="navbar" role="banner">
+      <div class="navbar-container content-width">
+        <nav class="nav-menu" role="navigation">
+          <a class="navlink" href="/">Home</a>
+          <a class="navlink" href="/how-it-works">How It Works</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero content-width">
+      <div class="hero-content">
+        <h1><a href="/">Trail Food Score</a></h1>
+      </div>
+    </section>
+  </body>
+</html>
+
+<style>
+  :root {
+    --section-background: white;
+    --section-thick-border-color: #198c7a57;
+    --section-thin-border-color: #198c88;
+    --section-thin-border: 2px solid var(--section-thin-border-color);
+
+    --divider-color: hsl(0, 0%, 53%);
+
+    --navbar-color: #198c88;
+  }
+
+  body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    font-size: 1.1rem;
+  }
+
+  .navbar {
+    background-color: var(--navbar-color);
+    width: 100%;
+  }
+
+  .navbar-container {
+    margin: 0 auto;
+    padding: 0;
+    height: 48px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+  }
+
+  /* Nav menu (desktop) */
+  .nav-menu {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    height: 100%;
+  }
+
+  .content-width {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .navlink {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 12px;
+  }
+
+  .navlink:hover {
+    text-decoration: underline;
+  }
+
+  .navlink.active {
+    background-color: white;
+    font-weight: 700;
+    color: black;
+  }
+
+  .navlink.active:hover {
+    text-decoration: none;
+  }
+
+  .hero {
+    margin: 0 auto 0;
+    padding: 20px 0 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-content {
+    width: clamp(19rem, 90vw, 35rem);
+    text-align: center;
+  }
+</style>
