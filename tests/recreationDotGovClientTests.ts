@@ -161,7 +161,7 @@ export function test(runner: TestRunner): void
                     test.assertNotUndefinedAndNotNull(response);
                     test.assertNotUndefinedAndNotNull(response.json);
                     test.assertNotUndefinedAndNotNull(response.dayAvailabilities);
-                    test.assertEqual(0, response.dayAvailabilities.getCount().await());
+                    test.assertEqual(31, response.dayAvailabilities.getCount().await());
                     test.assertNotUndefinedAndNotNull(response.maximumGroupSize);
                     test.assertNotUndefinedAndNotNull(response.minimumGroupSize);
                 });
@@ -181,7 +181,7 @@ export function test(runner: TestRunner): void
                     test.assertNotUndefinedAndNotNull(response);
                     test.assertNotUndefinedAndNotNull(response.json);
                     test.assertNotUndefinedAndNotNull(response.dayAvailabilities);
-                    test.assertEqual(0, response.dayAvailabilities.getCount().await());
+                    test.assertEqual(31, response.dayAvailabilities.getCount().await());
                     test.assertNotUndefinedAndNotNull(response.maximumGroupSize);
                     test.assertNotUndefinedAndNotNull(response.minimumGroupSize);
                 });
