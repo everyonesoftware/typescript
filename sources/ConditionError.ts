@@ -1,15 +1,5 @@
-import { BaseError } from "./BaseError.js";
-import { JavascriptIterable } from "./javascript.js";
-import { join } from "./strings.js";
 import { StringTable } from "./StringTable.js";
-import { ToStringFunctions } from "./toStringFunctions.js";
-import { isJavascriptIterable, isUndefinedNullOrEmpty, isUndefinedOrNull } from "./types.js";
-
-export interface ConditionErrorDescribedValue
-{
-    readonly description?: string;
-    readonly value?: unknown;
-}
+import { isUndefinedNullOrEmpty } from "./types.js";
 
 export interface ConditionErrorData
 {
@@ -17,81 +7,28 @@ export interface ConditionErrorData
 
     readonly expression?: string;
 
-    readonly expected?: ConditionErrorDescribedValue;
-
-    readonly actual?: ConditionErrorDescribedValue;
+    readonly expected: string;
+    readonly actual: string;
 }
 
-export class ConditionError extends BaseError
+export function conditionErrorDataToMessage(data: ConditionErrorData): string
 {
-    public readonly data: ConditionErrorData;
+    const table: StringTable = StringTable.create();
 
-    public get expression(): string | undefined
+    if (!isUndefinedNullOrEmpty(data.message))
     {
-        return this.data.expression;
+        table.addRow(["Message:", data.message]);
     }
 
-    public get expected(): ConditionErrorDescribedValue | undefined
+    if (!isUndefinedNullOrEmpty(data.expression))
     {
-        return this.data.expected;
+        table.addRow(["Expression:", data.expression]);
     }
 
-    public get actual(): ConditionErrorDescribedValue | undefined
-    {
-        return this.data.actual;
-    }
+    table.addRow(["Expected:", data.expected]);
+    table.addRow(["Actual:", data.actual]);
 
-    public constructor(messageLines: JavascriptIterable<string>, toStringFunctions?: ToStringFunctions);
-    public constructor(data: ConditionErrorData, toStringFunctions?: ToStringFunctions);
-    constructor(messageLinesOrData: JavascriptIterable<string> | ConditionErrorData, toStringFunctions?: ToStringFunctions)
-    {
-        let message: string;
-        let data: ConditionErrorData;
-        if (isJavascriptIterable(messageLinesOrData))
-        {
-            message = join("\n", messageLinesOrData);
-            data = {
-                message: message,
-            };
-        }
-        else
-        {
-            data = messageLinesOrData;
-            message = ConditionError.dataToMessage(data, toStringFunctions);
-        }
-
-        super(message);
-
-        this.data = data;
-    }
-
-    public static dataToMessage(data: ConditionErrorData, toStringFunctions?: ToStringFunctions): string
-    {
-        const table: StringTable = StringTable.create();
-
-        if (!isUndefinedNullOrEmpty(data.message))
-        {
-            table.addRow(["Message:", data.message]);
-        }
-
-        if (!isUndefinedNullOrEmpty(data.expression))
-        {
-            table.addRow(["Expression:", data.expression]);
-        }
-
-        toStringFunctions ??= ToStringFunctions.create();
-        if (!isUndefinedOrNull(data.expected))
-        {
-            table.addRow(["Expected:", toStringFunctions.toString(data.expected.description ?? data.expected.value)]);
-        }
-
-        if (!isUndefinedOrNull(data.actual))
-        {
-            table.addRow(["Actual:", toStringFunctions.toString(data.actual.description ?? data.actual.value)]);
-        }
-
-        return table.toString({
-            betweenColumns: " ",
-        });
-    }
+    return table.toString({
+        betweenColumns: " ",
+    });
 }

@@ -1,5 +1,4 @@
 export * from "./ANSIStyles.js";
-export * from "./assertMessageParameters.js";
 export * from "./AsyncDisposable.js";
 export * from "./asyncIterator.js";
 export * from "./asyncIteratorToJavascriptAsyncIteratorAdapter.js";

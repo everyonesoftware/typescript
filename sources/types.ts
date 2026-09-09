@@ -375,6 +375,11 @@ export function isIterable<T>(value: unknown): value is Iterable<T>
         hasFunction(value, "iterate", { parameterCount: 0 });
 }
 
+export function asIterable<T>(value: JavascriptIterable<T>): Iterable<T>
+{
+    return isIterable<T>(value) ? value : Iterable.create<T>(value);
+}
+
 /**
  * Get whether the provided value is a {@link JavascriptAsyncIterator}.
  * @param value The value to check.

@@ -19,16 +19,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                createErrorTest(undefined!, new PreConditionError(
-                    "Expression: characters",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                createErrorTest(null!, new PreConditionError(
-                    "Expression: characters",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                createErrorTest(undefined!, new PreConditionError({
+                    expression: "characters",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                createErrorTest(null!, new PreConditionError({
+                    expression: "characters",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 function createTest(characters: string): void
                 {

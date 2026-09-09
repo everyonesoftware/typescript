@@ -10,31 +10,31 @@ export function test(runner: TestRunner): void
     {
         runner.testType("Generator<T>", () =>
         {
-            iteratorTests(runner, () => Generator.create(() => {}));
+            iteratorTests(runner, () => Generator.create(() => { }));
 
             runner.testFunction("create()", () =>
             {
                 runner.test("with undefined", (test: Test) =>
                 {
-                    test.assertThrows(() => Generator.create(undefined!), new PreConditionError(
-                        "Expression: generatorAction",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ));
+                    test.assertThrows(() => Generator.create(undefined!), new PreConditionError({
+                        expression: "generatorAction",
+                        expected: "not undefined and not null",
+                        actual: "undefined",
+                    }));
                 });
 
                 runner.test("with null", (test: Test) =>
                 {
-                    test.assertThrows(() => Generator.create(null!), new PreConditionError(
-                        "Expression: generatorAction",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ));
+                    test.assertThrows(() => Generator.create(null!), new PreConditionError({
+                        expression: "generatorAction",
+                        expected: "not undefined and not null",
+                        actual: "null",
+                    }));
                 });
 
                 runner.test("with function that doesn't add any return values or return a value", (test: Test) =>
                 {
-                    const generator: Generator<void> = Generator.create(() => {});
+                    const generator: Generator<void> = Generator.create(() => { });
                     test.assertNotUndefinedAndNotNull(generator);
                     test.assertEqual([], generator.toArray().await());
                 });

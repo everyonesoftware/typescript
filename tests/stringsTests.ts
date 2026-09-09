@@ -1,5 +1,6 @@
 import { PreConditionError } from "../sources/preConditionError.js";
-import {
+import
+{
     escape, escapeAndQuote, getLength, isDigit, isLetter, isLetterOrDigit, isLowercasedLetter,
     isUppercasedLetter, isWhitespace, iterateLines, join, quote
 } from "../sources/strings.js";
@@ -38,46 +39,54 @@ export function test(runner: TestRunner): void
             }
 
             joinErrorTest(undefined!, [],
-                new PreConditionError(
-                    "Expression: separator",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined"));
+                new PreConditionError({
+                    expression: "separator",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
             joinErrorTest(undefined!, ["a"],
-                new PreConditionError(
-                    "Expression: separator",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined"));
+                new PreConditionError({
+                    expression: "separator",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
             joinErrorTest(undefined!, ["a", "b"],
-                new PreConditionError(
-                    "Expression: separator",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined"));
+                new PreConditionError({
+                    expression: "separator",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
             joinErrorTest(undefined!, ["a", "b", "c"],
-                new PreConditionError(
-                    "Expression: separator",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined"));
+                new PreConditionError({
+                    expression: "separator",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
 
             joinErrorTest(null!, [],
-                new PreConditionError(
-                    "Expression: separator",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null"));
+                new PreConditionError({
+                    expression: "separator",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
             joinErrorTest(null!, ["a"],
-                new PreConditionError(
-                    "Expression: separator",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null"));
+                new PreConditionError({
+                    expression: "separator",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
             joinErrorTest(null!, ["a", "b"],
-                new PreConditionError(
-                    "Expression: separator",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null"));
+                new PreConditionError({
+                    expression: "separator",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
             joinErrorTest(null!, ["a", "b", "c"],
-                new PreConditionError(
-                    "Expression: separator",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null"));
+                new PreConditionError({
+                    expression: "separator",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
             function joinTest(separator: string, values: string[], expected: string): void
             {
@@ -87,7 +96,7 @@ export function test(runner: TestRunner): void
                 });
             }
 
-            
+
 
             joinTest("", [], "");
             joinTest("", ["a"], "a");
@@ -193,26 +202,26 @@ export function test(runner: TestRunner): void
                 });
             }
 
-            isWhitespaceErrorTest(undefined, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     undefined",
-            ])));
-            isWhitespaceErrorTest(null, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     null",
-            ])));
-            isWhitespaceErrorTest("", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     0",
-            ])));
-            isWhitespaceErrorTest("  ", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     2",
-            ])));
+            isWhitespaceErrorTest(undefined, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "undefined",
+            }));
+            isWhitespaceErrorTest(null, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "null",
+            }));
+            isWhitespaceErrorTest("", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "0",
+            }));
+            isWhitespaceErrorTest("  ", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "2",
+            }));
 
             function isWhitespaceTest(value: string, expected: boolean): void
             {
@@ -242,26 +251,26 @@ export function test(runner: TestRunner): void
                 });
             }
 
-            isLetterErrorTest(undefined, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     undefined",
-            ])));
-            isLetterErrorTest(null, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     null",
-            ])));
-            isLetterErrorTest("", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     0",
-            ])));
-            isLetterErrorTest("  ", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     2",
-            ])));
+            isLetterErrorTest(undefined, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "undefined",
+            }));
+            isLetterErrorTest(null, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "null",
+            }));
+            isLetterErrorTest("", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "0",
+            }));
+            isLetterErrorTest("  ", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "2",
+            }));
 
             function isLetterTest(value: string, expected: boolean): void
             {
@@ -277,7 +286,7 @@ export function test(runner: TestRunner): void
             isLetterTest("A", true);
             isLetterTest("N", true);
             isLetterTest("Z", true);
-            
+
             isLetterTest(" ", false);
             isLetterTest("\n", false);
             isLetterTest("\r", false);
@@ -297,26 +306,26 @@ export function test(runner: TestRunner): void
                 });
             }
 
-            isLowercasedLetterErrorTest(undefined, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     undefined",
-            ])));
-            isLowercasedLetterErrorTest(null, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     null",
-            ])));
-            isLowercasedLetterErrorTest("", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     0",
-            ])));
-            isLowercasedLetterErrorTest("  ", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     2",
-            ])));
+            isLowercasedLetterErrorTest(undefined, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "undefined",
+            }));
+            isLowercasedLetterErrorTest(null, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "null",
+            }));
+            isLowercasedLetterErrorTest("", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "0",
+            }));
+            isLowercasedLetterErrorTest("  ", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "2",
+            }));
 
             function isLowercasedLetterTest(value: string, expected: boolean): void
             {
@@ -352,26 +361,26 @@ export function test(runner: TestRunner): void
                 });
             }
 
-            isUppercasedLetterErrorTest(undefined, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     undefined",
-            ])));
-            isUppercasedLetterErrorTest(null, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     null",
-            ])));
-            isUppercasedLetterErrorTest("", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     0",
-            ])));
-            isUppercasedLetterErrorTest("  ", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     2",
-            ])));
+            isUppercasedLetterErrorTest(undefined, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "undefined",
+            }));
+            isUppercasedLetterErrorTest(null, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "null",
+            }));
+            isUppercasedLetterErrorTest("", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "0",
+            }));
+            isUppercasedLetterErrorTest("  ", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "2",
+            }));
 
             function isUppercasedLetterTest(value: string, expected: boolean): void
             {
@@ -380,7 +389,7 @@ export function test(runner: TestRunner): void
                     test.assertSame(isUppercasedLetter(value), expected);
                 });
             }
-            
+
             isUppercasedLetterTest("A", true);
             isUppercasedLetterTest("N", true);
             isUppercasedLetterTest("Z", true);
@@ -407,26 +416,26 @@ export function test(runner: TestRunner): void
                 });
             }
 
-            isDigitErrorTest(undefined, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     undefined",
-            ])));
-            isDigitErrorTest(null, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     null",
-            ])));
-            isDigitErrorTest("", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     0",
-            ])));
-            isDigitErrorTest("  ", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     2",
-            ])));
+            isDigitErrorTest(undefined, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "undefined",
+            }));
+            isDigitErrorTest(null, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "null",
+            }));
+            isDigitErrorTest("", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "0",
+            }));
+            isDigitErrorTest("  ", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "2",
+            }));
 
             function isDigitTest(value: string, expected: boolean): void
             {
@@ -435,7 +444,7 @@ export function test(runner: TestRunner): void
                     test.assertSame(isDigit(value), expected);
                 });
             }
-            
+
             isDigitTest("0", true);
             isDigitTest("5", true);
             isDigitTest("9", true);
@@ -465,26 +474,26 @@ export function test(runner: TestRunner): void
                 });
             }
 
-            isLetterOrDigitErrorTest(undefined, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     undefined",
-            ])));
-            isLetterOrDigitErrorTest(null, new PreConditionError(join("\n", [
-                "Expression: value",
-                "Expected:   not undefined and not null",
-                "Actual:     null",
-            ])));
-            isLetterOrDigitErrorTest("", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     0",
-            ])));
-            isLetterOrDigitErrorTest("ab", new PreConditionError(join("\n", [
-                "Expression: value.length",
-                "Expected:   1",
-                "Actual:     2",
-            ])));
+            isLetterOrDigitErrorTest(undefined, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "undefined",
+            }));
+            isLetterOrDigitErrorTest(null, new PreConditionError({
+                expression: "value",
+                expected: "not undefined and not null",
+                actual: "null",
+            }));
+            isLetterOrDigitErrorTest("", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "0",
+            }));
+            isLetterOrDigitErrorTest("ab", new PreConditionError({
+                expression: "value.length",
+                expected: "1",
+                actual: "2",
+            }));
 
             function isLetterOrDigitTest(value: string, expected: boolean): void
             {
@@ -493,7 +502,7 @@ export function test(runner: TestRunner): void
                     test.assertSame(isLetterOrDigit(value), expected);
                 });
             }
-            
+
             isLetterOrDigitTest("0", true);
             isLetterOrDigitTest("5", true);
             isLetterOrDigitTest("9", true);

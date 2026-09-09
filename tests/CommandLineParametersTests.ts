@@ -1,4 +1,4 @@
-import { CommandLineParameters, Iterable, JavascriptIterable, PreConditionError } from "../sources/index.js";
+import { CommandLineParameters, Iterable, JavascriptIterable, NotFoundError, PreConditionError } from "../sources/index.js";
 import { Test } from "./test.js";
 import { TestRunner } from "./testRunner.js";
 
@@ -18,16 +18,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                createErrorTest(undefined!, new PreConditionError(
-                    "Expression: argv",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                createErrorTest(null!, new PreConditionError(
-                    "Expression: argv",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                createErrorTest(undefined!, new PreConditionError({
+                    expression: "argv",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                createErrorTest(null!, new PreConditionError({
+                    expression: "argv",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 function createTest(argv: JavascriptIterable<string>): void
                 {
@@ -76,33 +76,33 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                getNamedArgumentStringValueErrorTest([], undefined!, new PreConditionError(
-                    "Expression: nameOrNames",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                getNamedArgumentStringValueErrorTest([], null!, new PreConditionError(
-                    "Expression: nameOrNames",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
-                getNamedArgumentStringValueErrorTest([], "", new PreConditionError(
-                    "Expression: nameOrNames",
-                    "Expected:   not empty",
-                    "Actual:     \"\"",
-                ));
-                getNamedArgumentStringValueErrorTest([], [], new PreConditionError(
-                    "Expression: nameOrNames",
-                    "Expected:   not empty",
-                    "Actual:     []",
-                ));
-                getNamedArgumentStringValueErrorTest([], "a", new PreConditionError(
+                getNamedArgumentStringValueErrorTest([], undefined!, new PreConditionError({
+                    expression: "nameOrNames",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                getNamedArgumentStringValueErrorTest([], null!, new PreConditionError({
+                    expression: "nameOrNames",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
+                getNamedArgumentStringValueErrorTest([], "", new PreConditionError({
+                    expression: "nameOrNames",
+                    expected: "not empty",
+                    actual: `""`,
+                }));
+                getNamedArgumentStringValueErrorTest([], [], new PreConditionError({
+                    expression: "nameOrNames",
+                    expected: "not empty",
+                    actual: "[]",
+                }));
+                getNamedArgumentStringValueErrorTest([], "a", new NotFoundError(
                     "No argument found that matches \"a\".",
                 ));
-                getNamedArgumentStringValueErrorTest([], ["a", "b"], new PreConditionError(
+                getNamedArgumentStringValueErrorTest([], ["a", "b"], new NotFoundError(
                     "No argument found that matches \"a\" or \"b\".",
                 ));
-                getNamedArgumentStringValueErrorTest([], ["a", "b", "c"], new PreConditionError(
+                getNamedArgumentStringValueErrorTest([], ["a", "b", "c"], new NotFoundError(
                     "No argument found that matches \"a\", \"b\", or \"c\".",
                 ));
             });

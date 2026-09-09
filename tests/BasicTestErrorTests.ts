@@ -19,16 +19,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                createErrorTest(undefined, new PreConditionError(
-                    "Expression: error",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                createErrorTest(null, new PreConditionError(
-                    "Expression: error",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                createErrorTest(undefined, new PreConditionError({
+                    expression: "error",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                createErrorTest(null, new PreConditionError({
+                    expression: "error",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 runner.test(`with ${runner.toString("hello there")}`, (test: Test) =>
                 {

@@ -2,6 +2,7 @@ import { PromiseAsyncResult } from "../sources/promiseAsyncResult.js";
 import { PreConditionError } from "../sources/preConditionError.js";
 import { Test } from "./test.js";
 import { TestRunner } from "./testRunner.js";
+import { NotFoundError } from "../sources/index.js";
 
 export function test(runner: TestRunner): void
 {
@@ -19,16 +20,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                createErrorTest("with undefined", undefined!, new PreConditionError(
-                    "Expression: action or promise",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                createErrorTest("with null", null!, new PreConditionError(
-                    "Expression: action or promise",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                createErrorTest("with undefined", undefined!, new PreConditionError({
+                    expression: "action or promise",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                createErrorTest("with null", null!, new PreConditionError({
+                    expression: "action or promise",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 runner.test("with Promise", async (test: Test) =>
                 {
@@ -174,20 +175,22 @@ export function test(runner: TestRunner): void
                 {
                     const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.value(5);
                     test.assertThrows(() => parentResult.catch(undefined!, () => 6),
-                        new PreConditionError(
-                            "Expression: errorType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined"));
+                        new PreConditionError({
+                            expression: "errorType",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }));
                 });
 
                 runner.test("with null errorType", (test: Test) =>
                 {
                     const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.value(5);
                     test.assertThrows(() => parentResult.catch(null!, () => 6),
-                        new PreConditionError(
-                            "Expression: errorType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null"));
+                        new PreConditionError({
+                            expression: "errorType",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }));
                 });
 
                 runner.test("with error parent", async (test: Test) =>
@@ -249,14 +252,14 @@ export function test(runner: TestRunner): void
 
                 runner.test("with errorType that is a super-type of the actual error without error parameter", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("abc"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("abc"));
                     const catchResult: PromiseAsyncResult<number> = parentResult.catch(Error, () => 5);
                     test.assertSame(await catchResult, 5);
                 });
 
                 runner.test("with errorType that is a super-type of the actual error with error parameter", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("abc"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("abc"));
                     const catchResult: PromiseAsyncResult<number> = parentResult.catch(Error, (error: Error) => error.message.length);
                     test.assertSame(await catchResult, 3);
                 });
@@ -270,14 +273,14 @@ export function test(runner: TestRunner): void
 
                 runner.test("with errorType that is unrelated to the actual error", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("def"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("def"));
                     const catchResult: PromiseAsyncResult<number> = parentResult.catch(RangeError, () => 20);
-                    await test.assertThrowsAsync(catchResult, new PreConditionError("def"));
+                    await test.assertThrowsAsync(catchResult, new NotFoundError("def"));
                 });
 
                 runner.test("with catchFunction that throws", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("def"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("def"));
                     const catchResult: PromiseAsyncResult<number> = parentResult.catch(Error, () => { throw new TypeError("abc"); });
                     await test.assertThrowsAsync(catchResult, new TypeError("abc"));
                 });
@@ -296,20 +299,22 @@ export function test(runner: TestRunner): void
                 {
                     const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.value(5);
                     test.assertThrows(() => parentResult.onError(undefined!, () => { }),
-                        new PreConditionError(
-                            "Expression: errorType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined"));
+                        new PreConditionError({
+                            expression: "errorType",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }));
                 });
 
                 runner.test("with null errorType", (test: Test) =>
                 {
                     const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.value(5);
                     test.assertThrows(() => parentResult.onError(null!, () => { }),
-                        new PreConditionError(
-                            "Expression: errorType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null"));
+                        new PreConditionError({
+                            expression: "errorType",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }));
                 });
 
                 runner.test("with error parent, no errorType, and no error parameter", async (test: Test) =>
@@ -350,26 +355,26 @@ export function test(runner: TestRunner): void
 
                 runner.test("with errorType that is a super-type of the actual error without error parameter", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("abc"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("abc"));
                     let counter: number = 0;
                     const catchResult: PromiseAsyncResult<number> = parentResult.onError(Error, () => { counter++; });
                     test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
-                        await test.assertThrowsAsync(catchResult, new PreConditionError("abc"));
+                        await test.assertThrowsAsync(catchResult, new NotFoundError("abc"));
                         test.assertSame(counter, 1);
                     }
                 });
 
                 runner.test("with errorType that is a super-type of the actual error with error parameter", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("abc"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("abc"));
                     let counter: number = 0;
                     const catchResult: PromiseAsyncResult<number> = parentResult.onError(Error, (error: Error) => { counter += error.message.length; });
                     test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
-                        await test.assertThrowsAsync(catchResult, new PreConditionError("abc"));
+                        await test.assertThrowsAsync(catchResult, new NotFoundError("abc"));
                         test.assertSame(counter, 3);
                     }
                 });
@@ -389,20 +394,20 @@ export function test(runner: TestRunner): void
 
                 runner.test("with errorType that is unrelated to the actual error", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("def"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("def"));
                     let counter: number = 0;
                     const catchResult: PromiseAsyncResult<number> = parentResult.onError(RangeError, () => { counter++; });
                     test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
-                        await test.assertThrowsAsync(catchResult, new PreConditionError("def"));
+                        await test.assertThrowsAsync(catchResult, new NotFoundError("def"));
                         test.assertSame(counter, 0);
                     }
                 });
 
                 runner.test("with onErrorFunction that throws", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("def"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("def"));
                     let counter: number = 0;
                     const catchResult: PromiseAsyncResult<number> = parentResult.onError(Error, () => { counter++; throw new Error("abc"); });
                     test.assertSame(counter, 0);
@@ -433,20 +438,22 @@ export function test(runner: TestRunner): void
                 {
                     const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.value(5);
                     test.assertThrows(() => parentResult.convertError(undefined!),
-                        new PreConditionError(
-                            "Expression: convertErrorFunction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined"));
+                        new PreConditionError({
+                            expression: "convertErrorFunction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }));
                 });
 
                 runner.test("with null convertErrorFunction", (test: Test) =>
                 {
                     const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.value(5);
                     test.assertThrows(() => parentResult.convertError(null!),
-                        new PreConditionError(
-                            "Expression: convertErrorFunction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null"));
+                        new PreConditionError({
+                            expression: "convertErrorFunction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }));
                 });
 
                 runner.test("with successful parent", async (test: Test) =>
@@ -536,7 +543,7 @@ export function test(runner: TestRunner): void
 
                 runner.test("with error parent, super error match, and non-throwing convertErrorFunction", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("abc"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("abc"));
                     let counter: number = 0;
                     const convertErrorResult: PromiseAsyncResult<number> = parentResult.convertError(Error, (error: Error) =>
                     {
@@ -553,7 +560,7 @@ export function test(runner: TestRunner): void
 
                 runner.test("with error parent, no error match, and non-throwing convertErrorFunction", async (test: Test) =>
                 {
-                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new PreConditionError("abc"));
+                    const parentResult: PromiseAsyncResult<number> = PromiseAsyncResult.error(new NotFoundError("abc"));
                     let counter: number = 0;
                     const convertErrorResult: PromiseAsyncResult<number> = parentResult.convertError(TypeError, (error: TypeError) =>
                     {
@@ -563,7 +570,7 @@ export function test(runner: TestRunner): void
                     test.assertSame(counter, 0);
                     for (let i = 0; i < 3; i++)
                     {
-                        await test.assertThrowsAsync(convertErrorResult, new PreConditionError("abc"));
+                        await test.assertThrowsAsync(convertErrorResult, new NotFoundError("abc"));
                         test.assertSame(counter, 0);
                     }
                 });

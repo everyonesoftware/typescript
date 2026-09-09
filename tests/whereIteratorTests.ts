@@ -11,7 +11,7 @@ export function test(runner: TestRunner): void
     {
         runner.testType("WhereIterator<T>", () =>
         {
-            iteratorTests(runner, () => WhereIterator.create(Iterator.create<number>([]), (_: number) => true));
+            iteratorTests(runner, () => WhereIterator.create(Iterator.create<number>([]), (_value: number) => true));
 
             runner.testFunction("create(T[])", () =>
             {
@@ -27,21 +27,21 @@ export function test(runner: TestRunner): void
                     `with undefined innerIterator`,
                     undefined!,
                     (_value: number) => true,
-                    new PreConditionError(
-                        "Expression: innerIterator",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ),
+                    new PreConditionError({
+                        expression: "innerIterator",
+                        expected: "not undefined and not null",
+                        actual: "undefined",
+                    }),
                 );
                 createErrorTest(
                     `with null innerIterator`,
                     null!,
                     (_value: number) => true,
-                    new PreConditionError(
-                        "Expression: innerIterator",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ),
+                    new PreConditionError({
+                        expression: "innerIterator",
+                        expected: "not undefined and not null",
+                        actual: "null",
+                    }),
                 );
 
                 function createTest<T>(testName: string, innerIterator: Iterator<T>, condition: (value: T) => boolean, expected: T[]): void
@@ -56,7 +56,7 @@ export function test(runner: TestRunner): void
                 createTest(
                     `with empty innerIterator`,
                     Iterator.create<number>([]),
-                    (_: number) => true,
+                    (_value: number) => true,
                     [],
                 );
                 createTest(

@@ -29,16 +29,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                sendRequestErrorTest(undefined!, new PreConditionError(
-                    "Expression: request",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                sendRequestErrorTest(null!, new PreConditionError(
-                    "Expression: request",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                sendRequestErrorTest(undefined!, new PreConditionError({
+                    expression: "request",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                sendRequestErrorTest(null!, new PreConditionError({
+                    expression: "request",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 runner.test("with simple request", async (test: Test) =>
                 {

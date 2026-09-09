@@ -1,5 +1,3 @@
-
-
 import { EqualFunctions } from "../sources/equalFunctions.js";
 import { MutableCondition } from "../sources/mutableCondition.js";
 import { PreConditionError } from "../sources/preConditionError.js";
@@ -32,16 +30,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                setToStringFunctionsErrorTest("with undefined", undefined!, new PreConditionError(
-                    "Expression: toStringFunctions",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                setToStringFunctionsErrorTest("with null", null!, new PreConditionError(
-                    "Expression: toStringFunctions",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                setToStringFunctionsErrorTest("with undefined", undefined!, new PreConditionError({
+                    expression: "toStringFunctions",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                setToStringFunctionsErrorTest("with null", null!, new PreConditionError({
+                    expression: "toStringFunctions",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 runner.test("with valid value", (test: Test) =>
                 {
@@ -67,16 +65,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                setEqualFunctionsErrorTest("with undefined", undefined!, new PreConditionError(
-                    "Expression: equalFunctions",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                setEqualFunctionsErrorTest("with null", null!, new PreConditionError(
-                    "Expression: equalFunctions",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                setEqualFunctionsErrorTest("with undefined", undefined!, new PreConditionError({
+                    expression: "equalFunctions",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                setEqualFunctionsErrorTest("with null", null!, new PreConditionError({
+                    expression: "equalFunctions",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 runner.test("with valid value", (test: Test) =>
                 {
@@ -101,57 +99,9 @@ export function test(runner: TestRunner): void
                 });
             });
 
-            runner.testFunction("setCreateErrorFunction()", () =>
-            {
-                function setCreateErrorFunctionErrorTest(testName: string, createErrorFunction: ((message: string) => Error), expected: Error): void
-                {
-                    runner.test(testName, (test: Test) =>
-                    {
-                        const mc: MutableCondition = MutableCondition.create();
-                        test.assertThrows(() => mc.setCreateErrorFunction(createErrorFunction), expected);
-                    });
-                }
-
-                setCreateErrorFunctionErrorTest("with undefined", undefined!, new PreConditionError(
-                    "Expression: createErrorFunction",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                setCreateErrorFunctionErrorTest("with null", null!, new PreConditionError(
-                    "Expression: createErrorFunction",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
-
-                runner.test("with valid function", (test: Test) =>
-                {
-                    const mc: MutableCondition = MutableCondition.create();
-                    test.assertThrows(() => mc.assertEqual(1, 2));
-
-                    mc.setCreateErrorFunction((message: string) =>
-                    {
-                        return Error(`fake '${message}' fake`);
-                    });
-
-                    mc.setEqualFunctions(
-                        EqualFunctions.create()
-                            .add((left: unknown, right: unknown) =>
-                            {
-                                return isNumber(left) && isNumber(right)
-                                    ? left % 2 === right % 2
-                                    : undefined;
-                            })
-                    )
-
-                    test.assertTrue(mc.areEqual(3, 5));
-                    test.assertFalse(mc.areEqual(3, 4));
-                    test.assertTrue(mc.areEqual(4, 4));
-                });
-            });
-
             runner.testFunction("assertUndefined()", () =>
             {
-                runner.test("with undefined", (_: Test) =>
+                runner.test("with undefined", (_test: Test) =>
                 {
                     const mc: MutableCondition = MutableCondition.create();
                     mc.assertUndefined(undefined);
@@ -196,7 +146,7 @@ export function test(runner: TestRunner): void
 
                 function assertNotUndefinedTest(value: unknown): void
                 {
-                    runner.test(`with ${runner.toString(value)}`, (_: Test) =>
+                    runner.test(`with ${runner.toString(value)}`, (_test: Test) =>
                     {
                         const mc: MutableCondition = MutableCondition.create();
                         mc.assertNotUndefined(value);
@@ -227,7 +177,7 @@ export function test(runner: TestRunner): void
                 areEqualTest(undefined, "", false);
                 areEqualTest(1, 2, false);
                 areEqualTest(false, true, false);
-                areEqualTest({a:1}, {a:2}, false);
+                areEqualTest({ a: 1 }, { a: 2 }, false);
             });
 
             runner.testFunction("toValueString()", () =>
@@ -246,7 +196,7 @@ export function test(runner: TestRunner): void
                 toValueStringTest(0, "0");
                 toValueStringTest("abc", `"abc"`);
                 toValueStringTest({}, "{}");
-                toValueStringTest({a:"a"}, `{"a":"a"}`);
+                toValueStringTest({ a: "a" }, `{"a":"a"}`);
             });
 
             runner.testFunction("createError()", () =>

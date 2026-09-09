@@ -25,18 +25,18 @@ export function test(runner: TestRunner): void
 
                 createErrorTest(
                     undefined,
-                    new PreConditionError(
-                        "Expression: value",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ));
+                    new PreConditionError({
+                        expression: "value",
+                        expected: "not undefined and not null",
+                        actual: "undefined",
+                    }));
                 createErrorTest(
                     null,
-                    new PreConditionError(
-                        "Expression: value",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ));
+                    new PreConditionError({
+                        expression: "value",
+                        expected: "not undefined and not null",
+                        actual: "null",
+                    }));
 
                 function createTest(value: string): void
                 {
@@ -46,17 +46,17 @@ export function test(runner: TestRunner): void
                         test.assertFalse(iterator.hasStarted());
                         test.assertFalse(iterator.hasCurrent());
                         test.assertThrows(() => iterator.getCurrentIndex(),
-                            new PreConditionError(
-                                "Expression: this.hasCurrent()",
-                                "Expected:   true",
-                                "Actual:     false",
-                            ));
+                            new PreConditionError({
+                                expression: "this.hasCurrent()",
+                                expected: "true",
+                                actual: "false",
+                            }));
                         test.assertThrows(() => iterator.getCurrent(),
-                            new PreConditionError(
-                                "Expression: this.hasCurrent()",
-                                "Expected:   true",
-                                "Actual:     false",
-                            ));
+                            new PreConditionError({
+                                expression: "this.hasCurrent()",
+                                expected: "true",
+                                actual: "false",
+                            }));
                     });
                 }
 
@@ -87,17 +87,17 @@ export function test(runner: TestRunner): void
                             test.assertTrue(iterator.hasStarted());
                             test.assertFalse(iterator.hasCurrent());
                             test.assertThrows(() => iterator.getCurrentIndex(),
-                                new PreConditionError(
-                                    "Expression: this.hasCurrent()",
-                                    "Expected:   true",
-                                    "Actual:     false",
-                                ));
+                                new PreConditionError({
+                                    expression: "this.hasCurrent()",
+                                    expected: "true",
+                                    actual: "false",
+                                }));
                             test.assertThrows(() => iterator.getCurrent(),
-                                new PreConditionError(
-                                    "Expression: this.hasCurrent()",
-                                    "Expected:   true",
-                                    "Actual:     false",
-                                ));
+                                new PreConditionError({
+                                    expression: "this.hasCurrent()",
+                                    expected: "true",
+                                    actual: "false",
+                                }));
                         }
                     });
                 }
@@ -132,17 +132,17 @@ export function test(runner: TestRunner): void
                             test.assertTrue(iterator.hasStarted());
                             test.assertFalse(iterator.hasCurrent());
                             test.assertThrows(() => iterator.getCurrentIndex(),
-                                new PreConditionError(
-                                    "Expression: this.hasCurrent()",
-                                    "Expected:   true",
-                                    "Actual:     false",
-                                ));
+                                new PreConditionError({
+                                    expression: "this.hasCurrent()",
+                                    expected: "true",
+                                    actual: "false",
+                                }));
                             test.assertThrows(() => iterator.getCurrent(),
-                                new PreConditionError(
-                                    "Expression: this.hasCurrent()",
-                                    "Expected:   true",
-                                    "Actual:     false",
-                                ));
+                                new PreConditionError({
+                                    expression: "this.hasCurrent()",
+                                    expected: "true",
+                                    actual: "false",
+                                }));
                         }
                     });
                 }

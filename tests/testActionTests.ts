@@ -1,5 +1,4 @@
 import { PreConditionError } from "../sources/preConditionError.js";
-import { join } from "../sources/strings.js";
 import { Test } from "./test.js";
 import { TestAction } from "./testAction.js";
 import { TestRunner } from "./testRunner.js";
@@ -23,42 +22,42 @@ export function test(runner: TestRunner): void
                 createErrorTest(
                     undefined,
                     undefined!,
-                    () => {},
-                    new PreConditionError(join("\n", [
-                        "Expression: name",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ])),
+                    () => { },
+                    new PreConditionError({
+                        expression: "name",
+                        expected: "not undefined and not null",
+                        actual: "undefined",
+                    }),
                 );
                 createErrorTest(
                     undefined,
                     null!,
-                    () => {},
-                    new PreConditionError(join("\n", [
-                        "Expression: name",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ])),
+                    () => { },
+                    new PreConditionError({
+                        expression: "name",
+                        expected: "not undefined and not null",
+                        actual: "null",
+                    }),
                 );
                 createErrorTest(
                     undefined,
                     "a",
                     undefined!,
-                    new PreConditionError(join("\n", [
-                        "Expression: action",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ])),
+                    new PreConditionError({
+                        expression: "action",
+                        expected: "not undefined and not null",
+                        actual: "undefined",
+                    }),
                 );
                 createErrorTest(
                     undefined,
                     "a",
                     null!,
-                    new PreConditionError(join("\n", [
-                        "Expression: action",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ])),
+                    new PreConditionError({
+                        expression: "action",
+                        expected: "not undefined and not null",
+                        actual: "null",
+                    }),
                 );
 
                 function createTest(parent: TestAction | undefined, name: string, action: () => (void | Promise<void>)): void
@@ -73,7 +72,7 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                createTest(undefined, "b", () => {});
+                createTest(undefined, "b", () => { });
             });
 
             runner.testFunction("run()", (test: Test) =>

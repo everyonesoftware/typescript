@@ -1,3 +1,4 @@
+import { join } from "../sources/index.js";
 import { PreConditionError } from "../sources/preConditionError.js";
 import { Test } from "./test.js";
 import { TestRunner } from "./testRunner.js";
@@ -8,14 +9,20 @@ export function test(runner: TestRunner): void
     {
         runner.testType("PreConditionError", () =>
         {
-            runner.testFunction("constructor(string|undefined)", () =>
+            runner.testFunction("constructor()", () =>
             {
-                runner.test("with no arguments", (test: Test) =>
+                runner.test("with expected and actual", (test: Test) =>
                 {
-                    const error: PreConditionError = new PreConditionError();
+                    const error: PreConditionError = new PreConditionError({
+                        expected: "abc",
+                        actual: "def",
+                    });
                     test.assertNotUndefinedAndNotNull(error);
                     test.assertEqual(error.name, "Error");
-                    test.assertEqual(error.message, "");
+                    test.assertEqual(error.message, join("\n", [
+                        "Expected: abc",
+                        "Actual:   def",
+                    ]));
                     test.assertNotUndefinedAndNotNull(error.stack);
                 });
             });

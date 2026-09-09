@@ -20,16 +20,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                setBodyStringErrorTest(undefined!, new PreConditionError(
-                    "Expression: body",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                setBodyStringErrorTest(null!, new PreConditionError(
-                    "Expression: body",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                setBodyStringErrorTest(undefined!, new PreConditionError({
+                    expression: "body",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                setBodyStringErrorTest(null!, new PreConditionError({
+                    expression: "body",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
             });
 
             runner.testFunction("setBodyJSON()", () =>
@@ -44,11 +44,11 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                setBodyJSONErrorTest(undefined!, new PreConditionError(
-                    "Expression: body",
-                    "Expected:   not undefined",
-                    "Actual:     undefined",
-                ));
+                setBodyJSONErrorTest(undefined!, new PreConditionError({
+                    expression: "body",
+                    expected: "not undefined",
+                    actual: "undefined",
+                }));
 
                 function setBodyJSONTest(body: JSONData, expectedBody?: string): void
                 {
@@ -72,7 +72,7 @@ export function test(runner: TestRunner): void
                 setBodyJSONTest(false, "false");
                 setBodyJSONTest(true, "true");
                 setBodyJSONTest({}, `{}`);
-                setBodyJSONTest({a:false}, `{"a":false}`);
+                setBodyJSONTest({ a: false }, `{"a":false}`);
             });
         });
     });

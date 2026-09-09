@@ -1,6 +1,5 @@
 import { andList, orList } from "../sources/english.js";
 import { PreConditionError } from "../sources/preConditionError.js";
-import { join } from "../sources/strings.js";
 import { Test } from "./test.js";
 import { TestRunner } from "./testRunner.js";
 
@@ -20,20 +19,18 @@ export function test(runner: TestRunner): void
 
             andListErrorTest(
                 undefined,
-                new PreConditionError(
-                    join("\n", [
-                        "Expression: values",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ])));
-                    andListErrorTest(
+                new PreConditionError({
+                    expression: "values",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+            andListErrorTest(
                 null,
-                new PreConditionError(
-                    join("\n", [
-                        "Expression: values",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ])));
+                new PreConditionError({
+                    expression: "values",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
             function andListTest(values: string[], expected: string): void
             {
@@ -47,7 +44,7 @@ export function test(runner: TestRunner): void
             andListTest([""], "");
             andListTest(["", ""], " and ");
             andListTest(["", "", ""], ", , and ");
-            
+
             andListTest(["a"], "a");
             andListTest(["a", "b"], "a and b");
             andListTest(["a", "b", "c"], "a, b, and c");
@@ -66,20 +63,18 @@ export function test(runner: TestRunner): void
 
             orListErrorTest(
                 undefined,
-                new PreConditionError(
-                    join("\n", [
-                        "Expression: values",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ])));
-                    orListErrorTest(
+                new PreConditionError({
+                    expression: "values",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+            orListErrorTest(
                 null,
-                new PreConditionError(
-                    join("\n", [
-                        "Expression: values",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ])));
+                new PreConditionError({
+                    expression: "values",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
             function orListTest(values: string[], expected: string): void
             {
@@ -93,7 +88,7 @@ export function test(runner: TestRunner): void
             orListTest([""], "");
             orListTest(["", ""], " or ");
             orListTest(["", "", ""], ", , or ");
-            
+
             orListTest(["a"], "a");
             orListTest(["a", "b"], "a or b");
             orListTest(["a", "b", "c"], "a, b, or c");

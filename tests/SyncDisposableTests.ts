@@ -20,16 +20,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                createErrorTest("with undefined", undefined!, new PreConditionError(
-                    "Expression: disposeFunction",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                createErrorTest("with null", null!, new PreConditionError(
-                    "Expression: disposeFunction",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                createErrorTest("with undefined", undefined!, new PreConditionError({
+                    expression: "disposeFunction",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                createErrorTest("with null", null!, new PreConditionError({
+                    expression: "disposeFunction",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 runner.test("with function", (test: Test) =>
                 {

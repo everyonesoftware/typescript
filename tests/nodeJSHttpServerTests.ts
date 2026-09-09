@@ -43,11 +43,11 @@ export function test(runner: TestRunner): void
                     const httpServer: NodeJSHttpServer = NodeJSHttpServer.create();
                     test.assertTrue(await httpServer.dispose());
 
-                    await test.assertThrowsAsync(async () => await httpServer.start(3000), new PreConditionError(
-                        "Expression: this.isDisposed()",
-                        "Expected:   false",
-                        "Actual:     true",
-                    ));
+                    await test.assertThrowsAsync(async () => await httpServer.start(3000), new PreConditionError({
+                        expression: "this.isDisposed()",
+                        expected: "false",
+                        actual: "true",
+                    }));
                     test.assertTrue(httpServer.isDisposed());
                     test.assertFalse(httpServer.isStarted());
                 });

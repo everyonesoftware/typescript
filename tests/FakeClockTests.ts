@@ -18,16 +18,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                createErrorTest(undefined!, new PreConditionError(
-                    "Expression: currentTime",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                createErrorTest(null!, new PreConditionError(
-                    "Expression: currentTime",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                createErrorTest(undefined!, new PreConditionError({
+                    expression: "currentTime",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                createErrorTest(null!, new PreConditionError({
+                    expression: "currentTime",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 function createTest(currentTime: DateTime): void
                 {
@@ -51,23 +51,23 @@ export function test(runner: TestRunner): void
                     {
                         const initial: DateTime = DateTime.parse("2026-03-12").await();
                         const clock: FakeClock = FakeClock.create(initial);
-                        
+
                         test.assertThrows(() => clock.setCurrent(current), expected);
 
                         test.assertEqual(clock.getCurrent(), initial);
                     });
                 }
 
-                setCurrentErrorTest(undefined!, new PreConditionError(
-                    "Expression: currentTime",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                setCurrentErrorTest(null!, new PreConditionError(
-                    "Expression: currentTime",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                setCurrentErrorTest(undefined!, new PreConditionError({
+                    expression: "currentTime",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                setCurrentErrorTest(null!, new PreConditionError({
+                    expression: "currentTime",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 function setCurrentTest(current: DateTime): void
                 {
@@ -75,7 +75,7 @@ export function test(runner: TestRunner): void
                     {
                         const initial: DateTime = DateTime.parse("2026-03-12").await();
                         const clock: FakeClock = FakeClock.create(initial);
-                        
+
                         const setCurrentResult: FakeClock = clock.setCurrent(current);
 
                         test.assertSame(clock, setCurrentResult);
@@ -95,30 +95,30 @@ export function test(runner: TestRunner): void
                     {
                         const initial: DateTime = DateTime.parse("2026-03-12").await();
                         const clock: FakeClock = FakeClock.create(initial);
-                        
+
                         test.assertThrows(() => clock.advanceCurrent(duration), expected);
 
                         test.assertEqual(clock.getCurrent(), initial);
                     });
                 }
 
-                advanceCurrentErrorTest(undefined!, new PreConditionError(
-                    "Expression: duration",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                advanceCurrentErrorTest(null!, new PreConditionError(
-                    "Expression: duration",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                advanceCurrentErrorTest(undefined!, new PreConditionError({
+                    expression: "duration",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                advanceCurrentErrorTest(null!, new PreConditionError({
+                    expression: "duration",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 function advanceCurrentTest(initial: DateTime, duration: Duration, expected: DateTime): void
                 {
                     runner.test(`with ${runner.toString(duration)}`, (test: Test) =>
                     {
                         const clock: FakeClock = FakeClock.create(initial);
-                        
+
                         const advanceCurrentResult: FakeClock = clock.advanceCurrent(duration);
 
                         test.assertSame(clock, advanceCurrentResult);

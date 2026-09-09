@@ -1,7 +1,6 @@
 import { Condition } from "../sources/condition.js";
 import { JavascriptIterable } from "../sources/javascript.js";
 import { MutableCondition } from "../sources/mutableCondition.js";
-import { PreConditionError } from "../sources/preConditionError.js";
 import { join } from "../sources/strings.js";
 import { Test } from "./test.js";
 import { TestRunner } from "./testRunner.js";
@@ -99,23 +98,23 @@ export function test(runner: TestRunner): void
                 {
                     const condition: MutableCondition = Condition.create();
                     test.assertThrows(() => condition.assertNotUndefinedAndNotNull(undefined, "fake-expression"),
-                        new Error([
+                        new Error(join("\n", [
                             "Expression: fake-expression",
                             "Expected:   not undefined and not null",
-                            "Actual:     undefined"
-                        ].join("\n")));
+                            "Actual:     undefined",
+                        ])));
                 });
 
                 runner.test("with null, expression, and message", (test: Test) =>
                 {
                     const condition: MutableCondition = Condition.create();
                     test.assertThrows(() => condition.assertNotUndefinedAndNotNull(null, "fake-expression", "fake-message"),
-                        new Error([
+                        new Error(join("\n", [
                             "Message:    fake-message",
                             "Expression: fake-expression",
                             "Expected:   not undefined and not null",
-                            "Actual:     null"
-                        ].join("\n")));
+                            "Actual:     null",
+                        ])));
                 });
             });
 
@@ -125,10 +124,10 @@ export function test(runner: TestRunner): void
                 {
                     const condition: MutableCondition = Condition.create();
                     test.assertThrows(() => condition.assertTrue(false),
-                        new Error([
+                        new Error(join("\n", [
                             "Expected: true",
                             "Actual:   false",
-                        ].join("\n")));
+                        ])));
                 });
 
                 runner.test("with true", (test: Test) =>
@@ -173,7 +172,7 @@ export function test(runner: TestRunner): void
                         test.assertThrows(() => condition.assertSame(expected, actual, expression, message), expectedError);
                     });
                 }
-                
+
                 assertSameErrorTest(
                     undefined,
                     null,
@@ -245,7 +244,7 @@ export function test(runner: TestRunner): void
                 assertSameTest(10, 10, "fake-expression", "fake-message");
                 assertSameTest(true, true, "fake-expression", "fake-message");
                 assertSameTest("abc", "abc", "fake-expression", "fake-message");
-                
+
                 const o = {};
                 assertSameTest(o, o, "fake-expression", "fake-message");
             });
@@ -327,7 +326,7 @@ export function test(runner: TestRunner): void
                         "Expected:   not \"abc\"",
                         "Actual:     \"abc\"",
                     ])));
-                
+
                 const o = {};
                 assertNotSameErrorTest(
                     o,
@@ -763,52 +762,52 @@ export function test(runner: TestRunner): void
                     5,
                     undefined,
                     undefined,
-                    new PreConditionError(
+                    new Error(join("\n", [
                         "Expression: possibilities",
                         "Expected:   not undefined and not null",
                         "Actual:     undefined",
-                    ));
+                    ])));
                 assertOneOfErrorTest(
                     null!,
                     5,
                     undefined,
                     undefined,
-                    new PreConditionError(
+                    new Error(join("\n", [
                         "Expression: possibilities",
                         "Expected:   not undefined and not null",
                         "Actual:     null",
-                    ));
+                    ])));
                 assertOneOfErrorTest(
                     [],
                     5,
                     undefined,
                     undefined,
-                    new PreConditionError(
+                    new Error(join("\n", [
                         "Expected: one of []",
                         "Actual:   5",
-                    ));
+                    ])));
                 assertOneOfErrorTest(
                     [],
                     5,
                     "fake-expression",
                     "fake-message",
-                    new PreConditionError(
+                    new Error(join("\n", [
                         "Message:    fake-message",
                         "Expression: fake-expression",
                         "Expected:   one of []",
                         "Actual:     5",
-                    ));
+                    ])));
                 assertOneOfErrorTest(
                     [1, 2, 3],
                     5,
                     "fake-expression",
                     "fake-message",
-                    new PreConditionError(
+                    new Error(join("\n", [
                         "Message:    fake-message",
                         "Expression: fake-expression",
                         "Expected:   one of [1,2,3]",
                         "Actual:     5",
-                    ));
+                    ])));
 
                 function assertOneOfTest<T>(possibilities: JavascriptIterable<T>, value: T, expression?: string, message?: string): void
                 {

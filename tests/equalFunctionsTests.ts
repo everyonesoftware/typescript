@@ -68,7 +68,7 @@ export function test(runner: TestRunner): void
                 areEqualTest(true, {}, false);
                 areEqualTest(true, [], false);
                 areEqualTest(true, Map.create(), false);
-                
+
                 areEqualTest("hello", undefined, false);
                 areEqualTest("hello", null, false);
                 areEqualTest("hello", false, false);
@@ -104,14 +104,14 @@ export function test(runner: TestRunner): void
                 areEqualTest({}, "hello", false);
                 areEqualTest({}, 20, false);
                 areEqualTest({}, {}, true);
-                areEqualTest({}, {a:5}, false);
-                areEqualTest({a:5}, {a:5}, true);
-                areEqualTest({a:{b:5}}, {a:{b:5}}, true);
-                areEqualTest({a:6}, {a:5}, false);
-                areEqualTest({A:5}, {a:5}, false);
+                areEqualTest({}, { a: 5 }, false);
+                areEqualTest({ a: 5 }, { a: 5 }, true);
+                areEqualTest({ a: { b: 5 } }, { a: { b: 5 } }, true);
+                areEqualTest({ a: 6 }, { a: 5 }, false);
+                areEqualTest({ A: 5 }, { a: 5 }, false);
                 areEqualTest({}, [], false);
                 areEqualTest({}, Map.create(), false);
-                areEqualTest({a:5}, Map.create<string,number>().set("a", 5), false);
+                areEqualTest({ a: 5 }, Map.create<string, number>().set("a", 5), false);
 
                 areEqualTest([], undefined, false);
                 areEqualTest([], null, false);
@@ -125,9 +125,9 @@ export function test(runner: TestRunner): void
                 areEqualTest([], [], true);
                 areEqualTest([], [1], false);
                 areEqualTest([1], [1], true);
-                areEqualTest([1,2,3], [1,2,3], true);
-                areEqualTest([1,2], [1,2,3], false);
-                areEqualTest([1,2], [1,3], false);
+                areEqualTest([1, 2, 3], [1, 2, 3], true);
+                areEqualTest([1, 2], [1, 2, 3], false);
+                areEqualTest([1, 2], [1, 3], false);
                 areEqualTest([], Map.create(), false);
 
                 areEqualTest(List.create(), undefined, false);
@@ -140,9 +140,9 @@ export function test(runner: TestRunner): void
                 areEqualTest(List.create(), [], true);
                 areEqualTest(List.create(), [1], false);
                 areEqualTest(List.create([1]), [1], true);
-                areEqualTest(List.create([1,2,3]), [1,2,3], true);
-                areEqualTest(List.create([1,2]), [1,2,3], false);
-                areEqualTest(List.create([1,2]), [1,3], false);
+                areEqualTest(List.create([1, 2, 3]), [1, 2, 3], true);
+                areEqualTest(List.create([1, 2]), [1, 2, 3], false);
+                areEqualTest(List.create([1, 2]), [1, 3], false);
                 areEqualTest(List.create(), Map.create(), false);
 
                 areEqualTest(Map.create(), undefined, false);
@@ -152,9 +152,9 @@ export function test(runner: TestRunner): void
                 areEqualTest(Map.create(), "hello", false);
                 areEqualTest(Map.create(), 20, false);
                 areEqualTest(Map.create(), {}, false);
-                areEqualTest(Map.create().set("d", 4), {d:4}, false);
-                areEqualTest(Map.create().set("d", 4), {d:5}, false);
-                areEqualTest(Map.create().set("d", 4), {e:4}, false);
+                areEqualTest(Map.create().set("d", 4), { d: 4 }, false);
+                areEqualTest(Map.create().set("d", 4), { d: 5 }, false);
+                areEqualTest(Map.create().set("d", 4), { e: 4 }, false);
                 areEqualTest(Map.create(), [], false);
                 areEqualTest(Map.create(), Map.create(), true);
                 areEqualTest(Map.create(), Map.create().set("e", 5), false);
@@ -171,11 +171,11 @@ export function test(runner: TestRunner): void
                     const functions: EqualFunctions = EqualFunctions.create();
                     test.assertThrows(
                         () => functions.add(undefined!),
-                        new PreConditionError([
-                            "Expression: equalFunction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined"
-                        ].join("\n")),
+                        new PreConditionError({
+                            expression: "equalFunction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     );
                 });
 
@@ -184,11 +184,11 @@ export function test(runner: TestRunner): void
                     const functions: EqualFunctions = EqualFunctions.create();
                     test.assertThrows(
                         () => functions.add(null!),
-                        new PreConditionError([
-                            "Expression: equalFunction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null"
-                        ].join("\n")),
+                        new PreConditionError({
+                            expression: "equalFunction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     );
                 });
 

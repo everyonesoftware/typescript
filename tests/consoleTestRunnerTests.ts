@@ -3,7 +3,6 @@ import { AssertionError } from "assert";
 import { InMemoryCharacterWriteStream } from "../sources/inMemoryCharacterWriteStream.js";
 import { Iterable } from "../sources/iterable.js";
 import { List } from "../sources/list.js";
-import { PreConditionError } from "../sources/preConditionError.js";
 import { WhereIterable } from "../sources/whereIterable.js";
 import { ConsoleTestRunner } from "./consoleTestRunner.js";
 import { FailedTest } from "./failedTest.js";
@@ -13,6 +12,7 @@ import { TestAction } from "./testAction.js";
 import { TestRunner } from "./testRunner.js";
 import * as testRunnerTests from "./testRunnerTests.js";
 import { TestError } from "./TestError.js";
+import { NotFoundError } from "../sources/notFoundError.js";
 
 interface RunnerStats
 {
@@ -243,7 +243,7 @@ export function test(runner: TestRunner): void
                 {
                     const writeStream: InMemoryCharacterWriteStream = InMemoryCharacterWriteStream.create();
                     const runner2: ConsoleTestRunner = ConsoleTestRunner.create().setWriteStream(writeStream);
-                    
+
                     runner2.testGroup("fake group", () =>
                     {
                         const currentTestAction: TestAction | undefined = runner2.getCurrentTestAction();
@@ -272,7 +272,7 @@ export function test(runner: TestRunner): void
                 {
                     const writeStream: InMemoryCharacterWriteStream = InMemoryCharacterWriteStream.create();
                     const runner2: ConsoleTestRunner = ConsoleTestRunner.create().setWriteStream(writeStream);
-                    
+
                     let counter: number = 0;
                     runner2.testGroup("fake group", runner2.skip(), () =>
                     {
@@ -302,7 +302,7 @@ export function test(runner: TestRunner): void
                 {
                     const writeStream: InMemoryCharacterWriteStream = InMemoryCharacterWriteStream.create();
                     const runner2: ConsoleTestRunner = ConsoleTestRunner.create().setWriteStream(writeStream);
-                    
+
                     runner2.testGroup("fake-group", runner2.skip("fake-group-skip-message"), () =>
                     {
                         runner2.test("fake-test", (test: Test) =>
@@ -342,7 +342,7 @@ export function test(runner: TestRunner): void
                 {
                     const writeStream: InMemoryCharacterWriteStream = InMemoryCharacterWriteStream.create();
                     const runner2: ConsoleTestRunner = ConsoleTestRunner.create().setWriteStream(writeStream);
-                    
+
                     runner2.testGroup("fake group", () =>
                     {
                         throw Error("oops!");
@@ -372,7 +372,7 @@ export function test(runner: TestRunner): void
                 {
                     const writeStream: InMemoryCharacterWriteStream = InMemoryCharacterWriteStream.create();
                     const runner2: ConsoleTestRunner = ConsoleTestRunner.create().setWriteStream(writeStream);
-                    
+
                     runner2.test("fake test", (test2: Test) =>
                     {
                         const currentTestAction: TestAction | undefined = runner2.getCurrentTestAction();
@@ -404,7 +404,7 @@ export function test(runner: TestRunner): void
                     let counter: number = 0;
                     const writeStream: InMemoryCharacterWriteStream = InMemoryCharacterWriteStream.create();
                     const runner2: ConsoleTestRunner = ConsoleTestRunner.create().setWriteStream(writeStream);
-                    
+
                     runner2.testGroup("fake-test-group", () =>
                     {
                         counter++;
@@ -645,7 +645,7 @@ export function test(runner: TestRunner): void
 
                     runner2.test("fake-test-1", () =>
                     {
-                        throw new PreConditionError("oops!");
+                        throw new NotFoundError("oops!");
                     });
                     assertRunnerStats(test, runner2, {
                         testActionCount: 1,

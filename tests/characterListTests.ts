@@ -82,16 +82,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                addErrorTest("", new PreConditionError(
-                    "Expression: value",
-                    "Expected:   character",
-                    "Actual:     \"\"",
-                ));
-                addErrorTest("ab", new PreConditionError(
-                    "Expression: value",
-                    "Expected:   character",
-                    "Actual:     \"ab\"",
-                ));
+                addErrorTest("", new PreConditionError({
+                    expression: "value",
+                    expected: "character",
+                    actual: `""`,
+                }));
+                addErrorTest("ab", new PreConditionError({
+                    expression: "value",
+                    expected: "character",
+                    actual: `"ab"`,
+                }));
 
                 runner.test("with valid value", (test: Test) =>
                 {
@@ -148,36 +148,36 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                insertErrorTest([], -1, "a", new PreConditionError(
-                    "Expression: index",
-                    "Expected:   0",
-                    "Actual:     -1",
-                ));
-                insertErrorTest([], 1, "a", new PreConditionError(
-                    "Expression: index",
-                    "Expected:   0",
-                    "Actual:     1",
-                ));
-                insertErrorTest(["z"], -1, "a", new PreConditionError(
-                    "Expression: index",
-                    "Expected:   between 0 and 1",
-                    "Actual:     -1",
-                ));
-                insertErrorTest(["z"], 2, "a", new PreConditionError(
-                    "Expression: index",
-                    "Expected:   between 0 and 1",
-                    "Actual:     2",
-                ));
-                insertErrorTest([], 0, "", new PreConditionError(
-                    "Expression: value",
-                    "Expected:   character",
-                    "Actual:     \"\"",
-                ));
-                insertErrorTest([], 0, "ab", new PreConditionError(
-                    "Expression: value",
-                    "Expected:   character",
-                    "Actual:     \"ab\"",
-                ));
+                insertErrorTest([], -1, "a", new PreConditionError({
+                    expression: "index",
+                    expected: "0",
+                    actual: "-1",
+                }));
+                insertErrorTest([], 1, "a", new PreConditionError({
+                    expression: "index",
+                    expected: "0",
+                    actual: "1",
+                }));
+                insertErrorTest(["z"], -1, "a", new PreConditionError({
+                    expression: "index",
+                    expected: "between 0 and 1",
+                    actual: "-1",
+                }));
+                insertErrorTest(["z"], 2, "a", new PreConditionError({
+                    expression: "index",
+                    expected: "between 0 and 1",
+                    actual: "2",
+                }));
+                insertErrorTest([], 0, "", new PreConditionError({
+                    expression: "value",
+                    expected: "character",
+                    actual: `""`,
+                }));
+                insertErrorTest([], 0, "ab", new PreConditionError({
+                    expression: "value",
+                    expected: "character",
+                    actual: `"ab"`,
+                }));
 
                 function insertTest(initialValues: JavascriptIterable<string>, index: number, value: string, expected: string[]): void
                 {

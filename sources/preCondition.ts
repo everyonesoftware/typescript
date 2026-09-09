@@ -1,3 +1,4 @@
+import { ConditionErrorData } from "./ConditionError.js";
 import { JavascriptIterable } from "./javascript.js";
 import { MutableCondition } from "./mutableCondition.js";
 import { PreConditionError } from "./preConditionError.js";
@@ -14,11 +15,10 @@ export abstract class PreCondition
     {
         if (PreCondition.condition === undefined)
         {
-            PreCondition.condition = MutableCondition.create()
-                .setCreateErrorFunction((message: string) =>
-                {
-                    return new PreConditionError(message);
-                });
+            PreCondition.condition = MutableCondition.create((data: ConditionErrorData) =>
+            {
+                return new PreConditionError(data);
+            });
         }
         return PreCondition.condition;
     }

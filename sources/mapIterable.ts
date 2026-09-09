@@ -4,7 +4,7 @@ import { Iterator } from "./iterator.js";
 import { JavascriptIterable, JavascriptIterator } from "./javascript.js";
 import { PreCondition } from "./preCondition.js";
 import { SyncResult } from "./syncResult.js";
-import { Type } from "./types.js";
+import { isIterable, Type } from "./types.js";
 
 /**
  * An {@link Iterable} that converts {@link TInput} values to {@link TOutput} values.
@@ -14,16 +14,16 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
     private readonly innerIterable: Iterable<TInput>;
     private readonly mapping: (value: TInput) => (TOutput | SyncResult<TOutput>);
 
-    protected constructor(innerIterable: Iterable<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>))
+    protected constructor(innerIterable: JavascriptIterable<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>))
     {
         PreCondition.assertNotUndefinedAndNotNull(innerIterable, "innerIterable");
         PreCondition.assertNotUndefinedAndNotNull(mapping, "mapping");
 
-        this.innerIterable = innerIterable;
+        this.innerIterable = isIterable<TInput>(innerIterable) ? innerIterable : Iterable.create<TInput>(innerIterable);
         this.mapping = mapping;
     }
 
-    public static create<TInput,TOutput>(innerIterable: Iterable<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>)): MapIterable<TInput,TOutput>
+    public static create<TInput,TOutput>(innerIterable: JavascriptIterable<TInput>, mapping: (value: TInput) => (TOutput | SyncResult<TOutput>)): MapIterable<TInput,TOutput>
     {
         return new MapIterable<TInput,TOutput>(innerIterable, mapping);
     }

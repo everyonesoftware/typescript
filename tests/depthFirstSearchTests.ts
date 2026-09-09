@@ -15,43 +15,43 @@ export function test(runner: TestRunner): void
         {
             runner.test("with undefined initialToVisit", (test: Test) =>
             {
-                test.assertThrows(() => depthFirstSearch(undefined!, () => {}), new PreConditionError(
-                    "Expression: parameters",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
+                test.assertThrows(() => depthFirstSearch(undefined!, () => { }), new PreConditionError({
+                    expression: "parameters",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
             });
 
             runner.test("with null initialToVisit", (test: Test) =>
             {
-                test.assertThrows(() => depthFirstSearch(null!, () => {}), new PreConditionError(
-                    "Expression: parameters",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                test.assertThrows(() => depthFirstSearch(null!, () => { }), new PreConditionError({
+                    expression: "parameters",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
             });
 
             runner.test("with undefined searchAction", (test: Test) =>
             {
-                test.assertThrows(() => depthFirstSearch([], undefined!), new PreConditionError(
-                    "Expression: searchAction",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
+                test.assertThrows(() => depthFirstSearch([], undefined!), new PreConditionError({
+                    expression: "searchAction",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
             });
 
             runner.test("with null searchAction", (test: Test) =>
             {
-                test.assertThrows(() => depthFirstSearch([], null!), new PreConditionError(
-                    "Expression: searchAction",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                test.assertThrows(() => depthFirstSearch([], null!), new PreConditionError({
+                    expression: "searchAction",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
             });
 
             runner.test("with empty initialToVisit", (test: Test) =>
             {
-                const iterator: Iterator<number> = depthFirstSearch([], (searchControl: SearchControl<Node<number>,number>, current: Node<number>) =>
+                const iterator: Iterator<number> = depthFirstSearch([], (searchControl: SearchControl<Node<number>, number>, current: Node<number>) =>
                 {
                     searchControl.addAllToVisit(current.iterateConnectedNodes());
 
@@ -71,7 +71,7 @@ export function test(runner: TestRunner): void
                 {
                     nodes.add(Node.create(i));
                 }
-                
+
                 function connectNodes(index1: number, index2: number): void
                 {
                     nodes.get(index1).await().addConnectedNode(nodes.get(index2).await());
@@ -88,7 +88,7 @@ export function test(runner: TestRunner): void
                 connectNodes(7, 3);
                 connectNodes(8, 9);
 
-                const iterator: Iterator<number> = depthFirstSearch([nodes.get(0).await()], (searchControl: SearchControl<Node<number>,number>, current: Node<number>) =>
+                const iterator: Iterator<number> = depthFirstSearch([nodes.get(0).await()], (searchControl: SearchControl<Node<number>, number>, current: Node<number>) =>
                 {
                     searchControl.addAllToVisit(current.iterateConnectedNodes());
 

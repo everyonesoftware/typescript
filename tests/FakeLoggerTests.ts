@@ -29,21 +29,21 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                logMessageLevelErrorTest(undefined!, undefined, new PreConditionError(
-                    "Expression: message",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                logMessageLevelErrorTest(null!, undefined, new PreConditionError(
-                    "Expression: message",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
-                logMessageLevelErrorTest("", undefined, new PreConditionError(
-                    "Expression: message",
-                    "Expected:   not empty",
-                    "Actual:     \"\"",
-                ));
+                logMessageLevelErrorTest(undefined!, undefined, new PreConditionError({
+                    expression: "message",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                logMessageLevelErrorTest(null!, undefined, new PreConditionError({
+                    expression: "message",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
+                logMessageLevelErrorTest("", undefined, new PreConditionError({
+                    expression: "message",
+                    expected: "not empty",
+                    actual: `""`,
+                }));
 
                 function logMessageLevelTest(message: string, logLevel: LogLevel | undefined, expected: JavascriptIterable<FakeLog>): void
                 {
@@ -73,31 +73,31 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                logLevelMessageErrorTest(undefined!, undefined!, new PreConditionError(
-                    "Expression: message",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                logLevelMessageErrorTest(null!, undefined!, new PreConditionError(
-                    "Expression: message",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
-                logLevelMessageErrorTest(LogLevel.Debug, undefined!, new PreConditionError(
-                    "Expression: message",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                logLevelMessageErrorTest(LogLevel.Debug, null!, new PreConditionError(
-                    "Expression: message",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
-                logLevelMessageErrorTest(LogLevel.Debug, "", new PreConditionError(
-                    "Expression: message",
-                    "Expected:   not empty",
-                    "Actual:     \"\"",
-                ));
+                logLevelMessageErrorTest(undefined!, undefined!, new PreConditionError({
+                    expression: "message",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                logLevelMessageErrorTest(null!, undefined!, new PreConditionError({
+                    expression: "message",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
+                logLevelMessageErrorTest(LogLevel.Debug, undefined!, new PreConditionError({
+                    expression: "message",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                logLevelMessageErrorTest(LogLevel.Debug, null!, new PreConditionError({
+                    expression: "message",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
+                logLevelMessageErrorTest(LogLevel.Debug, "", new PreConditionError({
+                    expression: "message",
+                    expected: "not empty",
+                    actual: `""`,
+                }));
 
                 function logLevelMessageTest(logLevel: LogLevel, message: string, expected: JavascriptIterable<FakeLog>): void
                 {

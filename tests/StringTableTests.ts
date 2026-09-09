@@ -29,16 +29,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                addRowErrorTest(undefined!, new PreConditionError(
-                    "Expression: row",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                addRowErrorTest(null!, new PreConditionError(
-                    "Expression: row",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                addRowErrorTest(undefined!, new PreConditionError({
+                    expression: "row",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                addRowErrorTest(null!, new PreConditionError({
+                    expression: "row",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 function addRowTest(row: JavascriptIterable<string>): void
                 {
@@ -74,16 +74,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                addRowsErrorTest(undefined!, new PreConditionError(
-                    "Expression: rows",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                addRowsErrorTest(null!, new PreConditionError(
-                    "Expression: rows",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                addRowsErrorTest(undefined!, new PreConditionError({
+                    expression: "rows",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                addRowsErrorTest(null!, new PreConditionError({
+                    expression: "rows",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 function addRowsTest(rows: JavascriptIterable<JavascriptIterable<string>>): void
                 {
@@ -120,16 +120,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                writeToErrorTest(undefined!, new PreConditionError(
-                    "Expression: writeStream",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                writeToErrorTest(null!, new PreConditionError(
-                    "Expression: writeStream",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                writeToErrorTest(undefined!, new PreConditionError({
+                    expression: "writeStream",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                writeToErrorTest(null!, new PreConditionError({
+                    expression: "writeStream",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 function writeToTest(values: string[][], expected: string): void;
                 function writeToTest(values: string[][], options: StringTableWriteToOptions, expected: string): void;
@@ -185,7 +185,7 @@ export function test(runner: TestRunner): void
                 // );
                 writeToTest(
                     [["a", "b", "c"], ["dd", "eee", "ffff"]],
-                    { betweenColumns: "|", columnStyle: { alignment: "right" }},
+                    { betweenColumns: "|", columnStyle: { alignment: "right" } },
                     " a|  b|   c\ndd|eee|ffff",
                 );
             });

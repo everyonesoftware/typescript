@@ -1,6 +1,6 @@
+import { JavascriptIterable } from "../sources/index.js";
 import { Iterable } from "../sources/iterable.js";
 import { PreConditionError } from "../sources/preConditionError.js";
-import { join } from "../sources/strings.js";
 import { Type } from "../sources/types.js";
 import { Test } from "./test.js";
 import { TestRunner } from "./testRunner.js";
@@ -24,7 +24,7 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
         {
             runner.testFunction("andList()", () =>
             {
-                function andListErrorTest(values: unknown[] | Iterable<unknown>, expected: Error): void
+                function andListErrorTest(values: JavascriptIterable<unknown>, expected: Error): void
                 {
                     runner.test(`with ${runner.toString(values)}`, (test: Test) =>
                     {
@@ -33,16 +33,16 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     });
                 }
 
-                andListErrorTest(undefined!, new PreConditionError(join("\n", [
-                    "Expression: values",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ])));
-                andListErrorTest(null!, new PreConditionError(join("\n", [
-                    "Expression: values",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ])));
+                andListErrorTest(undefined!, new PreConditionError({
+                    expression: "values",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                andListErrorTest(null!, new PreConditionError({
+                    expression: "values",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 function andListTest(values: unknown[] | Iterable<unknown>, expected: string): void
                 {
@@ -56,7 +56,7 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                 andListTest([], "");
                 andListTest(["a"], `"a"`);
                 andListTest([1, "a"], `1 and "a"`);
-                andListTest([1, "a", {a:7}], `1, "a", and {"a":7}`);
+                andListTest([1, "a", { a: 7 }], `1, "a", and {"a":7}`);
             });
 
             runner.testFunction("toString()", () =>
@@ -79,7 +79,7 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                 toStringTest("", `""`);
                 toStringTest("hello there", `"hello there"`);
                 toStringTest({}, "{}");
-                toStringTest({a:{b:"c"}}, `{"a":{"b":"c"}}`);
+                toStringTest({ a: { b: "c" } }, `{"a":{"b":"c"}}`);
                 toStringTest([], "[]");
                 toStringTest([false, 1, "d"], `[false,1,"d"]`);
             });
@@ -139,52 +139,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testFileErrorTest(
                         "with undefined fileName",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFileErrorTest(
                         "with null fileName",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testFileErrorTest(
                         "with empty fileName",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testFileErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFileErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                 });
 
@@ -202,52 +202,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testFileErrorTest(
                         "with undefined fileName",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFileErrorTest(
                         "with null fileName",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testFileErrorTest(
                         "with empty fileName",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testFileErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFileErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                 });
 
@@ -265,52 +265,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testFileErrorTest(
                         "with undefined fileName",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFileErrorTest(
                         "with null fileName",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testFileErrorTest(
                         "with empty fileName",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testFileErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFileErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                 });
 
@@ -329,52 +329,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testFileErrorTest(
                         "with undefined fileName",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFileErrorTest(
                         "with null fileName",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testFileErrorTest(
                         "with empty fileName",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: fileName",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "fileName",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testFileErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFileErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                 });
             });
@@ -395,52 +395,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testTypeErrorTest(
                         "with undefined typeNameOrType",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeNameOrType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeNameOrType",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testTypeErrorTest(
                         "with null typeNameOrType",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeNameOrType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeNameOrType",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testTypeErrorTest(
                         "with empty typeNameOrType",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeName",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeName",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testTypeErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testTypeErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                 });
 
@@ -458,52 +458,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testTypeErrorTest(
                         "with undefined typeNameOrType",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeNameOrType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeNameOrType",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testTypeErrorTest(
                         "with null typeNameOrType",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeNameOrType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeNameOrType",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testTypeErrorTest(
                         "with empty typeNameOrType",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeName",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeName",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testTypeErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testTypeErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                 });
 
@@ -521,52 +521,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testTypeErrorTest(
                         "with undefined typeNameOrType",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeNameOrType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeNameOrType",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testTypeErrorTest(
                         "with null typeNameOrType",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeNameOrType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeNameOrType",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testTypeErrorTest(
                         "with empty typeNameOrType",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeName",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeName",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testTypeErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testTypeErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                 });
 
@@ -585,52 +585,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testTypeErrorTest(
                         "with undefined typeNameOrType",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeNameOrType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeNameOrType",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testTypeErrorTest(
                         "with null typeNameOrType",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeNameOrType",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeNameOrType",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testTypeErrorTest(
                         "with empty typeNameOrType",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: typeName",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "typeName",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testTypeErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testTypeErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                 });
             });
@@ -651,52 +651,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testFunctionErrorTest(
                         "with undefined functionSignature",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with null functionSignature",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with empty functionSignature",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testFunctionErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                 });
 
@@ -714,52 +714,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testFunctionErrorTest(
                         "with undefined functionSignature",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with null functionSignature",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with empty functionSignature",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testFunctionErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                 });
 
@@ -777,52 +777,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testFunctionErrorTest(
                         "with undefined functionSignature",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with null functionSignature",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with empty functionSignature",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testFunctionErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                 });
 
@@ -841,52 +841,52 @@ export function test2(runner: TestRunner, creator: () => TestRunner): void
                     testFunctionErrorTest(
                         "with undefined functionSignature",
                         undefined!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with null functionSignature",
                         null!,
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with empty functionSignature",
                         "",
-                        () => {},
-                        new PreConditionError(
-                            "Expression: functionSignature",
-                            "Expected:   not empty",
-                            "Actual:     \"\"",
-                        ),
+                        () => { },
+                        new PreConditionError({
+                            expression: "functionSignature",
+                            expected: "not empty",
+                            actual: `""`,
+                        }),
                     )
                     testFunctionErrorTest(
                         "with undefined testAction",
                         "abc",
                         undefined!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     undefined",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "undefined",
+                        }),
                     )
                     testFunctionErrorTest(
                         "with null testAction",
                         "abc",
                         null!,
-                        new PreConditionError(
-                            "Expression: testAction",
-                            "Expected:   not undefined and not null",
-                            "Actual:     null",
-                        ),
+                        new PreConditionError({
+                            expression: "testAction",
+                            expected: "not undefined and not null",
+                            actual: "null",
+                        }),
                     )
                 });
             });

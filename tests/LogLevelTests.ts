@@ -18,16 +18,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                parseErrorTest(undefined!, new PreConditionError(
-                    "Expression: value",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                parseErrorTest(null!, new PreConditionError(
-                    "Expression: value",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                parseErrorTest(undefined!, new PreConditionError({
+                    expression: "value",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                parseErrorTest(null!, new PreConditionError({
+                    expression: "value",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
                 parseErrorTest("", new ParseError(`Could not parse "" into a LogLevel.`));
                 parseErrorTest("apples", new ParseError(`Could not parse "apples" into a LogLevel.`));
 

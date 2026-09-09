@@ -1,4 +1,5 @@
 import { Bytes } from "./bytes.js";
+import { ConditionErrorData } from "./ConditionError.js";
 import { JavascriptIterable } from "./javascript.js";
 import { MutableCondition } from "./mutableCondition.js";
 import { Type } from "./types.js";
@@ -15,9 +16,9 @@ export abstract class Condition
     /**
      * Create a new {@link MutableCondition} object.
      */
-    public static create(): MutableCondition
+    public static create(createErrorFunction?: (data: ConditionErrorData) => Error): MutableCondition
     {
-        return MutableCondition.create();
+        return MutableCondition.create(createErrorFunction);
     }
 
     /**

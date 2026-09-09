@@ -1,14 +1,13 @@
-import { AssertMessageParameters } from "./assertMessageParameters.js";
 import { Bytes } from "./bytes.js";
 import { Comparer } from "./comparer.js";
 import { Comparison } from "./comparison.js";
 import { Condition } from "./condition.js";
+import { ConditionErrorData, conditionErrorDataToMessage } from "./ConditionError.js";
 import { EqualFunctions } from "./equalFunctions.js";
 import { isJavascriptIterableEmpty, JavascriptIterable } from "./javascript.js";
-import { StringTable } from "./StringTable.js";
 import { ToStringFunctions } from "./toStringFunctions.js";
 import {
-    hasFunction, hasProperty, instanceOf, isJavascriptIterable, isString, isUndefinedNullOrEmpty, isUndefinedOrNull, Type
+    hasFunction, hasProperty, instanceOf, isJavascriptIterable, isString, isUndefinedOrNull, Type
 } from "./types.js";
 
 /**
@@ -18,26 +17,23 @@ export class MutableCondition implements Condition
 {
     private toStringFunctions: ToStringFunctions;
     private equalFunctions: EqualFunctions;
-    private createErrorFunction: (message: string) => Error;
+    private createErrorFunction: (data: ConditionErrorData) => Error;
 
-    protected constructor()
+    protected constructor(createErrorFunction?: (data: ConditionErrorData) => Error)
     {
+        createErrorFunction ??= (data: ConditionErrorData) => new Error(conditionErrorDataToMessage(data));
+
         this.toStringFunctions = ToStringFunctions.create();
         this.equalFunctions = EqualFunctions.create();
-        this.createErrorFunction = MutableCondition.defaultCreateErrorFunction;
-    }
-
-    private static defaultCreateErrorFunction(message: string): Error
-    {
-        return new Error(message);
+        this.createErrorFunction = createErrorFunction
     }
 
     /**
      * Create a new {@link MutableCondition} object.
      */
-    public static create(): MutableCondition
+    public static create(createErrorFunction?: (data: ConditionErrorData) => Error): MutableCondition
     {
-        return new MutableCondition();
+        return new MutableCondition(createErrorFunction);
     }
 
     /**
@@ -71,19 +67,6 @@ export class MutableCondition implements Condition
         return this;
     }
 
-    /**
-     * Set the {@link Function} that will be used to create {@link Error}s.
-     * @param createErrorFunction The {@link Function} to use to create {@link Error}.
-     * @returns This object for method chaining.
-     */
-    public setCreateErrorFunction(createErrorFunction: (message: string) => Error): this
-    {
-        this.assertNotUndefinedAndNotNull(createErrorFunction, "createErrorFunction");
-
-        this.createErrorFunction = createErrorFunction;
-        return this;
-    }
-
     public assertUndefined(value: unknown, expression?: string, message?: string): asserts value is undefined
     {
         Condition.assertUndefined(this, value, expression, message);
@@ -114,39 +97,12 @@ export class MutableCondition implements Condition
     }
 
     /**
-     * Create an {@link Error} based on the provided {@link AssertMessageParameters}.
-     * @param parameters The {@link AssertMessageParameters} that define how the should be made.
+     * Create a {@link ConditionError} based on the provided {@link ConditionErrorData}.
+     * @param data The {@link ConditionErrorData} that defines how the should be made.
      */
-    public createError(parameters: AssertMessageParameters): Error
+    public createError(data: ConditionErrorData): Error
     {
-        const message: string = MutableCondition.createErrorMessage(parameters);
-        return this.createErrorFunction(message);
-    }
-
-    /**
-     * Create an error message based on the provided parameters.
-     * @param parameters The parameters to use to create the error message.
-     */
-    public static createErrorMessage(parameters: AssertMessageParameters): string
-    {
-        const table: StringTable = StringTable.create();
-
-        if (!isUndefinedNullOrEmpty(parameters.message))
-        {
-            table.addRow(["Message:", parameters.message]);
-        }
-
-        if (!isUndefinedNullOrEmpty(parameters.expression))
-        {
-            table.addRow(["Expression:", parameters.expression]);
-        }
-
-        table.addRow(["Expected:", parameters.expected]);
-        table.addRow(["Actual:", parameters.actual]);
-
-        return table.toString({
-            betweenColumns: " ",
-        });
+        return this.createErrorFunction!(data);
     }
 
     public assertNotUndefinedAndNotNull<T>(value: T, expression?: string, message?: string): asserts value is NonNullable<T>

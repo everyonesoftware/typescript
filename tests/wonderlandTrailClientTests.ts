@@ -64,41 +64,41 @@ export function test(runner: TestRunner): void
                 runner.test("with undefined location", (test: Test) =>
                 {
                     const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
-                    test.assertThrows(() => availability.addAvailability(undefined!, DateTime.parse("2026-03-11").await()), new PreConditionError(
-                        "Expression: location",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ));
+                    test.assertThrows(() => availability.addAvailability(undefined!, DateTime.parse("2026-03-11").await()), new PreConditionError({
+                        expression: "location",
+                        expected: "not undefined and not null",
+                        actual: "undefined",
+                    }));
                 });
 
                 runner.test("with null location", (test: Test) =>
                 {
                     const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
-                    test.assertThrows(() => availability.addAvailability(null!, DateTime.parse("2026-03-11").await()), new PreConditionError(
-                        "Expression: location",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ));
+                    test.assertThrows(() => availability.addAvailability(null!, DateTime.parse("2026-03-11").await()), new PreConditionError({
+                        expression: "location",
+                        expected: "not undefined and not null",
+                        actual: "null",
+                    }));
                 });
 
                 runner.test("with undefined date", (test: Test) =>
                 {
                     const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
-                    test.assertThrows(() => availability.addAvailability(WonderlandTrailLocations.boxCanyon, undefined!), new PreConditionError(
-                        "Expression: date",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ));
+                    test.assertThrows(() => availability.addAvailability(WonderlandTrailLocations.boxCanyon, undefined!), new PreConditionError({
+                        expression: "date",
+                        expected: "not undefined and not null",
+                        actual: "undefined",
+                    }));
                 });
 
                 runner.test("with null date", (test: Test) =>
                 {
                     const availability: WonderlandTrailAvailability = WonderlandTrailAvailability.create();
-                    test.assertThrows(() => availability.addAvailability(WonderlandTrailLocations.boxCanyon, null!), new PreConditionError(
-                        "Expression: date",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ));
+                    test.assertThrows(() => availability.addAvailability(WonderlandTrailLocations.boxCanyon, null!), new PreConditionError({
+                        expression: "date",
+                        expected: "not undefined and not null",
+                        actual: "null",
+                    }));
                 });
 
                 runner.test("with neither individual nor group site data", (test: Test) =>
@@ -158,16 +158,16 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                getAvailabilityErrorTest(undefined!, new PreConditionError(
-                    "Expression: location",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                getAvailabilityErrorTest(null!, new PreConditionError(
-                    "Expression: location",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                getAvailabilityErrorTest(undefined!, new PreConditionError({
+                    expression: "location",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                getAvailabilityErrorTest(null!, new PreConditionError({
+                    expression: "location",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 runner.test("when location isn't found", (test: Test) =>
                 {
@@ -209,26 +209,26 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                getDayAvailabilityErrorTest(undefined!, DateTime.parse("2025-07-04").await(), new PreConditionError(
-                    "Expression: location",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                getDayAvailabilityErrorTest(null!, DateTime.parse("2025-07-04").await(), new PreConditionError(
-                    "Expression: location",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
-                getDayAvailabilityErrorTest(WonderlandTrailLocations.boxCanyon, undefined!, new PreConditionError(
-                    "Expression: date",
-                    "Expected:   not undefined and not null",
-                    "Actual:     undefined",
-                ));
-                getDayAvailabilityErrorTest(WonderlandTrailLocations.boxCanyon, null!, new PreConditionError(
-                    "Expression: date",
-                    "Expected:   not undefined and not null",
-                    "Actual:     null",
-                ));
+                getDayAvailabilityErrorTest(undefined!, DateTime.parse("2025-07-04").await(), new PreConditionError({
+                    expression: "location",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                getDayAvailabilityErrorTest(null!, DateTime.parse("2025-07-04").await(), new PreConditionError({
+                    expression: "location",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
+                getDayAvailabilityErrorTest(WonderlandTrailLocations.boxCanyon, undefined!, new PreConditionError({
+                    expression: "date",
+                    expected: "not undefined and not null",
+                    actual: "undefined",
+                }));
+                getDayAvailabilityErrorTest(WonderlandTrailLocations.boxCanyon, null!, new PreConditionError({
+                    expression: "date",
+                    expected: "not undefined and not null",
+                    actual: "null",
+                }));
 
                 runner.test("with not found location or date", (test: Test) =>
                 {
@@ -385,20 +385,20 @@ export function test(runner: TestRunner): void
             {
                 runner.test("with undefined HttpClient", (test: Test) =>
                 {
-                    test.assertThrows(() => WonderlandTrailClient.create(undefined!), new PreConditionError(
-                        "Expression: httpClient",
-                        "Expected:   not undefined and not null",
-                        "Actual:     undefined",
-                    ));
+                    test.assertThrows(() => WonderlandTrailClient.create(undefined!), new PreConditionError({
+                        expression: "httpClient",
+                        expected: "not undefined and not null",
+                        actual: "undefined",
+                    }));
                 });
 
                 runner.test("with null HttpClient", (test: Test) =>
                 {
-                    test.assertThrows(() => WonderlandTrailClient.create(null!), new PreConditionError(
-                        "Expression: httpClient",
-                        "Expected:   not undefined and not null",
-                        "Actual:     null",
-                    ));
+                    test.assertThrows(() => WonderlandTrailClient.create(null!), new PreConditionError({
+                        expression: "httpClient",
+                        expected: "not undefined and not null",
+                        actual: "null",
+                    }));
                 });
 
                 runner.test("with defined HttpClient", (test: Test) =>

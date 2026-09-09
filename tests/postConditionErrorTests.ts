@@ -1,4 +1,4 @@
-import { PostConditionError } from "../sources/postConditionError.js";
+import { join, PostConditionError } from "../sources/index.js";
 import { Test } from "./test.js";
 import { TestRunner } from "./testRunner.js";
 
@@ -8,14 +8,20 @@ export function test(runner: TestRunner): void
     {
         runner.testType(PostConditionError.name, () =>
         {
-            runner.testFunction("constructor(string|undefined)", () =>
+            runner.testFunction("constructor()", () =>
             {
-                runner.test("with no arguments", (test: Test) =>
+                runner.test("with expected and actual", (test: Test) =>
                 {
-                    const error: PostConditionError = new PostConditionError();
+                    const error: PostConditionError = new PostConditionError({
+                        expected: "xyz",
+                        actual: "lmo",
+                    });
                     test.assertNotUndefinedAndNotNull(error);
                     test.assertEqual(error.name, "Error");
-                    test.assertEqual(error.message, "");
+                    test.assertEqual(error.message, join("\n", [
+                        "Expected: xyz",
+                        "Actual:   lmo",
+                    ]));
                     test.assertNotUndefinedAndNotNull(error.stack);
                 });
             });

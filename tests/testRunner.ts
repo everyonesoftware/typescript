@@ -1,5 +1,5 @@
 import { andList } from "../sources/english.js";
-import { Iterable } from "../sources/iterable.js";
+import { JavascriptIterable, MapIterable } from "../sources/index.js";
 import { PreCondition } from "../sources/preCondition.js";
 import { ToStringFunctions } from "../sources/toStringFunctions.js";
 import { isBoolean, Type } from "../sources/types.js";
@@ -16,7 +16,7 @@ export abstract class TestRunner
      * of the provided values into an "and-list".
      * @param values The values to concatenate.
      */
-    public andList(values: unknown[] | Iterable<unknown>): string
+    public andList(values: JavascriptIterable<unknown>): string
     {
         return TestRunner.andList(this, values);
     }
@@ -26,12 +26,12 @@ export abstract class TestRunner
      * of the provided values into an "and-list".
      * @param values The values to concatenate.
      */
-    public static andList(runner: TestRunner, values: unknown[] | Iterable<unknown>): string
+    public static andList(runner: TestRunner, values: JavascriptIterable<unknown>): string
     {
         PreCondition.assertNotUndefinedAndNotNull(runner, "runner");
         PreCondition.assertNotUndefinedAndNotNull(values, "values");
 
-        return andList(values.map((value: unknown) => runner.toString(value)));
+        return andList(MapIterable.create(values, (value: unknown) => runner.toString(value)));
     }
 
     /**

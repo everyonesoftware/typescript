@@ -1,3 +1,4 @@
+import { ConditionErrorData } from "./ConditionError.js";
 import { JavascriptIterable } from "./javascript.js";
 import { MutableCondition } from "./mutableCondition.js";
 import { PostConditionError } from "./postConditionError.js";
@@ -14,11 +15,10 @@ export abstract class PostCondition
     {
         if (PostCondition.condition === undefined)
         {
-            PostCondition.condition = MutableCondition.create()
-                .setCreateErrorFunction((message: string) =>
-                {
-                    return new PostConditionError(message);
-                });
+            PostCondition.condition = MutableCondition.create((data: ConditionErrorData) =>
+            {
+                return new PostConditionError(data);
+            });
         }
         return PostCondition.condition;
     }
