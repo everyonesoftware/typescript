@@ -6,7 +6,21 @@ import { HttpOutgoingRequest } from "./httpOutgoingRequest.js";
 import { PreCondition } from "./preCondition.js";
 import { TemperatureUnits } from "./TemperatureUnits.js";
 
-export interface WeatherDotGovClientErrorData
+export class WeatherDotGovClientUnknownError extends BaseError
+{
+    public readonly responseBody: string;
+    public readonly error: Error;
+
+    public constructor(responseBody: string, error: Error)
+    {
+        super(error.message, { cause: error });
+
+        this.responseBody = responseBody;
+        this.error = error;
+    }
+}
+
+export interface WeatherDotGovClientResponseErrorData
 {
     readonly status: number,
     readonly detail: string,
@@ -14,20 +28,15 @@ export interface WeatherDotGovClientErrorData
     readonly type: string,
 }
 
-export class WeatherDotGovClientError extends BaseError
+export class WeatherDotGovClientResponseError extends BaseError
 {
-    private readonly data: WeatherDotGovClientErrorData;
+    public readonly data: WeatherDotGovClientResponseErrorData;
 
-    constructor(data: WeatherDotGovClientErrorData)
+    constructor(data: WeatherDotGovClientResponseErrorData)
     {
         super(data.detail);
 
         this.data = data;
-    }
-
-    public getData(): WeatherDotGovClientErrorData
-    {
-        return this.data
     }
 }
 
@@ -198,7 +207,7 @@ export class WeatherDotGovClient
     /**
      * Returns metadata about a given latitude/longitude point. This function only works for
      * coordinates within the United States. Coordinates within Mexico and Canada will throw a
-     * {@link WeatherDotGovClientError}.
+     * {@link WeatherDotGovClientResponseError}.
      * @param latitude The latitude to get metadata about.
      * @param longitude The longitude to get metadata about.
      */
@@ -214,7 +223,7 @@ export class WeatherDotGovClient
             const pointsResponseJson: unknown = await rawPointsResponse.getBodyJSON();
             if (rawPointsResponse.getStatusCode() / 100 !== 2)
             {
-                throw new WeatherDotGovClientError(pointsResponseJson as WeatherDotGovClientErrorData);
+                throw new WeatherDotGovClientResponseError(pointsResponseJson as WeatherDotGovClientResponseErrorData);
             }
 
             return pointsResponseJson as GetPointResponse;
@@ -229,11 +238,22 @@ export class WeatherDotGovClient
             const forecastRequestURL: string = `https://api.weather.gov/gridpoints/${gridId}/${gridX},${gridY}/forecast?units=${noaaUnits}`;
 
             const getForecastResponse: HttpIncomingResponse = await this.sendGetRequest(forecastRequestURL);
-            const forecastResponseJson: unknown = await getForecastResponse.getBodyJSON();
-            if (!getForecastResponse.isStatusCodeOk())
+
+            const forecastResponseBody: string = await getForecastResponse.getBodyString();
+            let forecastResponseJson: unknown;
+            try
             {
-                throw new WeatherDotGovClientError(forecastResponseJson as WeatherDotGovClientErrorData);
+                forecastResponseJson = JSON.parse(forecastResponseBody);
+                if (!getForecastResponse.isStatusCodeOk())
+                {
+                    throw new WeatherDotGovClientResponseError(forecastResponseJson as WeatherDotGovClientResponseErrorData);
+                }
             }
+            catch (error)
+            {
+                throw new WeatherDotGovClientUnknownError(forecastResponseBody, error as Error);
+            }
+
             return forecastResponseJson as GetForecastResponse;
         });
     }
