@@ -168,4 +168,14 @@ export abstract class MutableIndexable<T> implements Indexable<T>
     {
         return Indexable.contains(indexable, value, equalFunctions);
     }
+
+    public containsAny(values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return MutableIndexable.containsAny(this, values, equalFunctions);
+    }
+
+    public static containsAny<T>(indexable: Indexable<T>, values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Indexable.containsAny(indexable, values, equalFunctions);
+    }
 }

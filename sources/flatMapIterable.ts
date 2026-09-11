@@ -7,7 +7,7 @@ import { SyncResult } from "./syncResult.js";
 import { ToStringFunctions } from "./toStringFunctions.js";
 import { Type } from "./types.js";
 
-export class FlatMapIterable<TInput,TOutput> implements Iterable<TOutput>
+export class FlatMapIterable<TInput, TOutput> implements Iterable<TOutput>
 {
     private readonly innerIterable: Iterable<TInput>;
     private readonly mapping: (value: TInput) => JavascriptIterable<TOutput>;
@@ -22,7 +22,7 @@ export class FlatMapIterable<TInput,TOutput> implements Iterable<TOutput>
         this.mapping = mapping;
     }
 
-    public static create<TInput,TOutput>(innerIterable: Iterable<TInput>, mapping: (value: TInput) => JavascriptIterable<TOutput>): FlatMapIterable<TInput,TOutput>
+    public static create<TInput, TOutput>(innerIterable: Iterable<TInput>, mapping: (value: TInput) => JavascriptIterable<TOutput>): FlatMapIterable<TInput, TOutput>
     {
         return new FlatMapIterable(innerIterable, mapping);
     }
@@ -79,7 +79,7 @@ export class FlatMapIterable<TInput,TOutput> implements Iterable<TOutput>
 
     public instanceOf<TOutput2 extends TOutput>(typeOrTypeCheck: Type<TOutput2> | ((value: TOutput2) => value is TOutput2)): Iterable<TOutput2>
     {
-        return Iterable.instanceOf<TOutput,TOutput2>(this, typeOrTypeCheck);
+        return Iterable.instanceOf<TOutput, TOutput2>(this, typeOrTypeCheck);
     }
 
     public first(condition?: ((value: TOutput) => (boolean | SyncResult<boolean>)) | undefined): SyncResult<TOutput>
@@ -95,6 +95,11 @@ export class FlatMapIterable<TInput,TOutput> implements Iterable<TOutput>
     public contains(value: TOutput, equalFunctions?: EqualFunctions): SyncResult<boolean>
     {
         return Iterable.contains(this, value, equalFunctions);
+    }
+
+    public containsAny(values: JavascriptIterable<TOutput>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.containsAny(this, values, equalFunctions);
     }
 
     public [Symbol.iterator](): JavascriptIterator<TOutput>

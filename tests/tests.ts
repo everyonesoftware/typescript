@@ -9,7 +9,6 @@ import * as byteTests from "./bytesTests.js";
 import * as characterListStreamTests from "./characterListStreamTests.js";
 import * as characterListTests from "./characterListTests.js";
 import * as clockTests from "./ClockTests.js";
-import * as commandLineParametersTests from "./CommandLineParametersTests.js";
 import * as comparerTests from "./comparerTests.js";
 import * as conditionTests from "./conditionTests.js";
 import * as consoleTestRunnerTests from "./consoleTestRunnerTests.js";
@@ -64,10 +63,11 @@ import * as toStringFunctionsTests from "./toStringFunctionsTests.js";
 import * as typesTests from "./typesTests.js";
 import * as whereIteratorTests from "./whereIteratorTests.js";
 import * as wonderlandTrailClientTests from "./wonderlandTrailClientTests.js";
+import * as commandLineCommandTests from "./CommandLineCommandTests.js";
 
 export const hasNetworkAccess: boolean = true;
 
-ConsoleTestRunner.run([
+await ConsoleTestRunner.run([
     assertTestTests,
     asyncDisposableTests,
     basicPropertyTests,
@@ -78,7 +78,6 @@ ConsoleTestRunner.run([
     characterListStreamTests,
     characterListTests,
     clockTests,
-    commandLineParametersTests,
     comparerTests,
     conditionTests,
     consoleTestRunnerTests,
@@ -133,4 +132,5 @@ ConsoleTestRunner.run([
     typesTests,
     whereIteratorTests,
     wonderlandTrailClientTests,
+    commandLineCommandTests,
 ]);

@@ -206,7 +206,7 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
         return Iterable.flatMap(this, mapping);
     }
 
-    public static flatMap<T,TOutput>(iterable: Iterable<T>, mapping: (value: T) => JavascriptIterable<TOutput>): Iterable<TOutput>
+    public static flatMap<T, TOutput>(iterable: Iterable<T>, mapping: (value: T) => JavascriptIterable<TOutput>): Iterable<TOutput>
     {
         return FlatMapIterable.create(iterable, mapping);
     }
@@ -323,20 +323,34 @@ export abstract class Iterable<T> implements JavascriptIterable<T>
 
     public static contains<T>(iterable: Iterable<T>, value: T, equalFunctions?: EqualFunctions): SyncResult<boolean>
     {
+        return Iterable.containsAny(iterable, [value], equalFunctions);
+    }
+
+    /**
+     * Get whether this {@link Iterable} contains any of the provided values.
+     * @param values The values to look for.
+     */
+    public containsAny(values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.containsAny(this, values, equalFunctions);
+    }
+
+    public static containsAny<T>(iterable: Iterable<T>, values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
         return SyncResult.create(() =>
         {
-            if (!equalFunctions)
-            {
-                equalFunctions = EqualFunctions.create();
-            }
+            equalFunctions ??= EqualFunctions.create();
 
             let result: boolean = false;
-            for (const iterableValue of iterable)
+            for (const value of values)
             {
-                if (equalFunctions.areEqual(value, iterableValue).await())
+                for (const iterableValue of iterable)
                 {
-                    result = true;
-                    break;
+                    if (equalFunctions.areEqual(value, iterableValue).await())
+                    {
+                        result = true;
+                        break;
+                    }
                 }
             }
             return result;

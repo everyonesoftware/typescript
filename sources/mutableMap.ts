@@ -289,4 +289,14 @@ export abstract class MutableMap<TKey, TValue> implements Map<TKey, TValue>
     {
         return Map.contains(map, value, equalFunctions);
     }
+
+    public containsAny(values: JavascriptIterable<MapEntry<TKey,TValue>>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return MutableMap.containsAny(this, values, equalFunctions);
+    }
+
+    public static containsAny<TKey,TValue>(map: MutableMap<TKey,TValue>, entries: JavascriptIterable<MapEntry<TKey,TValue>>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Map.containsAny(map, entries, equalFunctions);
+    }
 }

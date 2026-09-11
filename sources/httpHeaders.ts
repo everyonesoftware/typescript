@@ -213,4 +213,32 @@ export abstract class HttpHeaders implements Iterable<HttpHeader>
                 .await();
         });
     }
+
+    public containsAny(values: JavascriptIterable<HttpHeader>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return HttpHeaders.containsAny(this, values, equalFunctions);
+    }
+
+    public static containsAny(headers: HttpHeaders, headersToFind: JavascriptIterable<HttpHeader>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return SyncResult.create(() =>
+        {
+            equalFunctions ??= EqualFunctions.create();
+
+            let result: boolean = false;
+            for (const headerToFind of headersToFind)
+            {
+                result = headers.getValue(headerToFind.getName())
+                    .then(headerValue => equalFunctions!.areEqual(headerToFind.getValue(), headerValue).await())
+                    .catch(NotFoundError, () => false)
+                    .await();
+                if (result)
+                {
+                    break;
+                }
+            }
+
+            return result;
+        });
+    }
 }

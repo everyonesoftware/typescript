@@ -36,6 +36,11 @@ export interface StringTableWriteToOptions
      * that style will be applied to all columns.
      */
     readonly columnStyle?: StringTableWriteToColumnStyle | StringTableWriteToColumnStyle[];
+
+    /**
+     * The function that will be used to determine the column width of a string value.
+     */
+    readonly textWidthFunction?: (text: string) => number;
 }
 
 /**
@@ -82,33 +87,33 @@ export class StringTable
         return this.rows;
     }
 
-    private static getColumnWidths(rows: Indexable<Indexable<string>>): Indexable<number>
+    public static getColumnWidths(rows: JavascriptIterable<Indexable<string>>, textWidthFunction: (text: string) => number): Indexable<number>
     {
+        PreCondition.assertNotUndefinedAndNotNull(rows, "rows");
+        PreCondition.assertNotUndefinedAndNotNull(textWidthFunction, "textWidthFunction");
+
         const columnWidths: List<number> = List.create();
 
-        const rowCount: number = rows.getCount().await();
-        for (let rowIndex = 0; rowIndex < rowCount; ++rowIndex)
+        for (const row of rows)
         {
-            const row: Indexable<string> = rows.get(rowIndex).await();
-
             const columnCount: number = row.getCount().await();
             for (let columnIndex = 0; columnIndex < columnCount; ++columnIndex)
             {
                 const value: string = row.get(columnIndex).await();
 
-                let maxLineLength: number = 0;
+                let maxValueLineWidth: number = 0;
                 for (const valueLine of iterateLines(value))
                 {
-                    maxLineLength = Math.max(maxLineLength, valueLine.length);
+                    maxValueLineWidth = Math.max(maxValueLineWidth, textWidthFunction(valueLine));
                 }
 
                 if (columnWidths.getCount().await() <= columnIndex)
                 {
-                    columnWidths.add(maxLineLength);
+                    columnWidths.add(maxValueLineWidth);
                 }
                 else
                 {
-                    columnWidths.set(columnIndex, Math.max(columnWidths.get(columnIndex).await(), maxLineLength));
+                    columnWidths.set(columnIndex, Math.max(columnWidths.get(columnIndex).await(), maxValueLineWidth));
                 }
             }
         }
@@ -143,9 +148,12 @@ export class StringTable
     {
         PreCondition.assertNotUndefinedAndNotNull(writeStream, "writeStream");
 
-        const betweenColumns: string = options?.betweenColumns ?? "";
+        const betweenColumns: string = options?.betweenColumns ?? " ";
+        const textWidthFunction: (text: string) => number = !isUndefinedOrNull(options?.textWidthFunction)
+            ? options.textWidthFunction
+            : (text: string) => text.length;
         const rowCount: number = this.rows.getCount().await();
-        const columnWidths: Indexable<number> = StringTable.getColumnWidths(this.rows); List.create();
+        const columnWidths: Indexable<number> = StringTable.getColumnWidths(this.rows, textWidthFunction);
 
         let result: AsyncResult<number>;
         if (writeStream instanceof InMemoryCharacterWriteStream)
@@ -201,7 +209,7 @@ export class StringTable
                             const columnStyle: StringTableWriteToColumnStyle | undefined = StringTable.getColumnStyle(options?.columnStyle, columnIndex);
                             let leftPaddingCount: number = 0;
                             let rightPaddingCount: number = 0;
-                            const totalPadding: number = columnWidth - valueLine.length;
+                            const totalPadding: number = columnWidth - textWidthFunction(valueLine);
                             if (columnStyle?.alignment === "right")
                             {
                                 leftPaddingCount = totalPadding;
@@ -282,7 +290,7 @@ export class StringTable
                             const columnStyle: StringTableWriteToColumnStyle | undefined = StringTable.getColumnStyle(options?.columnStyle, columnIndex);
                             let leftPaddingCount: number = 0;
                             let rightPaddingCount: number = 0;
-                            const totalPadding: number = columnWidth - valueLine.length;
+                            const totalPadding: number = columnWidth - textWidthFunction(valueLine);
                             if (columnStyle?.alignment === "right")
                             {
                                 leftPaddingCount = totalPadding;

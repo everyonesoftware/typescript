@@ -12,7 +12,7 @@ import { Test } from "./test.js";
 import { TestAction, TestActionType } from "./testAction.js";
 import { TestRunner } from "./testRunner.js";
 import { TestSkip } from "./testSkip.js";
-import { AsyncResult, IndentedCharacterWriteStream } from "../sources/index.js";
+import { AsyncResult, CommandLineCommand, CommandLineParameter, IndentedCharacterWriteStream, Timer } from "../sources/index.js";
 import { ConsoleTestRunnerStyle, ConsoleTestRunnerUI } from "./ConsoleTestRunnerUI.js";
 import { ANSIStyles } from "../sources/ANSIStyles.js";
 import { TestCreator } from "./TestCreator.js";
@@ -95,23 +95,42 @@ export class ConsoleTestRunner implements TestRunner
 
         return CurrentProcess.run(async (currentProcess: CurrentProcess) =>
         {
-            const runner: ConsoleTestRunner = ConsoleTestRunner.create()
-                .setWriteStream(currentProcess.getOutputWriteStream())
-                .setStyles({
-                    file: t => ANSIStyles.blue(t),
-                    function: t => ANSIStyles.blue(t),
-                    type: t => ANSIStyles.blue(t),
-                    group: t => ANSIStyles.blue(t),
-                    passed: t => ANSIStyles.green(`✓ ${t}`),
-                    skipped: t => ANSIStyles.yellow(`◌ ${t}`),
-                    failed: t => ANSIStyles.red(`✗ ${t}`),
-                });
+            const command: CommandLineCommand = CommandLineCommand.create({
+                name: "test",
+                description: "Run the project's tests.",
+                arguments: currentProcess.getArguments(),
+            });
+            const timerParameter: CommandLineParameter = command.addParameter("timer", ["time"], "Measure the duration of the tests.", {
+                notFound: "false",
+                valueNotFound: "true",
+            });
+            if (!await command.showHelp(currentProcess.getOutputWriteStream()))
+            {
+                let timer: Timer | undefined;
+                if (timerParameter.getBooleanValue().await())
+                {
+                    timer = currentProcess.getClock().startTimer();
+                }
 
-            await testFunction(runner);
+                const runner: ConsoleTestRunner = ConsoleTestRunner.create()
+                    .setWriteStream(currentProcess.getOutputWriteStream())
+                    .setStyles({
+                        file: t => ANSIStyles.blue(t),
+                        function: t => ANSIStyles.blue(t),
+                        type: t => ANSIStyles.blue(t),
+                        group: t => ANSIStyles.blue(t),
+                        passed: t => ANSIStyles.green(`✓ ${t}`),
+                        skipped: t => ANSIStyles.yellow(`◌ ${t}`),
+                        failed: t => ANSIStyles.red(`✗ ${t}`),
+                        duration: t => `◷ ${t}`,
+                    });
 
-            await runner.runAsync();
+                await testFunction(runner);
 
-            await runner.printSummary();
+                await runner.runAsync();
+
+                await runner.printSummary(timer);
+            }
         });
     }
 
@@ -538,8 +557,8 @@ export class ConsoleTestRunner implements TestRunner
         this.resetTestActionInsertIndex();
     }
 
-    public printSummary(): AsyncResult<void>
+    public printSummary(timer?: Timer): AsyncResult<void>
     {
-        return this.ui.writeSummary(this.passedTestCount, this.getSkippedTests(), this.getFailedTests());
+        return this.ui.writeSummary(this.passedTestCount, this.getSkippedTests(), this.getFailedTests(), timer);
     }
 }

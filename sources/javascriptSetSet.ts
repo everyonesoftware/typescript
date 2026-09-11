@@ -127,6 +127,11 @@ export class JavascriptSetSet<T> implements Set<T>
             : Iterable.contains(this, value, equalFunctions);
     }
 
+    public containsAny(values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.containsAny(this, values, equalFunctions);
+    }
+
     public [Symbol.iterator](): JavascriptIterator<T>
     {
         return Set[Symbol.iterator](this);

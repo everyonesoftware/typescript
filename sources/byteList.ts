@@ -195,6 +195,11 @@ export class ByteList implements List<number>
         return List.contains(this, value, equalFunctions);
     }
 
+    public containsAny(values: JavascriptIterable<number>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return List.containsAny(this, values, equalFunctions);
+    }
+
     public [Symbol.iterator](): JavascriptIterator<number>
     {
         return List[Symbol.iterator](this);

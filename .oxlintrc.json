@@ -11,6 +11,7 @@
   "rules": {
     "typescript/no-this-alias": "off",
     "unicorn/no-thenable": "off",
+    "eslint/no-control-regex": "off",
   },
   "env": {
     "builtin": true

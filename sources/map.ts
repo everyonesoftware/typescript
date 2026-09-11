@@ -284,19 +284,36 @@ export abstract class Map<TKey, TValue> implements Iterable<MapEntry<TKey, TValu
         return Map.contains(this, value, equalFunctions);
     }
 
-    public static contains<TKey,TValue>(map: Map<TKey,TValue>, value: MapEntry<TKey,TValue>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    public static contains<TKey,TValue>(map: Map<TKey,TValue>, entry: MapEntry<TKey,TValue>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return map.containsAny([entry], equalFunctions);
+    }
+
+    public containsAny(values: JavascriptIterable<MapEntry<TKey,TValue>>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Map.containsAny(this, values, equalFunctions);
+    }
+
+    public static containsAny<TKey,TValue>(map: Map<TKey,TValue>, entries: JavascriptIterable<MapEntry<TKey,TValue>>, equalFunctions?: EqualFunctions): SyncResult<boolean>
     {
         return SyncResult.create(() =>
         {
-            if (!equalFunctions)
+            equalFunctions ??= EqualFunctions.create();
+
+            let result: boolean = false;
+            for (const entry of entries)
             {
-                equalFunctions = EqualFunctions.create();
+                result = map.get(entry.key)
+                    .then(mapEntryValue => equalFunctions!.areEqual(entry.value, mapEntryValue).await())
+                    .catch(NotFoundError, () => false)
+                    .await();
+                if (result)
+                {
+                    break;
+                }
             }
 
-            return map.get(value.key)
-                .then(entryValue => equalFunctions!.areEqual(entryValue, value.value).await())
-                .catch(NotFoundError, () => false)
-                .await();
+            return result;
         });
     }
 }

@@ -1,5 +1,5 @@
 import { CharacterWriteStream } from "./characterWriteStream.js";
-import { CommandLineParameters } from "./commandLineParameters.js";
+import { Clock } from "./Clock.js";
 import { DynamicProperty } from "./DynamicProperty.js";
 import { Iterable } from "./iterable.js";
 import { JavascriptIterable } from "./javascript.js";
@@ -7,6 +7,7 @@ import { Network } from "./network.js";
 import { NodeJSCharacterWriteStream } from "./nodeJSCharacterWriteStream.js";
 import { PreCondition } from "./preCondition.js";
 import { Property } from "./property.js";
+import { RealClock } from "./RealClock.js";
 import { RealNetwork } from "./realNetwork.js";
 import { isIterable, isNumber, isUndefinedOrNull } from "./types.js";
 
@@ -15,11 +16,11 @@ import { isIterable, isNumber, isUndefinedOrNull } from "./types.js";
  */
 export class CurrentProcess
 {
-    private args: Iterable<string> | undefined
-    private parameters: CommandLineParameters | undefined;
+    private args: Iterable<string> | undefined;
     private outputWriteStream: CharacterWriteStream | undefined;
     private exitCodeProperty: Property<number> | undefined;
     private network: Network | undefined;
+    private clock: Clock | undefined;
 
     private constructor()
     {
@@ -72,19 +73,9 @@ export class CurrentProcess
     public setArguments(args: JavascriptIterable<string>): this
     {
         PreCondition.assertNotUndefinedAndNotNull(args, "args");
-        PreCondition.assertUndefined(this.parameters, "this.parameters");
 
         this.args = isIterable<string>(args) ? args : Iterable.create(args);
         return this;
-    }
-
-    public getParameters(): CommandLineParameters
-    {
-        if (!this.parameters)
-        {
-            this.parameters = CommandLineParameters.create(this.getArguments());
-        }
-        return this.parameters;
     }
 
     public getOutputWriteStream(): CharacterWriteStream
@@ -137,6 +128,24 @@ export class CurrentProcess
         this.network = network;
 
         return this;
+    }
 
+    public getClock(): Clock
+    {
+        if (this.clock === undefined)
+        {
+            this.clock = RealClock.create();
+        }
+        return this.clock;
+    }
+
+    public setClock(clock: Clock): this
+    {
+        PreCondition.assertUndefined(this.clock, "this.clock");
+        PreCondition.assertNotUndefinedAndNotNull(clock, "clock");
+
+        this.clock = clock;
+
+        return this;
     }
 }

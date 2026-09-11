@@ -172,4 +172,9 @@ export class JavascriptArrayList<T> implements List<T>
     {
         return List.contains(this, value, equalFunctions);
     }
+
+    public containsAny(values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return List.containsAny(this, values, equalFunctions);
+    }
 }

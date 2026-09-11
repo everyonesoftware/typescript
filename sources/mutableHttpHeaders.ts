@@ -201,4 +201,9 @@ export class MutableHttpHeaders implements HttpHeaders
     {
         return HttpHeaders.contains(this, value, equalFunctions);
     }
+
+    public containsAny(values: JavascriptIterable<HttpHeader>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return HttpHeaders.containsAny(this, values, equalFunctions);
+    }
 }

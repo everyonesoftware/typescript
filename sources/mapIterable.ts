@@ -102,4 +102,9 @@ export class MapIterable<TInput,TOutput> implements Iterable<TOutput>
     {
         return Iterable.contains(this, value, equalFunctions);
     }
+
+    public containsAny(values: JavascriptIterable<TOutput>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.containsAny(this, values, equalFunctions);
+    }
 }

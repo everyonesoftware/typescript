@@ -1,4 +1,4 @@
-import { CharacterWriteStream, Indexable, InMemoryCharacterWriteStream, isString, JavascriptIterable, List, PreCondition, PreConditionError } from "../sources/index.js";
+import { CharacterWriteStream, Indexable, InMemoryCharacterWriteStream, isString, Iterable, JavascriptIterable, join, List, PreCondition, PreConditionError } from "../sources/index.js";
 import { StringTable, StringTableWriteToOptions } from "../sources/StringTable.js";
 import { Test } from "./test.js";
 import { TestRunner } from "./testRunner.js";
@@ -13,6 +13,47 @@ export function test(runner: TestRunner): void
             {
                 const table: StringTable = StringTable.create();
                 test.assertNotUndefinedAndNotNull(table);
+            });
+
+            runner.testFunction("getColumnWidths()", () =>
+            {
+                function getColumnWidthsTest(rows: JavascriptIterable<JavascriptIterable<string>>, expected: JavascriptIterable<number>): void
+                {
+                    runner.test(`with ${runner.toString(rows)}`, (test: Test) =>
+                    {
+                        const rowsList: List<List<string>> = List.create();
+                        for (const row of rows)
+                        {
+                            rowsList.add(List.create(row));
+                        }
+                        test.assertEqual(StringTable.getColumnWidths(rowsList, text => text.length), Iterable.create<number>(expected));
+                    });
+                }
+
+                getColumnWidthsTest([], []);
+                getColumnWidthsTest([List.create()], []);
+                getColumnWidthsTest([List.create(["a"])], [1]);
+                getColumnWidthsTest(
+                    [
+                        ["abc", "d", "efgh"],
+                    ],
+                    [3, 1, 4],
+                );
+                getColumnWidthsTest(
+                    [
+                        ["✓ Passed:", "1836"],
+                        ["◌ Skipped:", "3"],
+                    ],
+                    [10, 4],
+                );
+                getColumnWidthsTest(
+                    [
+                        ["✓ Passed:", "1836"],
+                        ["◌ Skipped:", "3"],
+                        ["Duration:", "4.411 seconds"],
+                    ],
+                    [10, 13],
+                );
             });
 
             runner.testFunction("addRow()", () =>
@@ -159,34 +200,52 @@ export function test(runner: TestRunner): void
                     });
                 }
 
-                // writeToTest([], "");
-                // writeToTest([[]], "");
-                // writeToTest([[],[]], "\n");
-                // writeToTest([[],[],[]], "\n\n");
+                writeToTest([], "");
+                writeToTest([[]], "");
+                writeToTest([[],[]], "\n");
+                writeToTest([[],[],[]], "\n\n");
 
-                // writeToTest([["a"]], "a");
-                // writeToTest([["a", "b"]], "a b");
-                // writeToTest([["a", "bc", "d"]], "a bc d");
+                writeToTest([["a"]], "a");
+                writeToTest([["a", "b"]], "a b");
+                writeToTest([["a", "bc", "d"]], "a bc d");
 
-                // writeToTest([["a"], ["b"], ["c", "de"]], "a\nb\nc de");
+                writeToTest([["a"], ["b"], ["c", "de"]], "a\nb\nc de");
 
-                // writeToTest([["a", "b", "c"], ["dd", "ee", "ff"]], {}, "a  b  c \ndd ee ff");
-                // writeToTest([["a", "b", "c"], ["dd", "ee", "ff"]], { betweenColumns: "|"}, "a |b |c \ndd|ee|ff");
+                writeToTest([["a", "b", "c"], ["dd", "ee", "ff"]], {}, "a  b  c\ndd ee ff");
+                writeToTest([["a", "b", "c"], ["dd", "ee", "ff"]], { betweenColumns: "|"}, "a |b |c\ndd|ee|ff");
 
-                // writeToTest(
-                //     [["a", "b", "c"], ["dd", "eee", "ffff"]],
-                //     { betweenColumns: "|", columnStyle: { alignment: "left" }},
-                //     "a |b  |c\ndd|eee|ffff",
-                // );
-                // writeToTest(
-                //     [["a", "b", "c"], ["dd", "eee", "ffff"]],
-                //     { betweenColumns: "|", columnStyle: { alignment: "center" }},
-                //     "a | b | c\ndd|eee|ffff",
-                // );
+                writeToTest(
+                    [["a", "b", "c"], ["dd", "eee", "ffff"]],
+                    { betweenColumns: "|", columnStyle: { alignment: "left" }},
+                    "a |b  |c\ndd|eee|ffff",
+                );
+                writeToTest(
+                    [["a", "b", "c"], ["dd", "eee", "ffff"]],
+                    { betweenColumns: "|", columnStyle: { alignment: "center" }},
+                    "a | b | c\ndd|eee|ffff",
+                );
                 writeToTest(
                     [["a", "b", "c"], ["dd", "eee", "ffff"]],
                     { betweenColumns: "|", columnStyle: { alignment: "right" } },
                     " a|  b|   c\ndd|eee|ffff",
+                );
+
+                writeToTest(
+                    [["✓ Passed:","1830"], ["◌ Skipped:", "3"]],
+                    {},
+                    join("\n", [
+                        "✓ Passed:  1830",
+                        "◌ Skipped: 3",
+                    ]),
+                );
+                writeToTest(
+                    [["✓ Passed:","1830"], ["◌ Skipped:", "3"], ["Duration:", "4.575 seconds"]],
+                    {},
+                    join("\n", [
+                        "✓ Passed:  1830",
+                        "◌ Skipped: 3",
+                        "Duration:  4.575 seconds",
+                    ]),
                 );
             });
         });

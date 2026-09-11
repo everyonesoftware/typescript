@@ -188,6 +188,11 @@ export class CharacterList implements List<string>
         return List.contains(this, value, equalFunctions);
     }
 
+    public containsAny(values: JavascriptIterable<string>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return List.containsAny(this, values, equalFunctions);
+    }
+
     public [Symbol.iterator](): JavascriptIterator<string>
     {
         return List[Symbol.iterator](this);

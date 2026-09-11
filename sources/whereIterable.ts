@@ -105,4 +105,9 @@ export class WhereIterable<T> implements Iterable<T>
     {
         return Iterable.contains(this, value, equalFunctions);
     }
+
+    public containsAny(values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.containsAny(this, values, equalFunctions);
+    }
 }

@@ -29,12 +29,13 @@
     "lint": "oxlint",
     "clean": "rimraf coverage outputs",
     "test-only": "c8 node -r source-map-support/register outputs/tests/tests.js",
-    "test": "npm run build && npm run test-only",
+    "test": "npm run build && npm run test-only --",
     "generate-barrels": "tsx scripts/generate-barrels.ts",
     "fix-imports": "tsx scripts/fix-imports.ts"
   },
   "dependencies": {
-    "luxon": "^3.7.2"
+    "luxon": "^3.7.2",
+    "string-width": "8.2.2"
   },
   "devDependencies": {
     "@types/luxon": "^3.7.2",

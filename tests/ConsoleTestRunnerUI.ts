@@ -1,11 +1,13 @@
-import { Iterable, AsyncResult, CharacterWriteStream, IndentedCharacterWriteStream, List, Map, MutableMap, NotFoundError, PreCondition, Stack } from "../sources/index.js";
+import { Iterable, AsyncResult, CharacterWriteStream, IndentedCharacterWriteStream, List, Map, MutableMap, NotFoundError, PreCondition, Stack, Timer, isUndefinedOrNull, StringTable } from "../sources/index.js";
 import { FailedTest } from "./failedTest.js";
 import { SkippedTest } from "./skippedTest.js";
 import { TestAction, TestActionType } from "./testAction.js";
 import { GetErrorStringOptions, TestError } from "./TestError.js";
 import { TestSkip } from "./testSkip.js";
 
-export type ConsoleTestRunnerStyle = TestActionType | "passed" | "skipped" | "failed";
+import stringWidth from "string-width";
+
+export type ConsoleTestRunnerStyle = TestActionType | "passed" | "skipped" | "failed" | "duration";
 
 export abstract class ConsoleTestRunnerUI
 {
@@ -149,12 +151,12 @@ export abstract class ConsoleTestRunnerUI
         return AsyncResult.empty();
     }
 
-    public beforeTest(_: TestAction): AsyncResult<void>
+    public beforeTest(_testAction: TestAction): AsyncResult<void>
     {
         return AsyncResult.empty();
     }
 
-    public afterPassedTest(_: TestAction): AsyncResult<void>
+    public afterPassedTest(_testAction: TestAction): AsyncResult<void>
     {
         return AsyncResult.create(async () =>
         {
@@ -184,7 +186,7 @@ export abstract class ConsoleTestRunnerUI
         });
     }
 
-    public writeSummary(passedTestCount: number, skippedTests: Iterable<SkippedTest>, failedTests: Iterable<FailedTest>): AsyncResult<void>
+    public writeSummary(passedTestCount: number, skippedTests: Iterable<SkippedTest>, failedTests: Iterable<FailedTest>, timer?: Timer): AsyncResult<void>
     {
         PreCondition.assertGreaterThanOrEqualTo(passedTestCount, 0, "passedTestCount");
         PreCondition.assertNotUndefinedAndNotNull(skippedTests, "skippedTests");
@@ -230,19 +232,38 @@ export abstract class ConsoleTestRunnerUI
                 }
             }
 
-            if (passedTestCount > 0)
+            const writeStream: CharacterWriteStream | undefined = this.writeStream;
+            if (!isUndefinedOrNull(writeStream))
             {
-                await this.writeLine(`${this.applyStyle("passed", "Passed")}:  ${passedTestCount}`);
-            }
+                const table: StringTable = StringTable.create();
 
-            if (await skippedTests.any())
-            {
-                await this.writeLine(`${this.applyStyle("skipped", "Skipped")}: ${skippedTests.getCount().await()}`);
-            }
+                if (passedTestCount > 0)
+                {
+                    table.addRow([`${this.applyStyle("passed", "Passed")}:`, `${passedTestCount}`]);
+                }
 
-            if (await failedTests.any())
-            {
-                await this.writeLine(`${this.applyStyle("failed", "Failed")}:  ${failedTests.getCount().await()}`);
+                if (await skippedTests.any())
+                {
+                    table.addRow([`${this.applyStyle("skipped", "Skipped")}:`, `${skippedTests.getCount().await()}`]);
+                }
+
+                if (await failedTests.any())
+                {
+                    table.addRow([`${this.applyStyle("failed", "Failed")}:`, `${failedTests.getCount().await()}`]);
+                }
+
+                if (!isUndefinedOrNull(timer))
+                {
+                    table.addRow([`${this.applyStyle("duration", "Duration")}:`, `${timer.getDuration().toSeconds()} seconds`]);
+                }
+
+                await table.writeTo(writeStream, {
+                    betweenColumns: " ",
+                    textWidthFunction: (text: string) => stringWidth(text, {
+                        countAnsiEscapeCodes: false,
+                    }),
+                });
+                await this.writeLine();
             }
         });
     }

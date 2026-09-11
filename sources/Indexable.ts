@@ -201,4 +201,14 @@ export abstract class Indexable<T> implements Iterable<T>
     {
         return Iterable.contains(indexable, value, equalFunctions);
     }
+
+    public containsAny(values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.containsAny(this, values, equalFunctions);
+    }
+
+    public static containsAny<T>(indexable: Indexable<T>, values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.containsAny(indexable, values, equalFunctions);
+    }
 }

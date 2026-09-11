@@ -241,4 +241,9 @@ export abstract class Set<T> implements Iterable<T>
     {
         return Iterable.contains(set, value, equalFunctions);
     }
+
+    public containsAny(values: JavascriptIterable<T>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return Iterable.containsAny(this, values, equalFunctions);
+    }
 }

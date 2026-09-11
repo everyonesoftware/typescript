@@ -26,6 +26,10 @@ export function test(runner: TestRunner): void
             getLengthTest("", 0);
             getLengthTest("a", 1);
             getLengthTest("abc", 3);
+            getLengthTest('hello', 5);
+            getLengthTest('✓ Passed', 8);
+            getLengthTest('😀', 2);
+            getLengthTest('中', 1);
         });
 
         runner.testFunction("join(string, string[])", () =>

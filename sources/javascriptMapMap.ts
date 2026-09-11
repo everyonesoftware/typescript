@@ -9,18 +9,18 @@ import { SyncResult } from "./syncResult.js";
 import { ToStringFunctions } from "./toStringFunctions.js";
 import { Type } from "./types.js";
 
-export class JavascriptMapMap<TKey,TValue> implements MutableMap<TKey,TValue>
+export class JavascriptMapMap<TKey, TValue> implements MutableMap<TKey, TValue>
 {
-    private readonly javascriptMap: JavascriptMap<TKey,TValue>;
+    private readonly javascriptMap: JavascriptMap<TKey, TValue>;
 
     private constructor()
     {
         this.javascriptMap = new JavascriptMap();
     }
 
-    public static create<TKey,TValue>(): JavascriptMapMap<TKey,TValue>
+    public static create<TKey, TValue>(): JavascriptMapMap<TKey, TValue>
     {
-        return new JavascriptMapMap<TKey,TValue>();
+        return new JavascriptMapMap<TKey, TValue>();
     }
 
     public any(): SyncResult<boolean>
@@ -60,10 +60,10 @@ export class JavascriptMapMap<TKey,TValue> implements MutableMap<TKey,TValue>
             : SyncResult.error(new NotFoundError(`The key ${JSON.stringify(key)} was not found in the map.`));
     }
 
-    public iterate(): Iterator<MapEntry<TKey,TValue>>
+    public iterate(): Iterator<MapEntry<TKey, TValue>>
     {
         return Iterator.create(this.javascriptMap.entries())
-            .map((entry: [TKey,TValue]) => { return {key: entry[0], value: entry[1]}; });
+            .map((entry: [TKey, TValue]) => { return { key: entry[0], value: entry[1] }; });
     }
 
     public iterateKeys(): Iterator<TKey>
@@ -139,5 +139,10 @@ export class JavascriptMapMap<TKey,TValue> implements MutableMap<TKey,TValue>
     public contains(value: MapEntry<TKey, TValue>, equalFunctions?: EqualFunctions): SyncResult<boolean>
     {
         return MutableMap.contains(this, value, equalFunctions);
+    }
+
+    public containsAny(values: JavascriptIterable<MapEntry<TKey, TValue>>, equalFunctions?: EqualFunctions): SyncResult<boolean>
+    {
+        return MutableMap.containsAny(this, values, equalFunctions);
     }
 }
